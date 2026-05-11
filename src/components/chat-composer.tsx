@@ -1,5 +1,5 @@
 import { useRouter } from "@tanstack/react-router";
-import { useMutation } from "convex/react";
+import { useMutation } from "@tanstack/react-query";
 import { ImagePlus, Loader2, SendHorizontal } from "lucide-react";
 import { useRef, useState } from "react";
 import { Button } from "~/components/ui/button";
@@ -13,9 +13,9 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
-import { authClient } from "~/lib/auth-client";
+import { authClient } from "~/lib/convex/auth-client";
+import { useCRPC } from "~/lib/convex/crpc";
 import { cn } from "~/lib/utils";
-import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 
 const LABELS = ["note", "reminder", "link", "idea"] as const;
@@ -32,6 +32,7 @@ export function ChatComposer({
   onCreated,
 }: ChatComposerProps) {
   const router = useRouter();
+  const crpc = useCRPC();
   const fileRef = useRef<HTMLInputElement>(null);
   const [body, setBody] = useState("");
   const [label, setLabel] = useState<string>(LABELS[0]);
@@ -40,8 +41,12 @@ export function ChatComposer({
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
-  const generateUploadUrl = useMutation(api.notes.generateUploadUrl);
-  const createNote = useMutation(api.notes.create);
+  const { mutateAsync: generateUploadUrl } = useMutation(
+    crpc.notes.generateUploadUrl.mutationOptions()
+  );
+  const { mutateAsync: createNote } = useMutation(
+    crpc.notes.create.mutationOptions()
+  );
   const session = authClient.useSession();
 
   const onPickFiles = (list: FileList | null) => {
@@ -61,7 +66,7 @@ export function ChatComposer({
 
       const storageIds: Id<"_storage">[] = [];
       for (const file of files) {
-        const postUrl = await generateUploadUrl();
+        const postUrl = await generateUploadUrl({});
         const res = await fetch(postUrl, {
           method: "POST",
           headers: { "Content-Type": file.type },

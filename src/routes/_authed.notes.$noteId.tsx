@@ -1,12 +1,11 @@
-import { convexQuery } from "@convex-dev/react-query";
-import { useQuery } from "@tanstack/react-query";
+import { skipToken, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
 import { useConvexAuth } from "convex/react";
 import type { ReactElement } from "react";
 import { AttachmentImage } from "~/components/attachment-image";
 import { TopNav } from "~/components/top-nav";
 import { Button } from "~/components/ui/button";
-import { api } from "../../convex/_generated/api";
+import { useCRPC } from "~/lib/convex/crpc";
 import type { Id } from "../../convex/_generated/dataModel";
 
 export const Route = createFileRoute("/_authed/notes/$noteId")({
@@ -18,11 +17,11 @@ function NoteDetail() {
   const { isAuthenticated } = useRouteContext({ from: "__root__" });
   const { isLoading: authLoading, isAuthenticated: convexAuthed } =
     useConvexAuth();
+  const crpc = useCRPC();
 
   const { data, isPending, error } = useQuery({
-    ...convexQuery(
-      api.notes.get,
-      convexAuthed && !authLoading ? { id: noteId as Id<"notes"> } : "skip"
+    ...crpc.notes.get.queryOptions(
+      convexAuthed && !authLoading ? { id: noteId as Id<"notes"> } : skipToken
     ),
   });
 

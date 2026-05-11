@@ -1,8 +1,18 @@
 import { httpRouter } from "convex/server";
-import { authComponent, createAuth } from "./auth.js";
+import { registerRoutes } from "kitcn/auth/http";
+import { getAuth } from "./generated/auth.js";
+
+const siteUrl = process.env.SITE_URL;
+if (!siteUrl) {
+  throw new Error("SITE_URL is not set");
+}
 
 const http = httpRouter();
 
-authComponent.registerRoutes(http, createAuth);
+registerRoutes(http, getAuth, {
+  cors: {
+    allowedOrigins: [siteUrl],
+  },
+});
 
 export default http;

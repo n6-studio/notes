@@ -1,22 +1,22 @@
-import {
-  createFileRoute,
-  useNavigate,
-  useRouteContext,
-} from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { ChatComposer } from "~/components/chat-composer";
 import { TopNav } from "~/components/top-nav";
 
 export const Route = createFileRoute("/")({
+  beforeLoad: ({ context }) => {
+    if (context.isAuthenticated) {
+      throw redirect({ to: "/home" });
+    }
+  },
   component: Landing,
 });
 
 function Landing() {
-  const { isAuthenticated } = useRouteContext({ from: "__root__" });
   const navigate = useNavigate();
 
   return (
     <div className="flex min-h-screen flex-col">
-      <TopNav isAuthenticated={isAuthenticated} />
+      <TopNav isAuthenticated={false} />
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 pt-10 pb-16 md:pt-16">
         <div className="mb-8 text-center md:mb-12">
           <h1 className="text-balance font-semibold text-3xl tracking-tight md:text-4xl">

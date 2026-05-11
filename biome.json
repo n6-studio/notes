@@ -15,7 +15,6 @@
       "!**/src/components/ui",
       "**/convex/**/*.ts",
       "!**/convex/_generated",
-      "!**/convex/betterAuth/_generated",
       "**/.vscode/**/*",
       "**/index.html",
       "**/vite.config.ts",
@@ -29,6 +28,19 @@
       "includes": ["**/src/routes/**"],
       "linter": {
         "rules": {
+          "style": {
+            "useFilenamingConvention": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/convex/**/*.ts"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noBarrelFile": "off"
+          },
           "style": {
             "useFilenamingConvention": "off"
           }

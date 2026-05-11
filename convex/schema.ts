@@ -1,7 +1,9 @@
+import { authSchema } from "./authSchema.js";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
+  ...authSchema,
   users: defineTable({
     authId: v.string(),
     username: v.optional(v.string()),

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthedSettingsRouteImport } from './routes/_authed.settings'
 import { Route as AuthedHomeRouteImport } from './routes/_authed.home'
 import { Route as AuthedNotesIndexRouteImport } from './routes/_authed.notes.index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedSettingsRoute = AuthedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedHomeRoute = AuthedHomeRouteImport.update({
   id: '/home',
@@ -49,6 +55,7 @@ const AuthedNotesNoteIdRoute = AuthedNotesNoteIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/home': typeof AuthedHomeRoute
+  '/settings': typeof AuthedSettingsRoute
   '/notes/$noteId': typeof AuthedNotesNoteIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/notes/': typeof AuthedNotesIndexRoute
@@ -56,6 +63,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/home': typeof AuthedHomeRoute
+  '/settings': typeof AuthedSettingsRoute
   '/notes/$noteId': typeof AuthedNotesNoteIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/notes': typeof AuthedNotesIndexRoute
@@ -65,20 +73,28 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteWithChildren
   '/_authed/home': typeof AuthedHomeRoute
+  '/_authed/settings': typeof AuthedSettingsRoute
   '/_authed/notes/$noteId': typeof AuthedNotesNoteIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_authed/notes/': typeof AuthedNotesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/home' | '/notes/$noteId' | '/api/auth/$' | '/notes/'
+  fullPaths:
+    | '/'
+    | '/home'
+    | '/settings'
+    | '/notes/$noteId'
+    | '/api/auth/$'
+    | '/notes/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/home' | '/notes/$noteId' | '/api/auth/$' | '/notes'
+  to: '/' | '/home' | '/settings' | '/notes/$noteId' | '/api/auth/$' | '/notes'
   id:
     | '__root__'
     | '/'
     | '/_authed'
     | '/_authed/home'
+    | '/_authed/settings'
     | '/_authed/notes/$noteId'
     | '/api/auth/$'
     | '/_authed/notes/'
@@ -105,6 +121,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authed/settings': {
+      id: '/_authed/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthedSettingsRouteImport
+      parentRoute: typeof AuthedRoute
     }
     '/_authed/home': {
       id: '/_authed/home'
@@ -139,12 +162,14 @@ declare module '@tanstack/react-router' {
 
 interface AuthedRouteChildren {
   AuthedHomeRoute: typeof AuthedHomeRoute
+  AuthedSettingsRoute: typeof AuthedSettingsRoute
   AuthedNotesNoteIdRoute: typeof AuthedNotesNoteIdRoute
   AuthedNotesIndexRoute: typeof AuthedNotesIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedHomeRoute: AuthedHomeRoute,
+  AuthedSettingsRoute: AuthedSettingsRoute,
   AuthedNotesNoteIdRoute: AuthedNotesNoteIdRoute,
   AuthedNotesIndexRoute: AuthedNotesIndexRoute,
 }

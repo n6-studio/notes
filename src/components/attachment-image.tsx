@@ -1,17 +1,17 @@
-import { convexQuery } from "@convex-dev/react-query";
-import { useQuery } from "@tanstack/react-query";
+import { skipToken, useQuery } from "@tanstack/react-query";
 import { useConvexAuth } from "convex/react";
 import { Skeleton } from "~/components/ui/skeleton";
-import { api } from "../../convex/_generated/api";
+import { useCRPC } from "~/lib/convex/crpc";
 import type { Id } from "../../convex/_generated/dataModel";
 
 export function AttachmentImage({ storageId }: { storageId: Id<"_storage"> }) {
   const { isLoading: authLoading, isAuthenticated: convexAuthed } =
     useConvexAuth();
+  const crpc = useCRPC();
   const { data: url, isPending } = useQuery({
-    ...convexQuery(
-      api.notes.getAttachmentUrl,
-      convexAuthed && !authLoading ? { storageId } : "skip"
+    ...crpc.notes.getAttachmentUrl.queryOptions(
+      convexAuthed && !authLoading ? { storageId } : skipToken,
+      { subscribe: false }
     ),
   });
 

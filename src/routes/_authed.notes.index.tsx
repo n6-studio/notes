@@ -1,10 +1,8 @@
-import { convexQuery } from "@convex-dev/react-query";
-import { useQuery } from "@tanstack/react-query";
+import { skipToken, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
 import { useConvexAuth } from "convex/react";
 import { useMemo, useState } from "react";
 import { TopNav } from "~/components/top-nav";
-import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
@@ -14,8 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { useCRPC } from "~/lib/convex/crpc";
 import { cn } from "~/lib/utils";
-import { api } from "../../convex/_generated/api";
 
 export const Route = createFileRoute("/_authed/notes/")({
   component: NotesLibrary,
@@ -25,6 +23,7 @@ function NotesLibrary() {
   const { isAuthenticated } = useRouteContext({ from: "__root__" });
   const { isLoading: authLoading, isAuthenticated: convexAuthed } =
     useConvexAuth();
+  const crpc = useCRPC();
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<"desc" | "asc">("desc");
   const [day, setDay] = useState("");
@@ -51,9 +50,8 @@ function NotesLibrary() {
   );
 
   const { data: notes, isPending } = useQuery({
-    ...convexQuery(
-      api.notes.list,
-      convexAuthed && !authLoading ? listArgs : "skip"
+    ...crpc.notes.list.queryOptions(
+      convexAuthed && !authLoading ? listArgs : skipToken
     ),
   });
 
@@ -151,10 +149,6 @@ function NotesLibrary() {
             Nothing here yet. Start on the home page.
           </p>
         ) : null}
-
-        <Button asChild className="mt-8" variant="outline">
-          <Link to="/home">Back to capture</Link>
-        </Button>
       </main>
     </div>
   );

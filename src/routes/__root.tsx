@@ -1,9 +1,8 @@
 /// <reference types="vite/client" />
 
-import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
-import type { ConvexQueryClient } from "@convex-dev/react-query";
-import { TanStackDevtools } from "@tanstack/react-devtools";
+import type { ConvexQueryClient } from "kitcn/react";
 import type { QueryClient } from "@tanstack/react-query";
+import { TanStackDevtools } from "@tanstack/react-devtools";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
   createRootRouteWithContext,
@@ -14,8 +13,8 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { createServerFn } from "@tanstack/react-start";
-import { authClient } from "~/lib/auth-client";
-import { getToken } from "~/lib/auth-server";
+import { ConvexAppProvider } from "~/lib/convex/convex-provider";
+import { getToken } from "~/lib/convex/auth-server";
 import appCss from "../styles.css?url";
 
 const getAuth = createServerFn({ method: "GET" }).handler(
@@ -50,10 +49,10 @@ export const Route = createRootRouteWithContext<{
       },
     ],
   }),
-  beforeLoad: async (ctx) => {
+  beforeLoad: async ({ context }) => {
     const token = await getAuth();
     if (token) {
-      ctx.context.convexQueryClient.serverHttpClient?.setAuth(token);
+      context.convexQueryClient.serverHttpClient?.setAuth(token);
     }
     return {
       isAuthenticated: Boolean(token),
@@ -66,15 +65,15 @@ export const Route = createRootRouteWithContext<{
 function RootComponent() {
   const context = useRouteContext({ from: Route.id });
   return (
-    <ConvexBetterAuthProvider
-      authClient={authClient}
-      client={context.convexQueryClient.convexClient}
+    <ConvexAppProvider
+      convexQueryClient={context.convexQueryClient}
       initialToken={context.token}
+      queryClient={context.queryClient}
     >
       <RootDocument>
         <Outlet />
       </RootDocument>
-    </ConvexBetterAuthProvider>
+    </ConvexAppProvider>
   );
 }
 

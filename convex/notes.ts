@@ -1,6 +1,8 @@
-import { ConvexError, v } from "convex/values";
-import { mutation, query } from "./_generated/server.js";
-import { getUser } from "./auth.js";
+import { CRPCError, zid } from "kitcn/server";
+import type { RegisteredMutation, RegisteredQuery } from "convex/server";
+import { z } from "zod";
+import type { DataModel, Doc, Id } from "./_generated/dataModel.js";
+import { authMutation, authQuery } from "./lib/protected.js";
 
 function filterByDates<T extends { _creationTime: number }>(
   rows: T[],
@@ -21,17 +23,19 @@ function filterByDates<T extends { _creationTime: number }>(
   });
 }
 
-export const list = query({
-  args: {
-    q: v.optional(v.string()),
-    dateFrom: v.optional(v.number()),
-    dateTo: v.optional(v.number()),
-    sort: v.optional(v.union(v.literal("desc"), v.literal("asc"))),
-  },
-  handler: async (ctx, args) => {
-    const user = await getUser(ctx);
-    const sort = args.sort ?? "desc";
-    const qText = args.q?.trim();
+const listInputSchema = z.object({
+  q: z.string().optional(),
+  dateFrom: z.number().optional(),
+  dateTo: z.number().optional(),
+  sort: z.enum(["desc", "asc"]).optional(),
+});
+
+export const list = authQuery
+  .input(listInputSchema)
+  .query(async ({ ctx, input }) => {
+    const user = ctx.user;
+    const sort = input.sort ?? "desc";
+    const qText = input.q?.trim();
 
     if (qText) {
       const found = await ctx.db
@@ -40,7 +44,7 @@ export const list = query({
           sq.search("body", qText).eq("userId", user._id)
         )
         .take(200);
-      const filtered = filterByDates(found, args.dateFrom, args.dateTo);
+      const filtered = filterByDates(found, input.dateFrom, input.dateTo);
       return filtered.sort((a, b) =>
         sort === "desc"
           ? b._creationTime - a._creationTime
@@ -54,54 +58,79 @@ export const list = query({
       .order(sort)
       .take(500);
 
-    return filterByDates(ordered, args.dateFrom, args.dateTo);
-  },
+    return filterByDates(ordered, input.dateFrom, input.dateTo);
+  }) as RegisteredQuery<
+  "public",
+  z.infer<typeof listInputSchema>,
+  Doc<"notes">[]
+>;
+
+const getInputSchema = z.object({
+  id: zid<DataModel>("notes"),
 });
 
-export const get = query({
-  args: { id: v.id("notes") },
-  handler: async (ctx, { id }) => {
-    const user = await getUser(ctx);
+export const get = authQuery
+  .input(getInputSchema)
+  .query(async ({ ctx, input }) => {
+    const user = ctx.user;
+    const id = input.id as Id<"notes">;
     const note = await ctx.db.get(id);
     if (!note || note.userId !== user._id) {
-      throw new ConvexError("Not found");
+      throw new CRPCError({
+        code: "NOT_FOUND",
+        message: "Not found",
+      });
     }
     const attachments = await ctx.db
       .query("attachments")
       .withIndex("by_note", (q) => q.eq("noteId", id))
       .collect();
     return { note, attachments };
-  },
+  }) as RegisteredQuery<
+  "public",
+  z.infer<typeof getInputSchema>,
+  { note: Doc<"notes">; attachments: Doc<"attachments">[] }
+>;
+
+const createInputSchema = z.object({
+  body: z.string(),
+  label: z.string().optional(),
+  linkUrl: z.string().optional(),
+  remindAt: z.number().optional(),
+  storageIds: z
+    .array(z.custom<Id<"_storage">>((v) => typeof v === "string"))
+    .optional(),
 });
 
-export const create = mutation({
-  args: {
-    body: v.string(),
-    label: v.optional(v.string()),
-    linkUrl: v.optional(v.string()),
-    remindAt: v.optional(v.number()),
-    storageIds: v.optional(v.array(v.id("_storage"))),
-  },
-  handler: async (ctx, args) => {
-    const user = await getUser(ctx);
-    const trimmedLink = args.linkUrl?.trim();
-    const body = args.body.trim();
+export const create = authMutation
+  .input(createInputSchema)
+  .mutation(async ({ ctx, input }) => {
+    const user = ctx.user;
+    const trimmedLink = input.linkUrl?.trim();
+    const body = input.body.trim();
     if (
-      !(body || (args.storageIds && args.storageIds.length > 0) || trimmedLink)
+      !(
+        body ||
+        (input.storageIds && input.storageIds.length > 0) ||
+        trimmedLink
+      )
     ) {
-      throw new ConvexError("Note is empty");
+      throw new CRPCError({
+        code: "BAD_REQUEST",
+        message: "Note is empty",
+      });
     }
 
     const noteId = await ctx.db.insert("notes", {
       userId: user._id,
       body: body || trimmedLink || "(attachment)",
-      label: args.label,
+      label: input.label,
       linkUrl: trimmedLink,
-      remindAt: args.remindAt,
+      remindAt: input.remindAt,
     });
 
-    if (args.storageIds?.length) {
-      for (const storageId of args.storageIds) {
+    if (input.storageIds?.length) {
+      for (const storageId of input.storageIds) {
         await ctx.db.insert("attachments", {
           noteId,
           userId: user._id,
@@ -111,29 +140,39 @@ export const create = mutation({
     }
 
     return noteId;
-  },
+  }) as RegisteredMutation<
+  "public",
+  z.infer<typeof createInputSchema>,
+  Id<"notes">
+>;
+
+export const generateUploadUrl = authMutation.mutation(async ({ ctx }) =>
+  ctx.storage.generateUploadUrl()
+) as RegisteredMutation<"public", Record<string, never>, string>;
+
+const attachmentUrlInputSchema = z.object({
+  storageId: z.custom<Id<"_storage">>((v) => typeof v === "string"),
 });
 
-export const generateUploadUrl = mutation({
-  args: {},
-  handler: async (ctx) => {
-    await getUser(ctx);
-    return await ctx.storage.generateUploadUrl();
-  },
-});
-
-export const getAttachmentUrl = query({
-  args: { storageId: v.id("_storage") },
-  handler: async (ctx, { storageId }) => {
-    const user = await getUser(ctx);
+export const getAttachmentUrl = authQuery
+  .input(attachmentUrlInputSchema)
+  .query(async ({ ctx, input }) => {
+    const user = ctx.user;
+    const storageId = input.storageId;
     const mine = await ctx.db
       .query("attachments")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
     const att = mine.find((a) => a.storageId === storageId);
     if (!att) {
-      throw new ConvexError("Not found");
+      throw new CRPCError({
+        code: "NOT_FOUND",
+        message: "Not found",
+      });
     }
     return await ctx.storage.getUrl(storageId);
-  },
-});
+  }) as RegisteredQuery<
+  "public",
+  z.infer<typeof attachmentUrlInputSchema>,
+  string | null
+>;
