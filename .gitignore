@@ -1,0 +1,17 @@
+node_modules
+.turbo
+dist
+dist-ssr
+coverage
+.DS_Store
+.env
+.env.local
+.env.*.local
+*.local
+.vinxi
+.output
+.nitro
+.tanstack
+.wrangler
+__unconfig*
+todos.json
