@@ -1,8 +1,7 @@
 /// <reference types="vite/client" />
 
-import type { ConvexQueryClient } from "kitcn/react";
-import type { QueryClient } from "@tanstack/react-query";
 import { TanStackDevtools } from "@tanstack/react-devtools";
+import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
   createRootRouteWithContext,
@@ -13,8 +12,9 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { createServerFn } from "@tanstack/react-start";
-import { ConvexAppProvider } from "~/lib/convex/convex-provider";
+import type { ConvexQueryClient } from "kitcn/react";
 import { getToken } from "~/lib/convex/auth-server";
+import { ConvexAppProvider } from "~/lib/convex/convex-provider";
 import appCss from "../styles.css?url";
 
 const getAuth = createServerFn({ method: "GET" }).handler(

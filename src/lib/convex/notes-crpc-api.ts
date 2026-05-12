@@ -12,6 +12,7 @@ function crpcLeaf(
     | "notes:get"
     | "notes:getAttachmentUrl"
     | "notes:create"
+    | "notes:remove"
     | "notes:generateUploadUrl",
   leaf: Record<string, unknown>
 ) {
@@ -40,6 +41,7 @@ export const notesCrpcApi = {
       auth: "required",
     }),
     create: crpcLeaf("mutation", "notes:create", { auth: "required" }),
+    remove: crpcLeaf("mutation", "notes:remove", { auth: "required" }),
     generateUploadUrl: crpcLeaf("mutation", "notes:generateUploadUrl", {
       auth: "required",
     }),

@@ -1,8 +1,22 @@
-import { skipToken, useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
+import { skipToken, useMutation, useQuery } from "@tanstack/react-query";
+import {
+  createFileRoute,
+  useRouteContext,
+  useRouter,
+} from "@tanstack/react-router";
 import { useConvexAuth } from "convex/react";
+import { Copy, MoreVerticalIcon, Trash2Icon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { TopNav } from "~/components/top-nav";
+import { Button } from "~/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
@@ -13,6 +27,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { useCRPC } from "~/lib/convex/crpc";
+import { noteLabelSurfaceClass } from "~/lib/note-label-styles";
 import { cn } from "~/lib/utils";
 
 export const Route = createFileRoute("/_authed/notes/")({
@@ -21,9 +36,11 @@ export const Route = createFileRoute("/_authed/notes/")({
 
 function NotesLibrary() {
   const { isAuthenticated } = useRouteContext({ from: "__root__" });
+  const router = useRouter();
   const { isLoading: authLoading, isAuthenticated: convexAuthed } =
     useConvexAuth();
   const crpc = useCRPC();
+  const removeNote = useMutation(crpc.notes.remove.mutationOptions());
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<"desc" | "asc">("desc");
   const [day, setDay] = useState("");
@@ -120,25 +137,79 @@ function NotesLibrary() {
                     "bg-muted-foreground/60"
                   )}
                 />
-                <Link
-                  className="block rounded-lg border border-transparent p-3 transition-colors hover:border-border/60 hover:bg-card/30"
-                  params={{ noteId: note._id }}
-                  to="/notes/$noteId"
-                >
-                  <p className="line-clamp-3 text-sm leading-relaxed">
-                    {note.body}
-                  </p>
-                  <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-muted-foreground">
-                    {note.label ? (
-                      <span className="rounded-full border border-border/50 px-2 py-0.5">
-                        {note.label}
-                      </span>
-                    ) : null}
-                    <time dateTime={new Date(note._creationTime).toISOString()}>
-                      {new Date(note._creationTime).toLocaleString()}
-                    </time>
+                <div className="flex gap-2 rounded-lg border border-transparent p-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="line-clamp-3 text-sm leading-relaxed">
+                      {note.body}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-muted-foreground">
+                      {note.label ? (
+                        <span
+                          className={cn(
+                            "rounded-full border px-2 py-0.5 font-medium capitalize",
+                            noteLabelSurfaceClass(note.label)
+                          )}
+                        >
+                          {note.label}
+                        </span>
+                      ) : null}
+                      <time
+                        dateTime={new Date(note._creationTime).toISOString()}
+                      >
+                        {new Date(note._creationTime).toLocaleString()}
+                      </time>
+                    </div>
                   </div>
-                </Link>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        aria-label="Note actions"
+                        className="-me-1 -mt-0.5 shrink-0 text-muted-foreground hover:text-foreground"
+                        size="icon-sm"
+                        type="button"
+                        variant="ghost"
+                      >
+                        <MoreVerticalIcon />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="min-w-40">
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem
+                          onSelect={() => {
+                            navigator.clipboard
+                              .writeText(note.body)
+                              .catch(() => {
+                                /* ignore clipboard errors */
+                              });
+                          }}
+                        >
+                          <Copy />
+                          Copy item
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          disabled={removeNote.isPending}
+                          onSelect={() => {
+                            removeNote.mutate(
+                              { id: note._id },
+                              {
+                                onSettled: () => {
+                                  router.invalidate().catch(() => {
+                                    /* invalidate best-effort */
+                                  });
+                                },
+                              }
+                            );
+                          }}
+                          variant="destructive"
+                        >
+                          <Trash2Icon />
+                          Delete item
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </li>
             ))}
           </ol>

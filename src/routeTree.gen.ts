@@ -15,7 +15,6 @@ import { Route as AuthedSettingsRouteImport } from './routes/_authed.settings'
 import { Route as AuthedHomeRouteImport } from './routes/_authed.home'
 import { Route as AuthedNotesIndexRouteImport } from './routes/_authed.notes.index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as AuthedNotesNoteIdRouteImport } from './routes/_authed.notes.$noteId'
 
 const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
@@ -46,17 +45,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthedNotesNoteIdRoute = AuthedNotesNoteIdRouteImport.update({
-  id: '/notes/$noteId',
-  path: '/notes/$noteId',
-  getParentRoute: () => AuthedRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/home': typeof AuthedHomeRoute
   '/settings': typeof AuthedSettingsRoute
-  '/notes/$noteId': typeof AuthedNotesNoteIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/notes/': typeof AuthedNotesIndexRoute
 }
@@ -64,7 +57,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/home': typeof AuthedHomeRoute
   '/settings': typeof AuthedSettingsRoute
-  '/notes/$noteId': typeof AuthedNotesNoteIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/notes': typeof AuthedNotesIndexRoute
 }
@@ -74,28 +66,20 @@ export interface FileRoutesById {
   '/_authed': typeof AuthedRouteWithChildren
   '/_authed/home': typeof AuthedHomeRoute
   '/_authed/settings': typeof AuthedSettingsRoute
-  '/_authed/notes/$noteId': typeof AuthedNotesNoteIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_authed/notes/': typeof AuthedNotesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/home'
-    | '/settings'
-    | '/notes/$noteId'
-    | '/api/auth/$'
-    | '/notes/'
+  fullPaths: '/' | '/home' | '/settings' | '/api/auth/$' | '/notes/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/home' | '/settings' | '/notes/$noteId' | '/api/auth/$' | '/notes'
+  to: '/' | '/home' | '/settings' | '/api/auth/$' | '/notes'
   id:
     | '__root__'
     | '/'
     | '/_authed'
     | '/_authed/home'
     | '/_authed/settings'
-    | '/_authed/notes/$noteId'
     | '/api/auth/$'
     | '/_authed/notes/'
   fileRoutesById: FileRoutesById
@@ -150,27 +134,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authed/notes/$noteId': {
-      id: '/_authed/notes/$noteId'
-      path: '/notes/$noteId'
-      fullPath: '/notes/$noteId'
-      preLoaderRoute: typeof AuthedNotesNoteIdRouteImport
-      parentRoute: typeof AuthedRoute
-    }
   }
 }
 
 interface AuthedRouteChildren {
   AuthedHomeRoute: typeof AuthedHomeRoute
   AuthedSettingsRoute: typeof AuthedSettingsRoute
-  AuthedNotesNoteIdRoute: typeof AuthedNotesNoteIdRoute
   AuthedNotesIndexRoute: typeof AuthedNotesIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedHomeRoute: AuthedHomeRoute,
   AuthedSettingsRoute: AuthedSettingsRoute,
-  AuthedNotesNoteIdRoute: AuthedNotesNoteIdRoute,
   AuthedNotesIndexRoute: AuthedNotesIndexRoute,
 }
 

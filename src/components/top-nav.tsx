@@ -33,7 +33,7 @@ export function TopNav({ isAuthenticated }: { isAuthenticated: boolean }) {
         <nav className="flex min-w-0 flex-1 items-center gap-1 text-sm">
           <Link
             className="mr-2 shrink-0 font-medium text-foreground/90 tracking-tight transition-opacity hover:opacity-80"
-            to="/"
+            to={isAuthenticated ? "/home" : "/"}
           >
             Dump
           </Link>

@@ -1,5 +1,5 @@
-import { CRPCError, zid } from "kitcn/server";
 import type { RegisteredMutation, RegisteredQuery } from "convex/server";
+import { CRPCError, zid } from "kitcn/server";
 import { z } from "zod";
 import type { DataModel, Doc, Id } from "./_generated/dataModel.js";
 import { authMutation, authQuery } from "./lib/protected.js";
@@ -149,6 +149,40 @@ export const create = authMutation
 export const generateUploadUrl = authMutation.mutation(async ({ ctx }) =>
   ctx.storage.generateUploadUrl()
 ) as RegisteredMutation<"public", Record<string, never>, string>;
+
+const removeInputSchema = z.object({
+  id: zid<DataModel>("notes"),
+});
+
+export const remove = authMutation
+  .input(removeInputSchema)
+  .mutation(async ({ ctx, input }) => {
+    const user = ctx.user;
+    const id = input.id as Id<"notes">;
+    const note = await ctx.db.get(id);
+    if (!note || note.userId !== user._id) {
+      throw new CRPCError({
+        code: "NOT_FOUND",
+        message: "Not found",
+      });
+    }
+
+    const attachments = await ctx.db
+      .query("attachments")
+      .withIndex("by_note", (q) => q.eq("noteId", id))
+      .collect();
+
+    for (const att of attachments) {
+      await ctx.storage.delete(att.storageId);
+      await ctx.db.delete(att._id);
+    }
+
+    await ctx.db.delete(id);
+  }) as RegisteredMutation<
+  "public",
+  z.infer<typeof removeInputSchema>,
+  undefined
+>;
 
 const attachmentUrlInputSchema = z.object({
   storageId: z.custom<Id<"_storage">>((v) => typeof v === "string"),

@@ -1,8 +1,7 @@
 import { getRequestHeaders } from "@tanstack/react-start/server";
-import { api } from "../../../convex/_generated/api.js";
 import { createCallerFactory } from "kitcn/server";
-
 import { getToken } from "~/lib/convex/auth-server";
+import { api } from "../../../convex/_generated/api.js";
 
 const { createContext, createCaller } = createCallerFactory({
   api,

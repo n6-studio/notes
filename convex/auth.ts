@@ -1,6 +1,6 @@
+import { anonymous } from "better-auth/plugins/anonymous";
 import type { RegisteredQuery } from "convex/server";
 import { asyncMap } from "convex-helpers";
-import { anonymous } from "better-auth/plugins/anonymous";
 import { convex } from "kitcn/auth";
 import type { Id } from "./_generated/dataModel.js";
 import authConfig from "./auth.config.js";

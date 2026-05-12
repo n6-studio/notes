@@ -1,10 +1,15 @@
-import { useRouter } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "@tanstack/react-router";
 import { ImagePlus, Loader2, SendHorizontal } from "lucide-react";
-import { useRef, useState } from "react";
+import {
+  type ClipboardEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { RemindDatetimeButton } from "~/components/remind-datetime-button";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -15,10 +20,76 @@ import {
 import { Textarea } from "~/components/ui/textarea";
 import { authClient } from "~/lib/convex/auth-client";
 import { useCRPC } from "~/lib/convex/crpc";
+import {
+  NOTE_LABELS,
+  NoteLabelSelectDisplay,
+  noteLabelSelectFocusClass,
+  noteLabelSelectItemAccentClass,
+  noteLabelSurfaceClass,
+} from "~/lib/note-label-styles";
 import { cn } from "~/lib/utils";
 import type { Id } from "../../convex/_generated/dataModel";
 
-const LABELS = ["note", "reminder", "link", "idea"] as const;
+const HAS_WHITESPACE = /\s/;
+const FIRST_NON_WHITESPACE_TOKEN = /^(\S+)/;
+
+function firstTokenAfterTrimStart(text: string): string | undefined {
+  const lead = text.trimStart();
+  return FIRST_NON_WHITESPACE_TOKEN.exec(lead)?.[1];
+}
+
+async function uploadNoteFiles(
+  files: File[],
+  getUploadPostUrl: () => Promise<string>
+): Promise<Id<"_storage">[]> {
+  const storageIds: Id<"_storage">[] = [];
+  for (const file of files) {
+    const postUrl = await getUploadPostUrl();
+    const res = await fetch(postUrl, {
+      method: "POST",
+      headers: { "Content-Type": file.type },
+      body: file,
+    });
+    if (!res.ok) {
+      throw new Error("Upload failed");
+    }
+    const json = (await res.json()) as { storageId: Id<"_storage"> };
+    storageIds.push(json.storageId);
+  }
+  return storageIds;
+}
+
+/** If the whole trimmed message is one http(s) URL, return normalized href; else undefined. */
+function singleHttpUrlFromCaptureText(text: string): string | undefined {
+  const trimmed = text.trim();
+  if (!trimmed || HAS_WHITESPACE.test(trimmed)) {
+    return;
+  }
+  const withScheme =
+    trimmed.startsWith("http://") || trimmed.startsWith("https://")
+      ? trimmed
+      : `https://${trimmed}`;
+  try {
+    const url = new URL(withScheme);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      return;
+    }
+    // Require a dot in hostname unless the user included an explicit scheme (e.g. http://localhost).
+    const host = url.hostname;
+    if (
+      !(
+        trimmed.startsWith("http://") ||
+        trimmed.startsWith("https://") ||
+        host.includes(".")
+      )
+    ) {
+      return;
+    }
+    return url.href;
+  } catch {
+    return;
+  }
+}
 
 interface ChatComposerProps {
   className?: string;
@@ -35,7 +106,7 @@ export function ChatComposer({
   const crpc = useCRPC();
   const fileRef = useRef<HTMLInputElement>(null);
   const [body, setBody] = useState("");
-  const [label, setLabel] = useState<string>(LABELS[0]);
+  const [label, setLabel] = useState<string>(NOTE_LABELS[0]);
   const [remindLocal, setRemindLocal] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +119,28 @@ export function ChatComposer({
     crpc.notes.create.mutationOptions()
   );
   const session = authClient.useSession();
+
+  useEffect(() => {
+    const cycleCaptureType = (event: KeyboardEvent) => {
+      if (!event.metaKey || event.repeat) {
+        return;
+      }
+      if (event.key !== "." && event.code !== "Period") {
+        return;
+      }
+      event.preventDefault();
+      setLabel((current) => {
+        const idx = NOTE_LABELS.indexOf(
+          current as (typeof NOTE_LABELS)[number]
+        );
+        const i = idx >= 0 ? idx : 0;
+        return NOTE_LABELS[(i + 1) % NOTE_LABELS.length];
+      });
+    };
+
+    window.addEventListener("keydown", cycleCaptureType);
+    return () => window.removeEventListener("keydown", cycleCaptureType);
+  }, []);
 
   const onPickFiles = (list: FileList | null) => {
     if (!list?.length) {
@@ -64,28 +157,21 @@ export function ChatComposer({
         await authClient.signIn.anonymous();
       }
 
-      const storageIds: Id<"_storage">[] = [];
-      for (const file of files) {
-        const postUrl = await generateUploadUrl({});
-        const res = await fetch(postUrl, {
-          method: "POST",
-          headers: { "Content-Type": file.type },
-          body: file,
-        });
-        if (!res.ok) {
-          throw new Error("Upload failed");
-        }
-        const json = (await res.json()) as { storageId: Id<"_storage"> };
-        storageIds.push(json.storageId);
-      }
+      const storageIds = await uploadNoteFiles(files, () =>
+        generateUploadUrl({})
+      );
 
       const remindAt = remindLocal
         ? new Date(remindLocal).getTime()
         : undefined;
 
+      const trimmedBody = body.trim();
+      const linkUrl = singleHttpUrlFromCaptureText(trimmedBody);
+
       await createNote({
-        body: body.trim(),
+        body: trimmedBody,
         label,
+        linkUrl,
         remindAt,
         storageIds: storageIds.length ? storageIds : undefined,
       });
@@ -107,91 +193,133 @@ export function ChatComposer({
   };
 
   const canSend = body.trim().length > 0 || files.length > 0;
+  const sendDisabled =
+    !canSend || pending || (variant === "landing" && session.isPending);
+
+  const onBodyKeyDown = (e: ReactKeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key !== "Enter" || e.repeat) {
+      return;
+    }
+    if (!(e.metaKey || e.ctrlKey)) {
+      return;
+    }
+    e.preventDefault();
+    if (sendDisabled) {
+      return;
+    }
+    submit().catch(() => undefined);
+  };
+
+  const onBodyPaste = (e: ClipboardEvent<HTMLTextAreaElement>) => {
+    const el = e.currentTarget;
+    const start = el.selectionStart ?? 0;
+    const end = el.selectionEnd ?? 0;
+    if (body.slice(0, start).trim() !== "") {
+      return;
+    }
+    const merged = `${body.slice(0, start)}${e.clipboardData.getData("text")}${body.slice(end)}`;
+    const first = firstTokenAfterTrimStart(merged);
+    if (first && singleHttpUrlFromCaptureText(first)) {
+      setLabel("link");
+    }
+  };
 
   return (
     <div
       className={cn(
-        "rounded-2xl border border-border/60 bg-card/40 p-1 shadow-sm backdrop-blur-sm",
+        "group rounded-2xl border border-border/60 bg-card/40 p-1 shadow-sm backdrop-blur-sm",
         className
       )}
     >
-      <div className="flex flex-col gap-3 p-3 sm:p-4">
+      <div
+        className={cn(
+          "flex flex-col gap-3 p-3 sm:p-4",
+          variant === "home" && "gap-4 p-4 sm:p-6"
+        )}
+      >
         <Textarea
-          className="min-h-[140px] resize-none border-0 bg-transparent text-base shadow-none focus-visible:ring-0 md:min-h-[180px]"
+          className={cn(
+            "resize-none border-0 bg-transparent shadow-none focus-visible:ring-0",
+            variant === "home"
+              ? "min-h-50 text-base md:min-h-70 md:text-lg"
+              : "min-h-35 text-base md:min-h-45"
+          )}
+          name="body"
           onChange={(e) => setBody(e.target.value)}
+          onKeyDown={onBodyKeyDown}
+          onPaste={onBodyPaste}
           placeholder="Write anything. Text, a link, a reminder…"
           value={body}
         />
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-          <div className="grid flex-1 gap-3 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label className="text-[11px] text-muted-foreground uppercase tracking-wide">
-                Type
-              </Label>
-              <Select onValueChange={setLabel} value={label}>
-                <SelectTrigger className="h-9 bg-background/50">
-                  <SelectValue placeholder="Label" />
-                </SelectTrigger>
-                <SelectContent>
-                  {LABELS.map((l) => (
-                    <SelectItem key={l} value={l}>
-                      {l}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-[11px] text-muted-foreground uppercase tracking-wide">
-                Remind
-              </Label>
-              <Input
-                className="h-9 bg-background/50"
-                onChange={(e) => setRemindLocal(e.target.value)}
-                type="datetime-local"
-                value={remindLocal}
-              />
-            </div>
-          </div>
-        </div>
         {error ? (
           <p className="text-destructive text-sm" role="alert">
             {error}
           </p>
         ) : null}
-        <div className="flex items-center justify-between gap-2 border-border/50 border-t pt-3">
-          <div className="flex items-center gap-1">
-            <input
-              accept="image/*"
-              className="hidden"
-              multiple
-              onChange={(e) => onPickFiles(e.target.files)}
-              ref={fileRef}
-              type="file"
-            />
-            <Button
-              aria-label="Attach images"
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 pt-3">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
+            <Select onValueChange={setLabel} value={label}>
+              <SelectTrigger
+                aria-label="Capture type"
+                className={cn(
+                  "w-[min(132px,100%)] shrink-0 border-0 font-medium",
+                  noteLabelSurfaceClass(label),
+                  label === "note" && "text-muted-foreground",
+                  noteLabelSelectFocusClass(label)
+                )}
+                size="sm"
+              >
+                <SelectValue placeholder="Label" />
+              </SelectTrigger>
+              <SelectContent>
+                {NOTE_LABELS.map((l) => (
+                  <SelectItem
+                    className={noteLabelSelectItemAccentClass(l)}
+                    key={l}
+                    value={l}
+                  >
+                    <NoteLabelSelectDisplay label={l} />
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <RemindDatetimeButton
               disabled={pending}
-              onClick={() => fileRef.current?.click()}
-              size="icon-sm"
-              type="button"
-              variant="ghost"
-            >
-              <ImagePlus className="size-4" />
-            </Button>
-            {files.length > 0 ? (
-              <span className="text-muted-foreground text-xs">
-                {files.length} image{files.length === 1 ? "" : "s"}
-              </span>
-            ) : null}
+              onChange={setRemindLocal}
+              value={remindLocal}
+            />
+
+            <div className="flex items-center gap-1">
+              <input
+                accept="image/*"
+                className="hidden"
+                multiple
+                onChange={(e) => onPickFiles(e.target.files)}
+                ref={fileRef}
+                type="file"
+              />
+              <Button
+                aria-label="Attach images"
+                disabled={pending}
+                onClick={() => fileRef.current?.click()}
+                size="icon-sm"
+                type="button"
+                variant="ghost"
+              >
+                <ImagePlus className="text-muted-foreground" />
+              </Button>
+              {files.length > 0 ? (
+                <span className="text-muted-foreground text-xs">
+                  {files.length} image{files.length === 1 ? "" : "s"}
+                </span>
+              ) : null}
+            </div>
           </div>
+
           <Button
-            className="gap-2"
-            disabled={
-              !canSend ||
-              pending ||
-              (variant === "landing" && session.isPending)
-            }
+            className="shrink-0 gap-2"
+            disabled={sendDisabled}
             onClick={() => {
               submit().catch(() => undefined);
             }}
@@ -202,7 +330,7 @@ export function ChatComposer({
             ) : (
               <SendHorizontal className="size-4" />
             )}
-            Send
+            Save
           </Button>
         </div>
       </div>

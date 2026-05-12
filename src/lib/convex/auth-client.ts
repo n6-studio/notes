@@ -1,6 +1,6 @@
-import { convexClient } from "kitcn/auth/client";
 import { anonymousClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
+import { convexClient } from "kitcn/auth/client";
 import { createAuthMutations } from "kitcn/react";
 
 export const authClient = createAuthClient({

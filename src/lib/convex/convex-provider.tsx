@@ -1,7 +1,7 @@
+import type { QueryClient } from "@tanstack/react-query";
 import { QueryClientProvider as TanstackQueryClientProvider } from "@tanstack/react-query";
 import { ConvexAuthProvider } from "kitcn/auth/client";
 import type { ConvexQueryClient } from "kitcn/react";
-import type { QueryClient } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 
 import { ConvexQueryAuthBind } from "~/components/convex-query-auth-bind";

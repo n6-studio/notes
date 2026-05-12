@@ -1,6 +1,6 @@
+import { withoutSystemFields } from "convex-helpers";
 import { getAuthUserIdentity } from "kitcn/auth";
 import { CRPCError } from "kitcn/server";
-import { withoutSystemFields } from "convex-helpers";
 import type { Id } from "../_generated/dataModel.js";
 import type { MutationCtx, QueryCtx } from "../_generated/server.js";
 

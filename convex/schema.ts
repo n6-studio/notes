@@ -1,6 +1,6 @@
-import { authSchema } from "./authSchema.js";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { authSchema } from "./authSchema.js";
 
 export default defineSchema({
   ...authSchema,
