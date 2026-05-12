@@ -15,7 +15,9 @@ export default defineSchema({
     body: v.string(),
     label: v.optional(v.string()),
     linkUrl: v.optional(v.string()),
+    /** Legacy capture timestamp; run `migrations:migrateRemindAtToTargetAt` then remove this field. */
     remindAt: v.optional(v.number()),
+    targetAt: v.optional(v.number()),
   })
     .index("by_user", ["userId"])
     .searchIndex("search_notes", {

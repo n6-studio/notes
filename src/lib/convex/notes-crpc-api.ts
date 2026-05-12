@@ -40,10 +40,10 @@ export const notesCrpcApi = {
     getAttachmentUrl: crpcLeaf("query", "notes:getAttachmentUrl", {
       auth: "required",
     }),
-    create: crpcLeaf("mutation", "notes:create", { auth: "required" }),
+    create: crpcLeaf("mutation", "notes:create", { auth: "optional" }),
     remove: crpcLeaf("mutation", "notes:remove", { auth: "required" }),
     generateUploadUrl: crpcLeaf("mutation", "notes:generateUploadUrl", {
-      auth: "required",
+      auth: "optional",
     }),
   },
 } as unknown as ConvexCodegenApiType;

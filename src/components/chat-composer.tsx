@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
+import { ConvexHttpClient } from "convex/browser";
 import { ImagePlus, Loader2, SendHorizontal } from "lucide-react";
 import {
   type ClipboardEvent,
@@ -8,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { RemindDatetimeButton } from "~/components/remind-datetime-button";
+import { TargetDatetimeButton } from "~/components/target-datetime-button";
 import { Button } from "~/components/ui/button";
 import {
   Select,
@@ -28,6 +29,7 @@ import {
   noteLabelSurfaceClass,
 } from "~/lib/note-label-styles";
 import { cn } from "~/lib/utils";
+import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 
 const HAS_WHITESPACE = /\s/;
@@ -57,6 +59,40 @@ async function uploadNoteFiles(
     storageIds.push(json.storageId);
   }
   return storageIds;
+}
+
+async function createNoteViaHttp(params: {
+  body: string;
+  label: string;
+  linkUrl: string | undefined;
+  targetAt: number | undefined;
+  files: File[];
+}): Promise<void> {
+  const convexUrl = import.meta.env.VITE_CONVEX_URL as string | undefined;
+  if (!convexUrl) {
+    throw new Error("VITE_CONVEX_URL is not set");
+  }
+  const tokenRes = await authClient.convex.token({
+    fetchOptions: { credentials: "include", throw: true },
+  });
+  const jwt = tokenRes.token;
+  if (!jwt) {
+    throw new Error("Could not get Convex session");
+  }
+  const httpClient = new ConvexHttpClient(convexUrl);
+  httpClient.setAuth(jwt);
+
+  const storageIds = await uploadNoteFiles(params.files, () =>
+    httpClient.mutation(api.notes.generateUploadUrl, {})
+  );
+
+  await httpClient.mutation(api.notes.create, {
+    body: params.body,
+    label: params.label,
+    linkUrl: params.linkUrl,
+    targetAt: params.targetAt,
+    storageIds: storageIds.length ? storageIds : undefined,
+  });
 }
 
 /** If the whole trimmed message is one http(s) URL, return normalized href; else undefined. */
@@ -94,6 +130,8 @@ function singleHttpUrlFromCaptureText(text: string): string | undefined {
 interface ChatComposerProps {
   className?: string;
   onCreated?: () => void;
+  /** Runs at the start of submit (before uploads). Use for ensuring auth, etc. */
+  onPreSubmit?: () => void | Promise<void>;
   variant: "landing" | "home";
 }
 
@@ -101,13 +139,14 @@ export function ChatComposer({
   variant,
   className,
   onCreated,
+  onPreSubmit,
 }: ChatComposerProps) {
   const router = useRouter();
   const crpc = useCRPC();
   const fileRef = useRef<HTMLInputElement>(null);
   const [body, setBody] = useState("");
   const [label, setLabel] = useState<string>(NOTE_LABELS[0]);
-  const [remindLocal, setRemindLocal] = useState("");
+  const [targetAtLocal, setTargetAtLocal] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -118,8 +157,6 @@ export function ChatComposer({
   const { mutateAsync: createNote } = useMutation(
     crpc.notes.create.mutationOptions()
   );
-  const session = authClient.useSession();
-
   useEffect(() => {
     const cycleCaptureType = (event: KeyboardEvent) => {
       if (!event.metaKey || event.repeat) {
@@ -153,31 +190,39 @@ export function ChatComposer({
     setError(null);
     setPending(true);
     try {
-      if (variant === "landing" && !session.data?.user) {
-        await authClient.signIn.anonymous();
-      }
+      await onPreSubmit?.();
 
-      const storageIds = await uploadNoteFiles(files, () =>
-        generateUploadUrl({})
-      );
-
-      const remindAt = remindLocal
-        ? new Date(remindLocal).getTime()
+      const targetAt = targetAtLocal
+        ? new Date(targetAtLocal).getTime()
         : undefined;
 
       const trimmedBody = body.trim();
       const linkUrl = singleHttpUrlFromCaptureText(trimmedBody);
 
-      await createNote({
-        body: trimmedBody,
-        label,
-        linkUrl,
-        remindAt,
-        storageIds: storageIds.length ? storageIds : undefined,
-      });
+      if (variant === "landing") {
+        await createNoteViaHttp({
+          body: trimmedBody,
+          label,
+          linkUrl,
+          targetAt,
+          files,
+        });
+      } else {
+        const storageIds = await uploadNoteFiles(files, () =>
+          generateUploadUrl({})
+        );
+
+        await createNote({
+          body: trimmedBody,
+          label,
+          linkUrl,
+          targetAt,
+          storageIds: storageIds.length ? storageIds : undefined,
+        });
+      }
 
       setBody("");
-      setRemindLocal("");
+      setTargetAtLocal("");
       setFiles([]);
       if (fileRef.current) {
         fileRef.current.value = "";
@@ -193,8 +238,7 @@ export function ChatComposer({
   };
 
   const canSend = body.trim().length > 0 || files.length > 0;
-  const sendDisabled =
-    !canSend || pending || (variant === "landing" && session.isPending);
+  const sendDisabled = !canSend || pending;
 
   const onBodyKeyDown = (e: ReactKeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key !== "Enter" || e.repeat) {
@@ -240,15 +284,16 @@ export function ChatComposer({
         <Textarea
           className={cn(
             "resize-none border-0 bg-transparent shadow-none focus-visible:ring-0",
+            "text-base md:text-lg",
             variant === "home"
-              ? "min-h-50 text-base md:min-h-70 md:text-lg"
-              : "min-h-35 text-base md:min-h-45"
+              ? "md:max-h:90 max-h-70 min-h-50 md:min-h-70"
+              : "max-h-45 min-h-35 md:max-h-55 md:min-h-45"
           )}
           name="body"
           onChange={(e) => setBody(e.target.value)}
           onKeyDown={onBodyKeyDown}
           onPaste={onBodyPaste}
-          placeholder="Write anything. Text, a link, a reminder…"
+          placeholder="Write anything. Text, a link, an idea…"
           value={body}
         />
         {error ? (
@@ -256,7 +301,7 @@ export function ChatComposer({
             {error}
           </p>
         ) : null}
-        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 pt-3">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
             <Select onValueChange={setLabel} value={label}>
               <SelectTrigger
@@ -284,10 +329,10 @@ export function ChatComposer({
               </SelectContent>
             </Select>
 
-            <RemindDatetimeButton
+            <TargetDatetimeButton
               disabled={pending}
-              onChange={setRemindLocal}
-              value={remindLocal}
+              onChange={setTargetAtLocal}
+              value={targetAtLocal}
             />
 
             <div className="flex items-center gap-1">

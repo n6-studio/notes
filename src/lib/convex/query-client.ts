@@ -5,6 +5,7 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 import { isCRPCClientError, isCRPCError } from "kitcn/crpc";
+import type { ConvexQueryClient } from "kitcn/react";
 
 export const hydrationConfig: Pick<DefaultOptions, "dehydrate" | "hydrate"> = {
   dehydrate: {
@@ -13,6 +14,27 @@ export const hydrationConfig: Pick<DefaultOptions, "dehydrate" | "hydrate"> = {
     shouldRedactErrors: () => false,
   },
 };
+
+/**
+ * Subscribes Convex live queries to the cache and installs TanStack defaults
+ * expected by kitcn CRPC (`convexQuery` options omit `queryFn`; see kitcn
+ * `ConvexQueryClient.queryFn()` docs).
+ */
+export function attachConvexQueryClient(
+  queryClient: QueryClient,
+  convexQueryClient: ConvexQueryClient
+): void {
+  convexQueryClient.connect(queryClient);
+  const current = queryClient.getDefaultOptions();
+  queryClient.setDefaultOptions({
+    ...current,
+    queries: {
+      ...current.queries,
+      queryFn: convexQueryClient.queryFn(),
+      queryKeyHashFn: convexQueryClient.hashFn(),
+    },
+  });
+}
 
 export function createQueryClient(): QueryClient {
   return new QueryClient({

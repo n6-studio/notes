@@ -96,7 +96,7 @@ const createInputSchema = z.object({
   body: z.string(),
   label: z.string().optional(),
   linkUrl: z.string().optional(),
-  remindAt: z.number().optional(),
+  targetAt: z.number().optional(),
   storageIds: z
     .array(z.custom<Id<"_storage">>((v) => typeof v === "string"))
     .optional(),
@@ -126,7 +126,7 @@ export const create = authMutation
       body: body || trimmedLink || "(attachment)",
       label: input.label,
       linkUrl: trimmedLink,
-      remindAt: input.remindAt,
+      targetAt: input.targetAt,
     });
 
     if (input.storageIds?.length) {

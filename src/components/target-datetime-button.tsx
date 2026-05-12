@@ -32,19 +32,19 @@ function parseDatetimeLocal(value: string): Date | undefined {
   return d;
 }
 
-export interface RemindDatetimeButtonProps {
+export interface TargetDatetimeButtonProps {
   className?: string;
   disabled?: boolean;
   onChange: (value: string) => void;
   value: string;
 }
 
-export function RemindDatetimeButton({
+export function TargetDatetimeButton({
   value,
   onChange,
   disabled,
   className,
-}: RemindDatetimeButtonProps) {
+}: TargetDatetimeButtonProps) {
   const timeInputId = useId();
   const [open, setOpen] = useState(false);
   const selected = parseDatetimeLocal(value);
@@ -113,8 +113,8 @@ export function RemindDatetimeButton({
           aria-haspopup="dialog"
           aria-label={
             selected === undefined
-              ? "Pick reminder date and time"
-              : `Reminder ${labelText}`
+              ? "Pick target date and time"
+              : `Target date ${labelText}`
           }
           className={cn(
             "max-w-[min(160px,100%)] shrink-0 justify-start gap-2 font-normal text-muted-foreground",

@@ -2,7 +2,10 @@ import { notifyManager } from "@tanstack/react-query";
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 import { ConvexQueryClient } from "kitcn/react";
-import { createQueryClient } from "./lib/convex/query-client";
+import {
+  attachConvexQueryClient,
+  createQueryClient,
+} from "./lib/convex/query-client";
 import { routeTree } from "./routeTree.gen";
 
 export function getRouter() {
@@ -20,7 +23,7 @@ export function getRouter() {
   });
 
   const queryClient = createQueryClient();
-  convexQueryClient.connect(queryClient);
+  attachConvexQueryClient(queryClient, convexQueryClient);
 
   const router = createTanStackRouter({
     routeTree,
