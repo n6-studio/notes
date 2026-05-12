@@ -1,6 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
-import { ConvexHttpClient } from "convex/browser";
 import { ImagePlus, Loader2, SendHorizontal } from "lucide-react";
 import {
   type ClipboardEvent,
@@ -19,7 +18,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
-import { authClient } from "~/lib/convex/auth-client";
+import {
+  submitNoteCaptureOverCrpc,
+  submitNoteCaptureOverHttp,
+} from "~/lib/convex/chat-composer-mutations";
 import { useCRPC } from "~/lib/convex/crpc";
 import {
   NOTE_LABELS,
@@ -29,8 +31,6 @@ import {
   noteLabelSurfaceClass,
 } from "~/lib/note-label-styles";
 import { cn } from "~/lib/utils";
-import { api } from "../../convex/_generated/api";
-import type { Id } from "../../convex/_generated/dataModel";
 
 const HAS_WHITESPACE = /\s/;
 const FIRST_NON_WHITESPACE_TOKEN = /^(\S+)/;
@@ -38,61 +38,6 @@ const FIRST_NON_WHITESPACE_TOKEN = /^(\S+)/;
 function firstTokenAfterTrimStart(text: string): string | undefined {
   const lead = text.trimStart();
   return FIRST_NON_WHITESPACE_TOKEN.exec(lead)?.[1];
-}
-
-async function uploadNoteFiles(
-  files: File[],
-  getUploadPostUrl: () => Promise<string>
-): Promise<Id<"_storage">[]> {
-  const storageIds: Id<"_storage">[] = [];
-  for (const file of files) {
-    const postUrl = await getUploadPostUrl();
-    const res = await fetch(postUrl, {
-      method: "POST",
-      headers: { "Content-Type": file.type },
-      body: file,
-    });
-    if (!res.ok) {
-      throw new Error("Upload failed");
-    }
-    const json = (await res.json()) as { storageId: Id<"_storage"> };
-    storageIds.push(json.storageId);
-  }
-  return storageIds;
-}
-
-async function createNoteViaHttp(params: {
-  body: string;
-  label: string;
-  linkUrl: string | undefined;
-  targetAt: number | undefined;
-  files: File[];
-}): Promise<void> {
-  const convexUrl = import.meta.env.VITE_CONVEX_URL as string | undefined;
-  if (!convexUrl) {
-    throw new Error("VITE_CONVEX_URL is not set");
-  }
-  const tokenRes = await authClient.convex.token({
-    fetchOptions: { credentials: "include", throw: true },
-  });
-  const jwt = tokenRes.token;
-  if (!jwt) {
-    throw new Error("Could not get Convex session");
-  }
-  const httpClient = new ConvexHttpClient(convexUrl);
-  httpClient.setAuth(jwt);
-
-  const storageIds = await uploadNoteFiles(params.files, () =>
-    httpClient.mutation(api.notes.generateUploadUrl, {})
-  );
-
-  await httpClient.mutation(api.notes.create, {
-    body: params.body,
-    label: params.label,
-    linkUrl: params.linkUrl,
-    targetAt: params.targetAt,
-    storageIds: storageIds.length ? storageIds : undefined,
-  });
 }
 
 /** If the whole trimmed message is one http(s) URL, return normalized href; else undefined. */
@@ -199,25 +144,20 @@ export function ChatComposer({
       const trimmedBody = body.trim();
       const linkUrl = singleHttpUrlFromCaptureText(trimmedBody);
 
-      if (variant === "landing") {
-        await createNoteViaHttp({
-          body: trimmedBody,
-          label,
-          linkUrl,
-          targetAt,
-          files,
-        });
-      } else {
-        const storageIds = await uploadNoteFiles(files, () =>
-          generateUploadUrl({})
-        );
+      const payload = {
+        body: trimmedBody,
+        label,
+        linkUrl,
+        targetAt,
+        files,
+      };
 
-        await createNote({
-          body: trimmedBody,
-          label,
-          linkUrl,
-          targetAt,
-          storageIds: storageIds.length ? storageIds : undefined,
+      if (variant === "landing") {
+        await submitNoteCaptureOverHttp(payload);
+      } else {
+        await submitNoteCaptureOverCrpc(payload, {
+          generateUploadUrl: () => generateUploadUrl({}),
+          createNote,
         });
       }
 
