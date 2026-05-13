@@ -1,8 +1,7 @@
-import { withoutSystemFields } from "convex-helpers";
 import { getAuthUserIdentity } from "kitcn/auth";
 import { CRPCError } from "kitcn/server";
 import type { Id } from "../_generated/dataModel.js";
-import type { MutationCtx, QueryCtx } from "../_generated/server.js";
+import type { MutationCtx, QueryCtx } from "../generated/server.js";
 
 export type AppCtx = QueryCtx | MutationCtx;
 
@@ -15,15 +14,7 @@ export async function safeGetUser(ctx: AppCtx) {
   if (!authUser) {
     return;
   }
-  const appUserId = authUser.userId;
-  if (!appUserId) {
-    return;
-  }
-  const user = await ctx.db.get(appUserId);
-  if (!user) {
-    return;
-  }
-  return { ...user, ...withoutSystemFields(authUser) };
+  return authUser;
 }
 
 export async function getUser(ctx: AppCtx) {

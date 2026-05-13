@@ -1,17 +1,12 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { authSchema } from "./authSchema.js";
+import { authSchema } from "./authSchema";
 
 export default defineSchema({
   ...authSchema,
-  users: defineTable({
-    authId: v.string(),
-    username: v.optional(v.string()),
-    isAnonymous: v.boolean(),
-  }).index("by_authId", ["authId"]),
 
   notes: defineTable({
-    userId: v.id("users"),
+    userId: v.id("user"),
     body: v.string(),
     label: v.optional(v.string()),
     linkUrl: v.optional(v.string()),
@@ -27,7 +22,7 @@ export default defineSchema({
 
   attachments: defineTable({
     noteId: v.id("notes"),
-    userId: v.id("users"),
+    userId: v.id("user"),
     storageId: v.id("_storage"),
     contentType: v.optional(v.string()),
   })

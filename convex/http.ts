@@ -1,6 +1,6 @@
 import { httpRouter } from "convex/server";
 import { registerRoutes } from "kitcn/auth/http";
-import { getAuth } from "./generated/auth.js";
+import { getAuth } from "./generated/auth";
 
 const siteUrl = process.env.SITE_URL;
 if (!siteUrl) {

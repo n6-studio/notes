@@ -62,51 +62,19 @@ export default defineAuth(() => {
       }),
       convex({
         authConfig,
+        jwks: process.env.JWKS,
       }),
     ],
     triggers: {
       user: {
-        create: {
-          after: async (authUser, ctx) => {
-            const { db } = mutationCtx(ctx);
-            const authUserId = authUser._id as Id<"user">;
-            const appUserId = await db.insert("users", {
-              authId: authUserId,
-              username: authUser.username ?? undefined,
-              isAnonymous: authUser.isAnonymous === true,
-            });
-            await db.patch(authUserId, { userId: appUserId });
-          },
-        },
-        update: {
-          after: async (newUser, ctx) => {
-            const { db } = mutationCtx(ctx);
-            const appUserId = newUser.userId as Id<"users"> | undefined;
-            if (!appUserId) {
-              return;
-            }
-            await db.patch(appUserId, {
-              authId: newUser._id as Id<"user">,
-              username: newUser.username ?? undefined,
-              isAnonymous: newUser.isAnonymous === true,
-            });
-          },
-        },
         delete: {
           after: async (authUser, ctx) => {
             const { db, storage } = mutationCtx(ctx);
-            const userId = authUser.userId as Id<"users"> | undefined;
-            if (!userId) {
-              return;
-            }
-            const user = await db.get(userId);
-            if (!user) {
-              return;
-            }
+            const authUserId = authUser._id as Id<"user">;
 
             const notes = await db
               .query("notes")
-              .withIndex("by_user", (q) => q.eq("userId", user._id))
+              .withIndex("by_user", (q) => q.eq("userId", authUserId))
               .collect();
 
             await asyncMap(notes, async (note) => {
@@ -120,8 +88,6 @@ export default defineAuth(() => {
               });
               await db.delete(note._id);
             });
-
-            await db.delete(user._id);
           },
         },
       },

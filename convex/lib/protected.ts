@@ -15,7 +15,7 @@ export const authQuery = publicQuery.use(async ({ ctx, next }) => {
     ctx: {
       ...ctx,
       user,
-      userId: user._id as Id<"users">,
+      userId: user._id as Id<"user">,
     },
   });
 });
@@ -32,7 +32,7 @@ export const authMutation = publicMutation.use(async ({ ctx, next }) => {
     ctx: {
       ...ctx,
       user,
-      userId: user._id as Id<"users">,
+      userId: user._id as Id<"user">,
     },
   });
 });
