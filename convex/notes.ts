@@ -28,6 +28,7 @@ const listInputSchema = z.object({
   dateFrom: z.number().optional(),
   dateTo: z.number().optional(),
   sort: z.enum(["desc", "asc"]).optional(),
+  label: z.enum(["note", "todo", "link", "idea"]).optional(),
 });
 
 export const list = authQuery
@@ -36,6 +37,14 @@ export const list = authQuery
     const user = ctx.user;
     const sort = input.sort ?? "desc";
     const qText = input.q?.trim();
+    const labelFilter = input.label;
+
+    function filterByLabel(rows: Doc<"notes">[]): Doc<"notes">[] {
+      if (labelFilter === undefined) {
+        return rows;
+      }
+      return rows.filter((row) => row.label === labelFilter);
+    }
 
     if (qText) {
       const found = await ctx.db
@@ -44,12 +53,15 @@ export const list = authQuery
           sq.search("body", qText).eq("userId", user._id)
         )
         .take(200);
-      const filtered = filterByDates(found, input.dateFrom, input.dateTo);
-      return filtered.sort((a, b) =>
+      const filtered = filterByLabel(
+        filterByDates(found, input.dateFrom, input.dateTo)
+      );
+      filtered.sort((a, b) =>
         sort === "desc"
           ? b._creationTime - a._creationTime
           : a._creationTime - b._creationTime
       );
+      return filtered;
     }
 
     const ordered = await ctx.db
@@ -58,7 +70,7 @@ export const list = authQuery
       .order(sort)
       .take(500);
 
-    return filterByDates(ordered, input.dateFrom, input.dateTo);
+    return filterByLabel(filterByDates(ordered, input.dateFrom, input.dateTo));
   }) as RegisteredQuery<
   "public",
   z.infer<typeof listInputSchema>,
