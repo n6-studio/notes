@@ -1,22 +1,25 @@
-import { skipToken, useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useConvexAuth } from "convex/react";
+import { Suspense } from "react";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useCRPC } from "~/lib/convex/crpc";
 import type { Id } from "../../convex/_generated/dataModel";
 
-export function AttachmentImage({ storageId }: { storageId: Id<"_storage"> }) {
-  const { isLoading: authLoading, isAuthenticated: convexAuthed } =
-    useConvexAuth();
+function AttachmentSkeleton() {
+  return <Skeleton className="aspect-video w-full rounded-lg" />;
+}
+
+function AttachmentImageReady({ storageId }: { storageId: Id<"_storage"> }) {
   const crpc = useCRPC();
-  const { data: url, isPending } = useQuery({
+  const { data: url } = useSuspenseQuery({
     ...crpc.notes.getAttachmentUrl.queryOptions(
-      convexAuthed && !authLoading ? { storageId } : skipToken,
+      { storageId },
       { subscribe: false }
     ),
   });
 
-  if (isPending || !url) {
-    return <Skeleton className="aspect-video w-full rounded-lg" />;
+  if (!url) {
+    return <AttachmentSkeleton />;
   }
 
   return (
@@ -35,4 +38,23 @@ export function AttachmentImage({ storageId }: { storageId: Id<"_storage"> }) {
       />
     </a>
   );
+}
+
+/**
+ * Convex auth–gated: children only mount the suspense query after the client reports signed-in state.
+ */
+function AttachmentGate({ storageId }: { storageId: Id<"_storage"> }) {
+  const { isLoading: authLoading, isAuthenticated } = useConvexAuth();
+  if (authLoading || !isAuthenticated) {
+    return <AttachmentSkeleton />;
+  }
+  return (
+    <Suspense fallback={<AttachmentSkeleton />}>
+      <AttachmentImageReady storageId={storageId} />
+    </Suspense>
+  );
+}
+
+export function AttachmentImage({ storageId }: { storageId: Id<"_storage"> }) {
+  return <AttachmentGate storageId={storageId} />;
 }

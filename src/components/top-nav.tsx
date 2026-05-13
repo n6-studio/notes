@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Link, useRouter } from "@tanstack/react-router";
 import { ChevronDownIcon } from "lucide-react";
 import { useState } from "react";
+import { LogoMark } from "~/components/logo-mark";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -20,37 +21,38 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import {
-  authClient,
   useSignInSocialMutationOptions,
   useSignOutMutationOptions,
 } from "~/lib/convex/auth-client";
+import { useUser } from "~/lib/convex/use-user";
 
-export function TopNav({ isAuthenticated }: { isAuthenticated: boolean }) {
+export function TopNav() {
   const router = useRouter();
-  const session = authClient.useSession();
+  const { user, isAuthenticated } = useUser();
   const [anonymousSignOutOpen, setAnonymousSignOutOpen] = useState(false);
 
   const signOut = useMutation(useSignOutMutationOptions());
   const signInSocial = useMutation(useSignInSocialMutationOptions());
 
-  const isAnonymous = session.data?.user?.isAnonymous === true;
+  const isAnonymous = user?.isAnonymous === true;
 
-  const userLabel =
-    session.data?.user?.name?.trim() ||
-    session.data?.user?.email?.trim() ||
-    "Account";
+  const userLabel = user?.name?.trim() || user?.email?.trim() || "Account";
 
   return (
     <>
       <header className="sticky top-0 z-50 border-border/40 border-b bg-background/10 backdrop-blur-md">
-        <div className="mx-auto flex h-11 max-w-2xl items-center justify-between gap-4 px-4">
+        <div className="mx-auto flex h-11 max-w-4xl items-center justify-between gap-4 px-4">
           <nav className="flex min-w-0 flex-1 items-center gap-1 text-sm">
             <Link
-              className="mr-2 shrink-0 font-medium text-foreground/90 tracking-tight transition-opacity hover:opacity-80"
+              className="mr-2 flex shrink-0 items-center gap-2 font-medium text-foreground/90 tracking-tight transition-opacity hover:opacity-80"
               to={isAuthenticated ? "/home" : "/"}
             >
-              Dump
+              <LogoMark className="size-5 shrink-0 text-foreground/90" />
+              <span className="font-bold text-foreground text-sm">NOTES</span>
             </Link>
+            <span className="font-semibold text-lg text-muted-foreground/30">
+              /
+            </span>
             {isAuthenticated && (
               <>
                 <Button

@@ -3,7 +3,6 @@ import { QueryClientProvider as TanstackQueryClientProvider } from "@tanstack/re
 import { ConvexAuthProvider } from "kitcn/auth/client";
 import type { ConvexQueryClient } from "kitcn/react";
 import type { ReactNode } from "react";
-
 import { ConvexQueryAuthBind } from "~/components/convex-query-auth-bind";
 import { authClient } from "~/lib/convex/auth-client";
 import { CRPCProvider } from "~/lib/convex/crpc";

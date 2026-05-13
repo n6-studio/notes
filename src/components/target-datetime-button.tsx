@@ -148,7 +148,7 @@ export function TargetDatetimeButton({
             Time
           </Label>
           <Input
-            className="h-9 max-w-[9rem] bg-background/50"
+            className="h-9 max-w-36 bg-background/50"
             id={timeInputId}
             onChange={(e) => onTimeChange(e.target.value)}
             step={60}

@@ -233,7 +233,7 @@ export function ChatComposer({
           onChange={(e) => setBody(e.target.value)}
           onKeyDown={onBodyKeyDown}
           onPaste={onBodyPaste}
-          placeholder="Write anything. Text, a link, an idea…"
+          placeholder={"What's on your mind — a note, a link, a todo…"}
           value={body}
         />
         {error ? (

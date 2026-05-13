@@ -1,8 +1,8 @@
-import { createFileRoute, useRouteContext } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { TriangleAlertIcon } from "lucide-react";
 import { TopNav } from "~/components/top-nav";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
-import { authClient } from "~/lib/convex/auth-client";
+import { useUser } from "~/lib/convex/use-user";
 import { cn } from "~/lib/utils";
 
 export const Route = createFileRoute("/_authed/settings")({
@@ -10,14 +10,13 @@ export const Route = createFileRoute("/_authed/settings")({
 });
 
 function Settings() {
-  const { isAuthenticated } = useRouteContext({ from: "__root__" });
-  const session = authClient.useSession();
-  const isAnonymous = session.data?.user?.isAnonymous === true;
+  const { user } = useUser();
+  const isAnonymous = user?.isAnonymous === true;
 
   return (
     <div className="flex min-h-screen flex-col">
-      <TopNav isAuthenticated={isAuthenticated} />
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 pt-8 pb-16 md:pt-12">
+      <TopNav />
+      <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 pt-8 pb-16 md:pt-12">
         <h1 className="font-medium text-foreground/90 text-xl tracking-tight">
           Settings
         </h1>
@@ -41,8 +40,8 @@ function Settings() {
               />
               <AlertTitle>Anonymous session</AlertTitle>
               <AlertDescription>
-                Sign out, clear this site's data, private browsing, or another
-                device can cut off access to your notes.
+                Sign out, clear this site&apos;s data, private browsing, or
+                another device can cut off access to your notes.
               </AlertDescription>
             </Alert>
           </section>

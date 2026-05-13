@@ -35,11 +35,42 @@ export const Route = createRootRouteWithContext<{
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "Rapid capture",
+        title: "Notes — Capture ideas, links & todos in one line",
       },
       {
         name: "description",
-        content: "Capture notes, links, and images without clutter.",
+        content:
+          "Jot ideas, todos, bookmarks, and due dates in a single send—optional links, times, and images included. Start free with anonymous sign-in or Google.",
+      },
+      {
+        name: "application-name",
+        content: "Notes",
+      },
+      {
+        property: "og:title",
+        content: "Notes — Capture ideas, links & todos in one line",
+      },
+      {
+        property: "og:description",
+        content:
+          "One box for everything you need to remember. Type, add context, send once, and come back when you are ready—real-time sync keeps it waiting.",
+      },
+      {
+        property: "og:type",
+        content: "website",
+      },
+      {
+        name: "twitter:card",
+        content: "summary",
+      },
+      {
+        name: "twitter:title",
+        content: "Notes — Capture ideas, links & todos in one line",
+      },
+      {
+        name: "twitter:description",
+        content:
+          "One box for everything you need to remember. Type, add context, send once, and come back when you are ready—real-time sync keeps it waiting.",
       },
     ],
     links: [
