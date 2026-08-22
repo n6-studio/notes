@@ -13,7 +13,12 @@ const config = defineConfig({
   },
   plugins: [
     devtools(),
-    nitro({ rollupConfig: { external: [/^@sentry\//] } }),
+    nitro({
+      // Prefer Node entry on Vercel so TanStack Start keeps `runtime.node`
+      // (web entry historically wiped it and caused SSR 500s).
+      vercel: { entryFormat: "node" },
+      rollupConfig: { external: [/^@sentry\//] },
+    }),
     tailwindcss(),
     tanstackStart(),
     viteReact(),

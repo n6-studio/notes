@@ -17,9 +17,14 @@ import { getToken } from "~/lib/convex/auth-server";
 import { ConvexAppProvider } from "~/lib/convex/convex-provider";
 import appCss from "../styles.css?url";
 
-const getAuth = createServerFn({ method: "GET" }).handler(
-  async () => await getToken()
-);
+const getAuth = createServerFn({ method: "GET" }).handler(async () => {
+  try {
+    return await getToken();
+  } catch (error) {
+    console.error("[auth] getToken failed during SSR", error);
+    return;
+  }
+});
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
