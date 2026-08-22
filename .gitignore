@@ -15,3 +15,4 @@ coverage
 .wrangler
 __unconfig*
 todos.json
+.vercel
