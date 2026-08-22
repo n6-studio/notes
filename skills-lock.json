@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "better-ui": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "skillPath": "skills/better-ui/SKILL.md",
+      "computedHash": "f383af38a3718c9f6884ace2d69191c8b7b6d633390873ed9074fe12a1fd3ade"
+    },
     "caveman": {
       "source": "mattpocock/skills",
       "sourceType": "github",
