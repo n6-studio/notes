@@ -57,11 +57,11 @@ importers:
         specifier: ^1.1.1
         version: 1.1.1(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       convex:
-        specifier: ^1.38.0
-        version: 1.38.0(react@19.2.6)
+        specifier: ^1.45.0
+        version: 1.45.0(react@19.2.6)
       convex-helpers:
-        specifier: ^0.1.116
-        version: 0.1.116(@standard-schema/spec@1.1.0)(convex@1.38.0(react@19.2.6))(hono@4.12.18)(react@19.2.6)(typescript@6.0.3)(zod@4.4.3)
+        specifier: ^0.1.123
+        version: 0.1.123(@standard-schema/spec@1.1.0)(convex@1.45.0(react@19.2.6))(hono@4.12.18)(react@19.2.6)(typescript@6.0.3)(zod@4.4.3)
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -73,7 +73,7 @@ importers:
         version: 1.4.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       kitcn:
         specifier: ^0.14.3
-        version: 0.14.3(@babel/core@7.29.0)(@babel/template@7.28.6)(@tanstack/query-core@5.100.10)(@tanstack/react-query@5.100.10(react@19.2.6))(@types/react@19.2.14)(better-auth@1.6.10(@opentelemetry/api@1.9.0)(@tanstack/react-start@1.167.65(crossws@0.4.5(srvx@0.11.15))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vite@8.0.12(@types/node@25.6.2)(esbuild@0.27.7)(jiti@2.7.0)(yaml@2.8.4)))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(solid-js@1.9.12)(vitest@4.1.6(@opentelemetry/api@1.9.0)(@types/node@25.6.2)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.14.5(@types/node@25.6.2)(typescript@6.0.3))(vite@8.0.12(@types/node@25.6.2)(esbuild@0.27.7)(jiti@2.7.0)(yaml@2.8.4))))(convex@1.38.0(react@19.2.6))(hono@4.12.18)(react@19.2.6)(solid-js@1.9.12)(zod@4.4.3)
+        version: 0.14.3(@babel/core@7.29.0)(@babel/template@7.28.6)(@tanstack/query-core@5.100.10)(@tanstack/react-query@5.100.10(react@19.2.6))(@types/react@19.2.14)(better-auth@1.6.10(@opentelemetry/api@1.9.0)(@tanstack/react-start@1.167.65(crossws@0.4.5(srvx@0.11.15))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vite@8.0.12(@types/node@25.6.2)(esbuild@0.27.7)(jiti@2.7.0)(yaml@2.8.4)))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(solid-js@1.9.12)(vitest@4.1.6(@opentelemetry/api@1.9.0)(@types/node@25.6.2)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.14.5(@types/node@25.6.2)(typescript@6.0.3))(vite@8.0.12(@types/node@25.6.2)(esbuild@0.27.7)(jiti@2.7.0)(yaml@2.8.4))))(convex@1.45.0(react@19.2.6))(hono@4.12.18)(react@19.2.6)(solid-js@1.9.12)(zod@4.4.3)
       lucide-react:
         specifier: ^1.14.0
         version: 1.14.0(react@19.2.6)
@@ -2317,9 +2317,6 @@ packages:
   '@types/estree@1.0.9':
     resolution: {integrity: sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==}
 
-  '@types/node@22.19.18':
-    resolution: {integrity: sha512-9v00a+dn2yWVsYDEunWC4g/TcRKVq3r8N5FuZp7u0SGrPvdN9c2yXI9bBuf5Fl0hNCb+QTIePTn5pJs2pwBOQQ==}
-
   '@types/node@25.6.2':
     resolution: {integrity: sha512-sokuT28dxf9JT5Kady1fsXOvI4HVpjZa95NKT5y9PNTIrs2AsobR4GFAA90ZG8M+nxVRLysCXsVj6eGC7Vbrlw==}
 
@@ -2670,15 +2667,15 @@ packages:
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
 
-  convex-helpers@0.1.116:
-    resolution: {integrity: sha512-kw+jqwkeXDc9LpiOurJgPiWrnJZKHrE32mpsyPes2UwLtRw3oLi9cXkc37G0dOJp7iaCXDJ8V9OmXDeXcKvEGw==}
+  convex-helpers@0.1.123:
+    resolution: {integrity: sha512-E9W4tscZy6ZtNnwPDdL5UhMc7Rj9aUYlzjdYiKsfVIAwdarABWqvPB8+St3Q6IwS83r+QIGSO1lTidTamDdyPQ==}
     hasBin: true
     peerDependencies:
       '@standard-schema/spec': ^1.0.0
-      convex: ^1.32.0
+      convex: ^1.43.0
       hono: ^4.0.5
       react: ^17.0.2 || ^18.0.0 || ^19.0.0
-      typescript: ^5.5 || ^6.0.0
+      typescript: ^5.5 || ^6.0.0 || ^7.0.0
       zod: ^3.25.0 || ^4.0.0
     peerDependenciesMeta:
       '@standard-schema/spec':
@@ -2692,9 +2689,9 @@ packages:
       zod:
         optional: true
 
-  convex@1.38.0:
-    resolution: {integrity: sha512-122AC6y5lUS7mr39cluLw9+TOtRX5d/XxeivHhHObs/NTXoVvOnIgDzexVcxaz6Rk0oLFSoydSR1rDCltEz/0A==}
-    engines: {node: '>=18.0.0', npm: '>=7.0.0'}
+  convex@1.45.0:
+    resolution: {integrity: sha512-AV3B56Ptu/14d76g3urBJ50dwpiZa6uJaLT84OWox5aCwZIJiuAamdjv3lLHDzs8vv5kC31anEZohhUe3qJ2bA==}
+    engines: {node: '>=20.0.0', npm: '>=7.0.0'}
     hasBin: true
     peerDependencies:
       '@auth0/auth0-react': ^2.0.1
@@ -4411,9 +4408,6 @@ packages:
       oxlint:
         optional: true
 
-  undici-types@6.21.0:
-    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
-
   undici-types@7.19.2:
     resolution: {integrity: sha512-qYVnV5OEm2AW8cJMCpdV20CDyaN3g0AjDlOGf1OW4iaDEx8MwdtChUp4zu4H0VP3nDRF/8RKWH+IPp9uW0YGZg==}
 
@@ -4714,8 +4708,8 @@ packages:
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
-  ws@8.18.0:
-    resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
+  ws@8.20.0:
+    resolution: {integrity: sha512-sAt8BhgNbzCtgGbt2OxmpuryO63ZoDk/sqaB/znQm94T4fCEsy/yV+7CdC1kJhOU9lboAEU7R3kquuycDoibVA==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -4726,8 +4720,8 @@ packages:
       utf-8-validate:
         optional: true
 
-  ws@8.20.0:
-    resolution: {integrity: sha512-sAt8BhgNbzCtgGbt2OxmpuryO63ZoDk/sqaB/znQm94T4fCEsy/yV+7CdC1kJhOU9lboAEU7R3kquuycDoibVA==}
+  ws@8.21.0:
+    resolution: {integrity: sha512-Vsp28b7DRcimFQvrqu2Wek3z1iYxDCWqHYB8Qsnk/S4RfaCQzPGPyBNuVjJV3cd6UiKtUtp6sNM77gWvzcCH+g==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -6866,10 +6860,6 @@ snapshots:
 
   '@types/estree@1.0.9': {}
 
-  '@types/node@22.19.18':
-    dependencies:
-      undici-types: 6.21.0
-
   '@types/node@25.6.2':
     dependencies:
       undici-types: 7.19.2
@@ -6884,7 +6874,7 @@ snapshots:
 
   '@types/set-cookie-parser@2.4.10':
     dependencies:
-      '@types/node': 22.19.18
+      '@types/node': 25.6.2
 
   '@types/statuses@2.0.6': {}
 
@@ -7198,9 +7188,9 @@ snapshots:
 
   convert-source-map@2.0.0: {}
 
-  convex-helpers@0.1.116(@standard-schema/spec@1.1.0)(convex@1.38.0(react@19.2.6))(hono@4.12.18)(react@19.2.6)(typescript@6.0.3)(zod@4.4.3):
+  convex-helpers@0.1.123(@standard-schema/spec@1.1.0)(convex@1.45.0(react@19.2.6))(hono@4.12.18)(react@19.2.6)(typescript@6.0.3)(zod@4.4.3):
     dependencies:
-      convex: 1.38.0(react@19.2.6)
+      convex: 1.45.0(react@19.2.6)
     optionalDependencies:
       '@standard-schema/spec': 1.1.0
       hono: 4.12.18
@@ -7208,11 +7198,11 @@ snapshots:
       typescript: 6.0.3
       zod: 4.4.3
 
-  convex@1.38.0(react@19.2.6):
+  convex@1.45.0(react@19.2.6):
     dependencies:
       esbuild: 0.27.0
       prettier: 3.8.3
-      ws: 8.18.0
+      ws: 8.21.0
     optionalDependencies:
       react: 19.2.6
     transitivePeerDependencies:
@@ -7956,7 +7946,7 @@ snapshots:
     optionalDependencies:
       graceful-fs: 4.2.11
 
-  kitcn@0.14.3(@babel/core@7.29.0)(@babel/template@7.28.6)(@tanstack/query-core@5.100.10)(@tanstack/react-query@5.100.10(react@19.2.6))(@types/react@19.2.14)(better-auth@1.6.10(@opentelemetry/api@1.9.0)(@tanstack/react-start@1.167.65(crossws@0.4.5(srvx@0.11.15))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vite@8.0.12(@types/node@25.6.2)(esbuild@0.27.7)(jiti@2.7.0)(yaml@2.8.4)))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(solid-js@1.9.12)(vitest@4.1.6(@opentelemetry/api@1.9.0)(@types/node@25.6.2)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.14.5(@types/node@25.6.2)(typescript@6.0.3))(vite@8.0.12(@types/node@25.6.2)(esbuild@0.27.7)(jiti@2.7.0)(yaml@2.8.4))))(convex@1.38.0(react@19.2.6))(hono@4.12.18)(react@19.2.6)(solid-js@1.9.12)(zod@4.4.3):
+  kitcn@0.14.3(@babel/core@7.29.0)(@babel/template@7.28.6)(@tanstack/query-core@5.100.10)(@tanstack/react-query@5.100.10(react@19.2.6))(@types/react@19.2.14)(better-auth@1.6.10(@opentelemetry/api@1.9.0)(@tanstack/react-start@1.167.65(crossws@0.4.5(srvx@0.11.15))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vite@8.0.12(@types/node@25.6.2)(esbuild@0.27.7)(jiti@2.7.0)(yaml@2.8.4)))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(solid-js@1.9.12)(vitest@4.1.6(@opentelemetry/api@1.9.0)(@types/node@25.6.2)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.14.5(@types/node@25.6.2)(typescript@6.0.3))(vite@8.0.12(@types/node@25.6.2)(esbuild@0.27.7)(jiti@2.7.0)(yaml@2.8.4))))(convex@1.45.0(react@19.2.6))(hono@4.12.18)(react@19.2.6)(solid-js@1.9.12)(zod@4.4.3):
     dependencies:
       '@babel/parser': 7.29.3
       '@better-fetch/fetch': 1.1.21
@@ -7964,7 +7954,7 @@ snapshots:
       '@tanstack/query-core': 5.100.10
       chokidar: 5.0.0
       common-tags: 1.8.2
-      convex: 1.38.0(react@19.2.6)
+      convex: 1.45.0(react@19.2.6)
       diff: 8.0.4
       dotenv: 17.4.2
       esbuild: 0.27.7
@@ -8908,8 +8898,6 @@ snapshots:
       yaml: 2.8.4
       zod: 4.4.3
 
-  undici-types@6.21.0: {}
-
   undici-types@7.19.2: {}
 
   undici@7.25.0: {}
@@ -9090,9 +9078,9 @@ snapshots:
 
   wrappy@1.0.2: {}
 
-  ws@8.18.0: {}
-
   ws@8.20.0: {}
+
+  ws@8.21.0: {}
 
   wsl-utils@0.3.1:
     dependencies:
