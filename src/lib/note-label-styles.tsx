@@ -13,7 +13,7 @@ export const NOTE_LABEL_ICONS: Record<NoteLabel, LucideIcon> = {
   idea: Lightbulb,
 };
 
-/** Icon + label text for SelectItem contents (Radix mirrors into SelectValue on the trigger). */
+/** Icon + label text for SelectItem contents and SelectValue (SSR-safe trigger label). */
 export function NoteLabelSelectDisplay({
   label: labelKey,
 }: {
@@ -50,7 +50,7 @@ const SELECT_ITEM_ACCENT: Record<NoteLabel, string> = {
   idea: "data-[highlighted]:bg-fuchsia-100/45 data-[highlighted]:text-fuchsia-900 focus:bg-fuchsia-100/45 focus:text-fuchsia-900 data-[state=checked]:bg-fuchsia-100/30 data-[state=checked]:text-fuchsia-900 dark:data-[highlighted]:bg-fuchsia-950/38 dark:data-[highlighted]:text-fuchsia-200 dark:focus:bg-fuchsia-950/38 dark:focus:text-fuchsia-200 dark:data-[state=checked]:bg-fuchsia-950/26 dark:data-[state=checked]:text-fuchsia-200",
 };
 
-function isNoteLabel(value: string): value is NoteLabel {
+export function isNoteLabel(value: string): value is NoteLabel {
   return (NOTE_LABELS as readonly string[]).includes(value);
 }
 

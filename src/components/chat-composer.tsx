@@ -1,10 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
-import { ImagePlus, Loader2, SendHorizontal } from "lucide-react";
+import { ImagePlus, Loader2 } from "lucide-react";
 import {
   type ClipboardEvent,
   type KeyboardEvent as ReactKeyboardEvent,
   useEffect,
+  useId,
   useRef,
   useState,
 } from "react";
@@ -24,7 +25,9 @@ import {
 } from "~/lib/convex/chat-composer-mutations";
 import { useCRPC } from "~/lib/convex/crpc";
 import {
+  isNoteLabel,
   NOTE_LABELS,
+  type NoteLabel,
   NoteLabelSelectDisplay,
   noteLabelSelectFocusClass,
   noteLabelSelectItemAccentClass,
@@ -32,8 +35,55 @@ import {
 } from "~/lib/note-label-styles";
 import { cn } from "~/lib/utils";
 
+const SELECT_SPIN_S = 18;
 const HAS_WHITESPACE = /\s/;
 const FIRST_NON_WHITESPACE_TOKEN = /^(\S+)/;
+const SAVE_HOVER_LABELS = [
+  "Send it",
+  "Launch it",
+  "Forget it",
+  "Yeet it",
+  "Dump it",
+  "Ship it",
+  "Drop it",
+  "Stash it",
+  "Toss it",
+  "Park it",
+  "Fire it",
+  "Push it",
+  "Fling it",
+  "Chuck it",
+  "Hurl it",
+  "Keep it",
+  "File it",
+  "Pin it",
+  "Bank it",
+  "Seal it",
+  "Lock it",
+  "Ink it",
+  "Log it",
+  "Catch it",
+  "Bounce it",
+  "Flick it",
+  "Sling it",
+  "Vault it",
+  "Pocket it",
+  "Bin it",
+  "Cast it",
+  "Lob it",
+  "Ping it",
+  "Post it",
+  "Tuck it",
+  "Cache it",
+] as const;
+const SAVE_LABEL_SIZER = SAVE_HOVER_LABELS.reduce((longest, label) =>
+  label.length > longest.length ? label : longest
+);
+
+function pickSaveHoverLabel(previous: string): string {
+  const pool = SAVE_HOVER_LABELS.filter((label) => label !== previous);
+  return pool[Math.floor(Math.random() * pool.length)] ?? "Send it";
+}
 
 function firstTokenAfterTrimStart(text: string): string | undefined {
   const lead = text.trimStart();
@@ -72,6 +122,53 @@ function singleHttpUrlFromCaptureText(text: string): string | undefined {
   }
 }
 
+interface CaptureTypeSelectProps {
+  onValueChange: (value: NoteLabel) => void;
+  value: NoteLabel;
+}
+
+export function CaptureTypeSelect({
+  value,
+  onValueChange,
+}: CaptureTypeSelectProps) {
+  return (
+    <Select
+      onValueChange={(next) => {
+        if (isNoteLabel(next)) {
+          onValueChange(next);
+        }
+      }}
+      value={value}
+    >
+      <SelectTrigger
+        aria-label="Capture type"
+        className={cn(
+          "w-[min(132px,100%)] shrink-0 border-0 font-medium",
+          noteLabelSurfaceClass(value),
+          value === "note" && "text-muted-foreground",
+          noteLabelSelectFocusClass(value)
+        )}
+        size="sm"
+      >
+        <SelectValue placeholder="Label">
+          <NoteLabelSelectDisplay label={value} />
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {NOTE_LABELS.map((l) => (
+          <SelectItem
+            className={noteLabelSelectItemAccentClass(l)}
+            key={l}
+            value={l}
+          >
+            <NoteLabelSelectDisplay label={l} />
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
 interface ChatComposerProps {
   className?: string;
   onCreated?: () => void;
@@ -89,12 +186,20 @@ export function ChatComposer({
   const router = useRouter();
   const crpc = useCRPC();
   const fileRef = useRef<HTMLInputElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
+  const accentGradId = `composer-accent-${useId().replaceAll(":", "")}`;
+  const [frameBox, setFrameBox] = useState({ h: 0, rx: 18, w: 0 });
   const [body, setBody] = useState("");
-  const [label, setLabel] = useState<string>(NOTE_LABELS[0]);
+  const [label, setLabel] = useState<NoteLabel>(NOTE_LABELS[0]);
   const [targetAtLocal, setTargetAtLocal] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [saveLabel, setSaveLabel] = useState(() => pickSaveHoverLabel(""));
+  const saveHoverArmedRef = useRef(false);
+  const saveLabelShouldAnimateRef = useRef(false);
+  const bodyRef = useRef(body);
+  bodyRef.current = body;
 
   const { mutateAsync: generateUploadUrl } = useMutation(
     crpc.notes.generateUploadUrl.mutationOptions()
@@ -112,9 +217,7 @@ export function ChatComposer({
       }
       event.preventDefault();
       setLabel((current) => {
-        const idx = NOTE_LABELS.indexOf(
-          current as (typeof NOTE_LABELS)[number]
-        );
+        const idx = NOTE_LABELS.indexOf(current);
         const i = idx >= 0 ? idx : 0;
         return NOTE_LABELS[(i + 1) % NOTE_LABELS.length];
       });
@@ -122,6 +225,83 @@ export function ChatComposer({
 
     window.addEventListener("keydown", cycleCaptureType);
     return () => window.removeEventListener("keydown", cycleCaptureType);
+  }, []);
+
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) {
+      return;
+    }
+
+    const syncFrameBox = () => {
+      const rect = frame.getBoundingClientRect();
+      const rx = Number.parseFloat(getComputedStyle(frame).borderTopLeftRadius);
+      setFrameBox((prev) => {
+        if (prev.w === rect.width && prev.h === rect.height && prev.rx === rx) {
+          return prev;
+        }
+        return { h: rect.height, rx, w: rect.width };
+      });
+    };
+
+    const observer = new ResizeObserver(syncFrameBox);
+    observer.observe(frame);
+    syncFrameBox();
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) {
+      return;
+    }
+
+    const spinGradient = () => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        return;
+      }
+      const spin = frame.querySelector(".composer-border-grad-spin");
+      if (spin && "beginElement" in spin) {
+        (spin as SVGAnimateTransformElement).beginElement();
+      }
+    };
+
+    const resetGradient = () => {
+      const spin = frame.querySelector(".composer-border-grad-spin");
+      if (spin && "endElement" in spin) {
+        try {
+          (spin as SVGAnimateTransformElement).endElement();
+        } catch {
+          // Not running.
+        }
+      }
+    };
+
+    const onFocusIn = (event: FocusEvent) => {
+      const from = event.relatedTarget;
+      if (from instanceof Node && frame.contains(from)) {
+        return;
+      }
+      spinGradient();
+    };
+
+    const onFocusOut = (event: FocusEvent) => {
+      const to = event.relatedTarget;
+      if (to instanceof Node && frame.contains(to)) {
+        return;
+      }
+      if (bodyRef.current.trim().length > 0) {
+        return;
+      }
+      resetGradient();
+    };
+
+    frame.addEventListener("focusin", onFocusIn);
+    frame.addEventListener("focusout", onFocusOut);
+    return () => {
+      frame.removeEventListener("focusin", onFocusIn);
+      frame.removeEventListener("focusout", onFocusOut);
+    };
   }, []);
 
   const onPickFiles = (list: FileList | null) => {
@@ -179,6 +359,17 @@ export function ChatComposer({
 
   const canSend = body.trim().length > 0 || files.length > 0;
   const sendDisabled = !canSend || pending;
+  const hasText = body.trim().length > 0;
+  const borderInset = 0.5;
+  const borderW = Math.max(0, frameBox.w - borderInset * 2);
+  const borderH = Math.max(0, frameBox.h - borderInset * 2);
+  const borderRx = Math.min(
+    Math.max(0, frameBox.rx - borderInset),
+    borderW / 2,
+    borderH / 2
+  );
+  const borderCx = frameBox.w / 2;
+  const borderCy = frameBox.h / 2;
 
   const onBodyKeyDown = (e: ReactKeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key !== "Enter" || e.repeat) {
@@ -192,6 +383,25 @@ export function ChatComposer({
       return;
     }
     submit().catch(() => undefined);
+  };
+
+  const armSaveHover = () => {
+    saveHoverArmedRef.current = true;
+  };
+
+  const releaseSaveHover = (event: { currentTarget: HTMLElement }) => {
+    const el = event.currentTarget;
+    requestAnimationFrame(() => {
+      if (el.matches(":hover") || el.matches(":focus-visible")) {
+        return;
+      }
+      if (!saveHoverArmedRef.current) {
+        return;
+      }
+      saveHoverArmedRef.current = false;
+      saveLabelShouldAnimateRef.current = true;
+      setSaveLabel((current) => pickSaveHoverLabel(current));
+    });
   };
 
   const onBodyPaste = (e: ClipboardEvent<HTMLTextAreaElement>) => {
@@ -211,13 +421,60 @@ export function ChatComposer({
   return (
     <div
       className={cn(
-        "group rounded-2xl border border-border/60 bg-card/40 p-1 shadow-sm backdrop-blur-sm",
+        "composer-frame group relative rounded-2xl border border-border/60 bg-card/40 p-1 shadow-sm backdrop-blur-sm",
+        hasText && "composer-frame-filled",
         className
       )}
+      ref={frameRef}
     >
+      {frameBox.w > 2 && frameBox.h > 2 ? (
+        <svg
+          aria-hidden="true"
+          className="composer-border-light"
+          preserveAspectRatio="none"
+          viewBox={`0 0 ${frameBox.w} ${frameBox.h}`}
+        >
+          <defs>
+            <linearGradient
+              gradientUnits="userSpaceOnUse"
+              id={accentGradId}
+              x1={0}
+              x2={frameBox.w}
+              y1={borderCy}
+              y2={borderCy}
+            >
+              <stop offset="0%" stopColor="oklch(0.76 0.22 312)" />
+              <stop offset="50%" stopColor="oklch(0.72 0.2 248)" />
+              <stop offset="100%" stopColor="oklch(0.76 0.22 312)" />
+              <animateTransform
+                attributeName="gradientTransform"
+                begin="indefinite"
+                calcMode="spline"
+                className="composer-border-grad-spin"
+                dur={`${SELECT_SPIN_S}s`}
+                fill="freeze"
+                keySplines="0.12 0.38 0.2 1"
+                keyTimes="0;1"
+                type="rotate"
+                values={`0 ${borderCx} ${borderCy};360 ${borderCx} ${borderCy}`}
+              />
+            </linearGradient>
+          </defs>
+          <rect
+            className="composer-border-accent"
+            fill="none"
+            height={borderH}
+            rx={borderRx}
+            stroke={`url(#${accentGradId})`}
+            width={borderW}
+            x={borderInset}
+            y={borderInset}
+          />
+        </svg>
+      ) : null}
       <div
         className={cn(
-          "flex flex-col gap-3 p-3 sm:p-4",
+          "relative flex flex-col gap-3 p-3 sm:p-4",
           variant === "home" && "gap-4 p-4 sm:p-6"
         )}
       >
@@ -243,31 +500,7 @@ export function ChatComposer({
         ) : null}
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
-            <Select onValueChange={setLabel} value={label}>
-              <SelectTrigger
-                aria-label="Capture type"
-                className={cn(
-                  "w-[min(132px,100%)] shrink-0 border-0 font-medium",
-                  noteLabelSurfaceClass(label),
-                  label === "note" && "text-muted-foreground",
-                  noteLabelSelectFocusClass(label)
-                )}
-                size="sm"
-              >
-                <SelectValue placeholder="Label" />
-              </SelectTrigger>
-              <SelectContent>
-                {NOTE_LABELS.map((l) => (
-                  <SelectItem
-                    className={noteLabelSelectItemAccentClass(l)}
-                    key={l}
-                    value={l}
-                  >
-                    <NoteLabelSelectDisplay label={l} />
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <CaptureTypeSelect onValueChange={setLabel} value={label} />
 
             <TargetDatetimeButton
               disabled={pending}
@@ -303,19 +536,38 @@ export function ChatComposer({
           </div>
 
           <Button
-            className="shrink-0 gap-2"
+            aria-label="Save"
+            className="composer-save relative shrink-0 overflow-visible"
             disabled={sendDisabled}
+            onBlur={releaseSaveHover}
             onClick={() => {
               submit().catch(() => undefined);
             }}
+            onFocus={armSaveHover}
+            onPointerEnter={armSaveHover}
+            onPointerLeave={releaseSaveHover}
             type="button"
           >
+            <span aria-hidden className="composer-save-accent" />
             {pending ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <SendHorizontal className="size-4" />
-            )}
-            Save
+              <Loader2 className="relative z-1 size-4 animate-spin" />
+            ) : null}
+            <span className="relative z-1 inline-grid justify-items-center">
+              <span aria-hidden className="invisible col-start-1 row-start-1">
+                {SAVE_LABEL_SIZER}
+              </span>
+              <span
+                className={cn(
+                  "col-start-1 row-start-1",
+                  saveLabelShouldAnimateRef.current &&
+                    "composer-save-label-swap"
+                )}
+                key={saveLabel}
+                suppressHydrationWarning
+              >
+                {saveLabel}
+              </span>
+            </span>
           </Button>
         </div>
       </div>
