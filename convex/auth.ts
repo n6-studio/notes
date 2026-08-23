@@ -9,6 +9,7 @@ import type { MutationCtx } from "./generated/server.js";
 import { type AppUser, safeGetUser } from "./lib/app_user.js";
 import { publicQuery } from "./lib/crpc.js";
 import { authQuery } from "./lib/protected.js";
+import { betterAuthTrustedOrigins } from "./lib/trusted_origins.js";
 
 function mutationCtx(ctx: MutationCtx | unknown): MutationCtx {
   return ctx as MutationCtx;
@@ -47,7 +48,7 @@ export default defineAuth(() => {
 
   return {
     baseURL: siteUrl,
-    trustedOrigins: [siteUrl],
+    trustedOrigins: betterAuthTrustedOrigins(siteUrl, process.env.DEPLOY_ENV),
     socialProviders: {
       google: {
         clientId: process.env.GOOGLE_CLIENT_ID as string,

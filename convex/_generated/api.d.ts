@@ -16,6 +16,7 @@ import type * as http from "../http.js";
 import type * as lib_app_user from "../lib/app_user.js";
 import type * as lib_crpc from "../lib/crpc.js";
 import type * as lib_protected from "../lib/protected.js";
+import type * as lib_trusted_origins from "../lib/trusted_origins.js";
 import type * as notes from "../notes.js";
 
 import type {
@@ -33,6 +34,7 @@ declare const fullApi: ApiFromModules<{
   "lib/app_user": typeof lib_app_user;
   "lib/crpc": typeof lib_crpc;
   "lib/protected": typeof lib_protected;
+  "lib/trusted_origins": typeof lib_trusted_origins;
   notes: typeof notes;
 }>;
 
