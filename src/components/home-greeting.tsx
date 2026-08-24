@@ -3,7 +3,6 @@ import {
   type ReactNode,
   use,
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -17,49 +16,37 @@ import { cn } from "~/lib/utils";
 
 interface HomeCompanionValue {
   cycle: () => void;
-  pair: HomeCompanionPair | null;
+  pair: HomeCompanionPair;
 }
 
 type CompanionScope = "home" | "landing";
 
 const HomeCompanionContext = createContext<HomeCompanionValue | null>(null);
 
-const sessionPairs: Partial<Record<CompanionScope, HomeCompanionPair>> = {};
-
 export function HomeCompanionProvider({
   children,
+  initialPair,
   scope = "home",
 }: {
   children: ReactNode;
+  initialPair: HomeCompanionPair;
   scope?: CompanionScope;
 }) {
   const { user } = useUser();
   const titlesOnly = scope === "landing";
-  const [pair, setPair] = useState<HomeCompanionPair | null>(
-    () => sessionPairs[scope] ?? null
-  );
-
-  useLayoutEffect(() => {
-    const ctx = {
-      firstName: companionFirstName(user?.name, user?.isAnonymous),
-      hour: new Date().getHours(),
-      titlesOnly,
-    };
-    sessionPairs[scope] ??= pickHomeCompanion(ctx);
-    setPair(sessionPairs[scope] ?? null);
-  }, [scope, titlesOnly, user?.isAnonymous, user?.name]);
+  const [pair, setPair] = useState(initialPair);
 
   const cycle = () => {
-    const next = pickHomeCompanion(
-      {
-        firstName: companionFirstName(user?.name, user?.isAnonymous),
-        hour: new Date().getHours(),
-        titlesOnly,
-      },
-      sessionPairs[scope]
+    setPair((current) =>
+      pickHomeCompanion(
+        {
+          firstName: companionFirstName(user?.name, user?.isAnonymous),
+          hour: new Date().getHours(),
+          titlesOnly,
+        },
+        current
+      )
     );
-    sessionPairs[scope] = next;
-    setPair(next);
   };
 
   return (
@@ -81,34 +68,24 @@ export function useHomeCompanion() {
 
 export function HomeGreeting() {
   const { pair } = useHomeCompanion();
-  const phrase = pair?.greeting ?? null;
   const previousPhrase = useRef<string | null>(null);
-  const isSwap = previousPhrase.current != null && phrase != null;
+  const isSwap =
+    previousPhrase.current != null && previousPhrase.current !== pair.greeting;
 
   useEffect(() => {
-    previousPhrase.current = phrase;
-  }, [phrase]);
+    previousPhrase.current = pair.greeting;
+  }, [pair.greeting]);
 
   return (
     <h1
       aria-live="polite"
       className={cn(
         "hero-title mb-10 min-h-[1.15em] text-balance text-center font-semibold text-4xl tracking-tight md:mb-16 md:text-6xl",
-        greetingMotionClass(phrase, isSwap)
+        isSwap && "home-greeting-swap"
       )}
-      key={phrase}
+      key={pair.greeting}
     >
-      {phrase ?? "\u00a0"}
+      {pair.greeting}
     </h1>
   );
-}
-
-function greetingMotionClass(phrase: string | null, isSwap: boolean) {
-  if (!phrase) {
-    return "opacity-0";
-  }
-  if (isSwap) {
-    return "home-greeting-swap";
-  }
-  return "home-greeting-enter";
 }

@@ -93,6 +93,27 @@ export function pickHomeCompanion(
   return pool[Math.floor(random() * pool.length)] ?? COMPANION_PAIRS[0];
 }
 
+export interface CompanionUser {
+  isAnonymous?: boolean | null;
+  name?: string | null;
+}
+
+export function pickHomeCompanionForPage(
+  page: "home" | "landing",
+  user?: CompanionUser | null,
+  random = Math.random
+): HomeCompanionPair {
+  return pickHomeCompanion(
+    {
+      firstName: companionFirstName(user?.name, user?.isAnonymous),
+      hour: new Date().getHours(),
+      titlesOnly: page === "landing",
+    },
+    undefined,
+    random
+  );
+}
+
 function timeCompanions(
   dayPart: DayPart,
   firstName?: string

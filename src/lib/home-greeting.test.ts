@@ -5,6 +5,7 @@ import {
   HOME_SAVE_LABEL_SIZER,
   homeCompanionsFor,
   pickHomeCompanion,
+  pickHomeCompanionForPage,
 } from "~/lib/home-greeting";
 
 describe("companionFirstName", () => {
@@ -84,5 +85,17 @@ describe("home companions", () => {
     expect(greetings).toContain("What's sitting with you?");
     expect(greetings).not.toContain("Good evening");
     expect(greetings).not.toContain("Hey");
+  });
+
+  it("picks a landing companion without time-of-day greetings", () => {
+    const pair = pickHomeCompanionForPage(
+      "landing",
+      { isAnonymous: false, name: "Ada" },
+      () => 0
+    );
+    expect(pair).toEqual({
+      greeting: "What's sitting with you?",
+      saveLabel: "Dump it",
+    });
   });
 });

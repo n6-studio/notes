@@ -542,7 +542,6 @@ export function ChatComposer({
                     "composer-save-label-swap"
                 )}
                 key={saveLabel}
-                suppressHydrationWarning
               >
                 {saveLabel}
               </span>
