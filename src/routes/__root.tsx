@@ -15,14 +15,15 @@ import { createServerFn } from "@tanstack/react-start";
 import type { ConvexQueryClient } from "kitcn/react";
 import { getToken } from "~/lib/convex/auth-server";
 import { ConvexAppProvider } from "~/lib/convex/convex-provider";
+import { rootAuthFromGetToken } from "~/lib/convex/root-auth";
 import appCss from "../styles.css?url";
 
-const getAuth = createServerFn({ method: "GET" }).handler(async () => {
+const getAuth = createServerFn({ method: "POST" }).handler(async () => {
   try {
-    return await getToken();
+    return { lookupFailed: false, token: (await getToken()) ?? null };
   } catch (error) {
     console.error("[auth] getToken failed during SSR", error);
-    return;
+    return { lookupFailed: true, token: null };
   }
 });
 
@@ -86,14 +87,11 @@ export const Route = createRootRouteWithContext<{
     ],
   }),
   beforeLoad: async ({ context }) => {
-    const token = await getAuth();
-    if (token) {
-      context.convexQueryClient.serverHttpClient?.setAuth(token);
+    const auth = await getAuth();
+    if (auth.token) {
+      context.convexQueryClient.serverHttpClient?.setAuth(auth.token);
     }
-    return {
-      isAuthenticated: Boolean(token),
-      token: token ?? null,
-    };
+    return rootAuthFromGetToken(auth.token, auth.lookupFailed);
   },
   component: RootComponent,
 });

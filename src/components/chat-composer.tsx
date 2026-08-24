@@ -1,3 +1,4 @@
+import { Plural, useLingui } from "@lingui/react/macro";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { ImagePlus, Loader2 } from "lucide-react";
@@ -20,6 +21,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
+import { nextComposerFrameBox } from "~/lib/composer-frame-box";
 import {
   submitNoteCaptureOverCrpc,
   submitNoteCaptureOverHttp,
@@ -215,12 +217,7 @@ export function ChatComposer({
     const syncFrameBox = () => {
       const rect = frame.getBoundingClientRect();
       const rx = Number.parseFloat(getComputedStyle(frame).borderTopLeftRadius);
-      setFrameBox((prev) => {
-        if (prev.w === rect.width && prev.h === rect.height && prev.rx === rx) {
-          return prev;
-        }
-        return { h: rect.height, rx, w: rect.width };
-      });
+      setFrameBox((prev) => nextComposerFrameBox(prev, rect, rx));
     };
 
     const observer = new ResizeObserver(syncFrameBox);
