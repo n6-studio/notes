@@ -16,6 +16,8 @@ const config = defineConfig({
     nitro({
       // Prefer Node entry on Vercel so TanStack Start keeps `runtime.node`
       // (web entry historically wiped it and caused SSR 500s).
+      // NitroPluginConfig typings omit `vercel` in some nitro-nightly builds.
+      // @ts-expect-error vercel is a valid Nitro deployment option
       vercel: { entryFormat: "node" },
       rollupConfig: { external: [/^@sentry\//] },
     }),

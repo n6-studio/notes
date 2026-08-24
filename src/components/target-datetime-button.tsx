@@ -107,27 +107,29 @@ export function TargetDatetimeButton({
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
-      <PopoverTrigger asChild>
-        <Button
-          aria-expanded={open}
-          aria-haspopup="dialog"
-          aria-label={
-            selected === undefined
-              ? "Pick target date and time"
-              : `Target date ${labelText}`
-          }
-          className={cn(
-            "max-w-[min(160px,100%)] shrink-0 justify-start gap-2 font-normal text-muted-foreground",
-            className
-          )}
-          disabled={disabled}
-          size="sm"
-          type="button"
-          variant="ghost"
-        >
-          <CalendarClock className="size-4 shrink-0" />
-          <span className="truncate">{labelText}</span>
-        </Button>
+      <PopoverTrigger
+        render={
+          <Button
+            aria-expanded={open}
+            aria-haspopup="dialog"
+            aria-label={
+              selected === undefined
+                ? "Pick target date and time"
+                : `Target date ${labelText}`
+            }
+            className={cn(
+              "max-w-[min(160px,100%)] shrink-0 justify-start gap-2 font-normal text-muted-foreground",
+              className
+            )}
+            disabled={disabled}
+            size="sm"
+            type="button"
+            variant="ghost"
+          />
+        }
+      >
+        <CalendarClock className="size-4 shrink-0" />
+        <span className="truncate">{labelText}</span>
       </PopoverTrigger>
       <PopoverContent
         align="start"

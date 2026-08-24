@@ -3,6 +3,7 @@ import {
   type ReactNode,
   use,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -33,21 +34,23 @@ export function HomeCompanionProvider({
   scope?: CompanionScope;
 }) {
   const { user } = useUser();
-  const [pair, setPair] = useState<HomeCompanionPair | null>(null);
   const titlesOnly = scope === "landing";
+  const [pair, setPair] = useState<HomeCompanionPair | null>(
+    () => sessionPairs[scope] ?? null
+  );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const ctx = {
       firstName: companionFirstName(user?.name, user?.isAnonymous),
       hour: new Date().getHours(),
       titlesOnly,
     };
     sessionPairs[scope] ??= pickHomeCompanion(ctx);
-    setPair(sessionPairs[scope]);
+    setPair(sessionPairs[scope] ?? null);
   }, [scope, titlesOnly, user?.isAnonymous, user?.name]);
 
   const cycle = () => {
-    sessionPairs[scope] = pickHomeCompanion(
+    const next = pickHomeCompanion(
       {
         firstName: companionFirstName(user?.name, user?.isAnonymous),
         hour: new Date().getHours(),
@@ -55,7 +58,8 @@ export function HomeCompanionProvider({
       },
       sessionPairs[scope]
     );
-    setPair(sessionPairs[scope] ?? null);
+    sessionPairs[scope] = next;
+    setPair(next);
   };
 
   return (
@@ -89,7 +93,7 @@ export function HomeGreeting() {
     <h1
       aria-live="polite"
       className={cn(
-        "hero-title mb-6 min-h-[1.15em] text-balance text-center font-semibold text-4xl tracking-tight md:mb-8 md:text-6xl",
+        "hero-title mb-10 min-h-[1.15em] text-balance text-center font-semibold text-4xl tracking-tight md:mb-16 md:text-6xl",
         greetingMotionClass(phrase, isSwap)
       )}
       key={phrase}

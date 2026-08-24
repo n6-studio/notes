@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   companionFirstName,
   dayPartFromHour,
+  HOME_SAVE_LABEL_SIZER,
   homeCompanionsFor,
   pickHomeCompanion,
 } from "~/lib/home-greeting";
@@ -70,6 +71,9 @@ describe("home companions", () => {
     const pool = homeCompanionsFor({ firstName: "Ada", hour: 19 });
     for (const pair of pool) {
       expect(pair.saveLabel.endsWith(" it")).toBe(true);
+      expect(HOME_SAVE_LABEL_SIZER.length).toBeGreaterThanOrEqual(
+        pair.saveLabel.length
+      );
     }
   });
 

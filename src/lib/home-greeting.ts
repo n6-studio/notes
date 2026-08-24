@@ -23,6 +23,12 @@ const COMPANION_PAIRS: HomeCompanionPair[] = [
   { greeting: "Catch it while it's here", saveLabel: "Catch it" },
 ];
 
+export const HOME_SAVE_LABEL_SIZER = COMPANION_PAIRS.reduce(
+  (longest, pair) =>
+    pair.saveLabel.length > longest.length ? pair.saveLabel : longest,
+  "it"
+);
+
 export function companionFirstName(
   name: string | null | undefined,
   isAnonymous?: boolean | null

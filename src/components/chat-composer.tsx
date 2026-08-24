@@ -14,6 +14,7 @@ import { Button } from "~/components/ui/button";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -24,6 +25,7 @@ import {
   submitNoteCaptureOverHttp,
 } from "~/lib/convex/chat-composer-mutations";
 import { useCRPC } from "~/lib/convex/crpc";
+import { HOME_SAVE_LABEL_SIZER } from "~/lib/home-greeting";
 import {
   isNoteLabel,
   NOTE_LABELS,
@@ -35,55 +37,14 @@ import {
 } from "~/lib/note-label-styles";
 import { cn } from "~/lib/utils";
 
+const CAPTURE_TYPE_ITEMS = NOTE_LABELS.map((l) => ({
+  label: l,
+  value: l,
+}));
+
 const SELECT_SPIN_S = 18;
 const HAS_WHITESPACE = /\s/;
 const FIRST_NON_WHITESPACE_TOKEN = /^(\S+)/;
-const SAVE_HOVER_LABELS = [
-  "Send it",
-  "Launch it",
-  "Forget it",
-  "Yeet it",
-  "Dump it",
-  "Ship it",
-  "Drop it",
-  "Stash it",
-  "Toss it",
-  "Park it",
-  "Fire it",
-  "Push it",
-  "Fling it",
-  "Chuck it",
-  "Hurl it",
-  "Keep it",
-  "File it",
-  "Pin it",
-  "Bank it",
-  "Seal it",
-  "Lock it",
-  "Ink it",
-  "Log it",
-  "Catch it",
-  "Bounce it",
-  "Flick it",
-  "Sling it",
-  "Vault it",
-  "Pocket it",
-  "Bin it",
-  "Cast it",
-  "Lob it",
-  "Ping it",
-  "Post it",
-  "Tuck it",
-  "Cache it",
-] as const;
-const SAVE_LABEL_SIZER = SAVE_HOVER_LABELS.reduce((longest, label) =>
-  label.length > longest.length ? label : longest
-);
-
-function pickSaveHoverLabel(previous: string): string {
-  const pool = SAVE_HOVER_LABELS.filter((label) => label !== previous);
-  return pool[Math.floor(Math.random() * pool.length)] ?? "Send it";
-}
 
 function firstTokenAfterTrimStart(text: string): string | undefined {
   const lead = text.trimStart();
@@ -133,8 +94,9 @@ export function CaptureTypeSelect({
 }: CaptureTypeSelectProps) {
   return (
     <Select
+      items={CAPTURE_TYPE_ITEMS}
       onValueChange={(next) => {
-        if (isNoteLabel(next)) {
+        if (typeof next === "string" && isNoteLabel(next)) {
           onValueChange(next);
         }
       }}
@@ -151,19 +113,27 @@ export function CaptureTypeSelect({
         size="sm"
       >
         <SelectValue placeholder="Label">
-          <NoteLabelSelectDisplay label={value} />
+          {(selected: string | null) =>
+            selected && isNoteLabel(selected) ? (
+              <NoteLabelSelectDisplay label={selected} />
+            ) : (
+              "Label"
+            )
+          }
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
-        {NOTE_LABELS.map((l) => (
-          <SelectItem
-            className={noteLabelSelectItemAccentClass(l)}
-            key={l}
-            value={l}
-          >
-            <NoteLabelSelectDisplay label={l} />
-          </SelectItem>
-        ))}
+        <SelectGroup>
+          {NOTE_LABELS.map((l) => (
+            <SelectItem
+              className={noteLabelSelectItemAccentClass(l)}
+              key={l}
+              value={l}
+            >
+              <NoteLabelSelectDisplay label={l} />
+            </SelectItem>
+          ))}
+        </SelectGroup>
       </SelectContent>
     </Select>
   );
@@ -172,12 +142,13 @@ export function CaptureTypeSelect({
 interface ChatComposerProps {
   className?: string;
   onCreated?: () => void;
-  /** When set, the save button uses this label instead of an internal random verb. */
+  /** Cycles the companion pair (title/placeholder + save verb) together. */
   onCycleSaveLabel?: () => void;
   /** Runs at the start of submit (before uploads). Use for ensuring auth, etc. */
   onPreSubmit?: () => void | Promise<void>;
   placeholder: string;
-  saveLabel?: string;
+  /** Companion-pair verb; always shown as-is, never replaced by a random CTA. */
+  saveLabel: string;
   variant: "landing" | "home";
 }
 
@@ -188,7 +159,7 @@ export function ChatComposer({
   onCycleSaveLabel,
   onPreSubmit,
   placeholder,
-  saveLabel: saveLabelProp,
+  saveLabel,
 }: ChatComposerProps) {
   const router = useRouter();
   const crpc = useCRPC();
@@ -202,12 +173,10 @@ export function ChatComposer({
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-  const [internalSaveLabel, setInternalSaveLabel] = useState(() =>
-    pickSaveHoverLabel("")
-  );
-  const saveLabel = saveLabelProp ?? internalSaveLabel;
   const saveHoverArmedRef = useRef(false);
   const saveLabelShouldAnimateRef = useRef(false);
+  const cycleSaveLabelRef = useRef(onCycleSaveLabel);
+  cycleSaveLabelRef.current = onCycleSaveLabel;
   const bodyRef = useRef(body);
   bodyRef.current = body;
 
@@ -410,11 +379,7 @@ export function ChatComposer({
       }
       saveHoverArmedRef.current = false;
       saveLabelShouldAnimateRef.current = true;
-      if (onCycleSaveLabel) {
-        onCycleSaveLabel();
-        return;
-      }
-      setInternalSaveLabel((current) => pickSaveHoverLabel(current));
+      cycleSaveLabelRef.current?.();
     });
   };
 
@@ -568,7 +533,7 @@ export function ChatComposer({
             ) : null}
             <span className="relative z-1 inline-grid justify-items-center">
               <span aria-hidden className="invisible col-start-1 row-start-1">
-                {SAVE_LABEL_SIZER}
+                {HOME_SAVE_LABEL_SIZER}
               </span>
               <span
                 className={cn(

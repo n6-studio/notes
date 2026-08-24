@@ -18,6 +18,7 @@ import { Label } from "~/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -35,6 +36,16 @@ import { cn } from "~/lib/utils";
 export const Route = createFileRoute("/_authed/notes/")({
   component: NotesLibrary,
 });
+
+const TYPE_FILTER_ITEMS = [
+  { label: "All types", value: "all" },
+  ...NOTE_LABELS.map((l) => ({ label: l, value: l })),
+] as const;
+
+const SORT_ITEMS = [
+  { label: "Newest first", value: "desc" },
+  { label: "Oldest first", value: "asc" },
+] as const;
 
 /** Normalized filters passed to `notes.list` once Convex auth is ready. */
 interface NotesListInput {
@@ -131,27 +142,33 @@ function NotesLibrary() {
                   Type
                 </Label>
                 <Select
-                  onValueChange={(v) =>
-                    setTypeFilter(v === "all" ? "all" : (v as NoteLabel))
-                  }
+                  items={[...TYPE_FILTER_ITEMS]}
+                  onValueChange={(v) => {
+                    if (v === null) {
+                      return;
+                    }
+                    setTypeFilter(v === "all" ? "all" : (v as NoteLabel));
+                  }}
                   value={typeFilter}
                 >
                   <SelectTrigger className="h-9 w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All types</SelectItem>
-                    {NOTE_LABELS.map((l) => (
-                      <SelectItem
-                        className={noteLabelSelectItemAccentClass(l)}
-                        key={l}
-                        value={l}
-                      >
-                        <span className="flex items-center gap-2">
-                          <NoteLabelSelectDisplay label={l} />
-                        </span>
-                      </SelectItem>
-                    ))}
+                    <SelectGroup>
+                      <SelectItem value="all">All types</SelectItem>
+                      {NOTE_LABELS.map((l) => (
+                        <SelectItem
+                          className={noteLabelSelectItemAccentClass(l)}
+                          key={l}
+                          value={l}
+                        >
+                          <span className="flex items-center gap-2">
+                            <NoteLabelSelectDisplay label={l} />
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
@@ -160,15 +177,22 @@ function NotesLibrary() {
                   Sort
                 </Label>
                 <Select
-                  onValueChange={(v) => setSort(v as "desc" | "asc")}
+                  items={[...SORT_ITEMS]}
+                  onValueChange={(v) => {
+                    if (v === "desc" || v === "asc") {
+                      setSort(v);
+                    }
+                  }}
                   value={sort}
                 >
                   <SelectTrigger className="h-9 w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="desc">Newest first</SelectItem>
-                    <SelectItem value="asc">Oldest first</SelectItem>
+                    <SelectGroup>
+                      <SelectItem value="desc">Newest first</SelectItem>
+                      <SelectItem value="asc">Oldest first</SelectItem>
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
@@ -236,21 +260,23 @@ function NotesTimeline({
               </div>
             </div>
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  aria-label="Note actions"
-                  className="-me-1 -mt-0.5 shrink-0 text-muted-foreground hover:text-foreground"
-                  size="icon-sm"
-                  type="button"
-                  variant="ghost"
-                >
-                  <MoreVerticalIcon />
-                </Button>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    aria-label="Note actions"
+                    className="-me-1 -mt-0.5 shrink-0 text-muted-foreground hover:text-foreground"
+                    size="icon-sm"
+                    type="button"
+                    variant="ghost"
+                  />
+                }
+              >
+                <MoreVerticalIcon />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-40">
                 <DropdownMenuGroup>
                   <DropdownMenuItem
-                    onSelect={() => {
+                    onClick={() => {
                       navigator.clipboard.writeText(note.body).catch(() => {
                         /* ignore clipboard errors */
                       });
@@ -262,7 +288,7 @@ function NotesTimeline({
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     disabled={removeNote.isPending}
-                    onSelect={() => {
+                    onClick={() => {
                       removeNote.mutate(
                         { id: note._id },
                         {

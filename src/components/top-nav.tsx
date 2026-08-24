@@ -56,20 +56,22 @@ export function TopNav() {
             {isAuthenticated && (
               <>
                 <Button
-                  asChild
                   className="h-8 px-2 text-muted-foreground hover:text-foreground"
+                  nativeButton={false}
+                  render={<Link to="/home" />}
                   size="sm"
                   variant="ghost"
                 >
-                  <Link to="/home">Home</Link>
+                  Home
                 </Button>
                 <Button
-                  asChild
                   className="h-8 px-2 text-muted-foreground hover:text-foreground"
+                  nativeButton={false}
+                  render={<Link to="/notes" />}
                   size="sm"
                   variant="ghost"
                 >
-                  <Link to="/notes">Notes</Link>
+                  Notes
                 </Button>
               </>
             )}
@@ -77,26 +79,28 @@ export function TopNav() {
           <div className="flex shrink-0 items-center">
             {isAuthenticated ? (
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    className="-mr-2 h-8 gap-1 px-2 text-muted-foreground hover:text-foreground"
-                    size="sm"
-                    variant="ghost"
-                  >
-                    <span className="max-w-36 truncate">{userLabel}</span>
-                    <ChevronDownIcon className="size-4 opacity-60" />
-                  </Button>
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      className="-mr-2 h-8 gap-1 px-2 text-muted-foreground hover:text-foreground"
+                      size="sm"
+                      variant="ghost"
+                    />
+                  }
+                >
+                  <span className="max-w-36 truncate">{userLabel}</span>
+                  <ChevronDownIcon className="size-4 opacity-60" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="min-w-44">
-                  <DropdownMenuItem asChild>
-                    <Link to="/settings">Settings</Link>
+                  <DropdownMenuItem render={<Link to="/settings" />}>
+                    Settings
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
+                    closeOnClick={!isAnonymous}
                     disabled={signOut.isPending}
-                    onSelect={(event) => {
+                    onClick={() => {
                       if (isAnonymous) {
-                        event.preventDefault();
                         setAnonymousSignOutOpen(true);
                         return;
                       }
