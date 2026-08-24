@@ -1,3 +1,4 @@
+import { Trans, useLingui } from "@lingui/react/macro";
 import { CalendarClock } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 import { Button } from "~/components/ui/button";
@@ -45,6 +46,7 @@ export function TargetDatetimeButton({
   disabled,
   className,
 }: TargetDatetimeButtonProps) {
+  const { i18n, t } = useLingui();
   const timeInputId = useId();
   const [open, setOpen] = useState(false);
   const selected = parseDatetimeLocal(value);
@@ -65,8 +67,8 @@ export function TargetDatetimeButton({
 
   const labelText =
     selected === undefined
-      ? "Date"
-      : selected.toLocaleString(undefined, {
+      ? t`Date`
+      : selected.toLocaleString(i18n.locale, {
           dateStyle: "medium",
           timeStyle: "short",
         });
@@ -114,8 +116,8 @@ export function TargetDatetimeButton({
             aria-haspopup="dialog"
             aria-label={
               selected === undefined
-                ? "Pick target date and time"
-                : `Target date ${labelText}`
+                ? t`Pick target date and time`
+                : t`Target date ${labelText}`
             }
             className={cn(
               "max-w-[min(160px,100%)] shrink-0 justify-start gap-2 font-normal text-muted-foreground",
@@ -147,7 +149,7 @@ export function TargetDatetimeButton({
             className="shrink-0 text-muted-foreground"
             htmlFor={timeInputId}
           >
-            Time
+            <Trans>Time</Trans>
           </Label>
           <Input
             className="h-9 max-w-36 bg-background/50"
@@ -167,7 +169,7 @@ export function TargetDatetimeButton({
             type="button"
             variant="ghost"
           >
-            Clear
+            <Trans>Clear</Trans>
           </Button>
         </div>
       </PopoverContent>

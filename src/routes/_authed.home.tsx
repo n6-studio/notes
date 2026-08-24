@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import { createFileRoute } from "@tanstack/react-router";
 import { ChatComposer } from "~/components/chat-composer";
 import {
@@ -41,14 +42,15 @@ function Home() {
 }
 
 function HomeComposer() {
+  const { i18n, t } = useLingui();
   const { cycle, pair } = useHomeCompanion();
 
   return (
     <ChatComposer
       className="w-full"
       onCycleSaveLabel={cycle}
-      placeholder="Note, URL or image"
-      saveLabel={pair.saveLabel}
+      placeholder={t`Note, URL or image`}
+      saveLabel={i18n._(pair.saveLabel)}
       variant="home"
     />
   );

@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
 
+import { useLingui } from "@lingui/react";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -112,8 +113,9 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const { i18n } = useLingui();
   return (
-    <html className="dark" lang="en">
+    <html className="dark" lang={i18n.locale}>
       <head>
         <HeadContent />
       </head>

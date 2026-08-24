@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 import { createFileRoute } from "@tanstack/react-router";
 import { TriangleAlertIcon } from "lucide-react";
 import { TopNav } from "~/components/top-nav";
@@ -18,7 +19,7 @@ function Settings() {
       <TopNav />
       <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 pt-8 pb-16 md:pt-12">
         <h1 className="font-medium text-foreground/90 text-xl tracking-tight">
-          Settings
+          <Trans>Settings</Trans>
         </h1>
         {isAnonymous && (
           <section aria-labelledby="settings-account-heading" className="mt-8">
@@ -26,7 +27,7 @@ function Settings() {
               className="mb-3 font-medium text-foreground/80 text-sm"
               id="settings-account-heading"
             >
-              Account
+              <Trans>Account</Trans>
             </h2>
             <Alert
               className={cn(
@@ -38,10 +39,14 @@ function Settings() {
                 aria-hidden
                 className="text-amber-600 dark:text-amber-400"
               />
-              <AlertTitle>Anonymous session</AlertTitle>
+              <AlertTitle>
+                <Trans>Anonymous session</Trans>
+              </AlertTitle>
               <AlertDescription>
-                Sign out, clear this site&apos;s data, private browsing, or
-                another device can cut off access to your notes.
+                <Trans>
+                  Sign out, clear this site&apos;s data, private browsing, or
+                  another device can cut off access to your notes.
+                </Trans>
               </AlertDescription>
             </Alert>
           </section>

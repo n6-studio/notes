@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import {
   createContext,
   type ReactNode,
@@ -67,14 +68,16 @@ export function useHomeCompanion() {
 }
 
 export function HomeGreeting() {
+  const { i18n } = useLingui();
   const { pair } = useHomeCompanion();
+  const greeting = i18n._(pair.greeting);
   const previousPhrase = useRef<string | null>(null);
   const isSwap =
-    previousPhrase.current != null && previousPhrase.current !== pair.greeting;
+    previousPhrase.current != null && previousPhrase.current !== greeting;
 
   useEffect(() => {
-    previousPhrase.current = pair.greeting;
-  }, [pair.greeting]);
+    previousPhrase.current = greeting;
+  }, [greeting]);
 
   return (
     <h1
@@ -83,9 +86,9 @@ export function HomeGreeting() {
         "hero-title mb-10 min-h-[1.15em] text-balance text-center font-semibold text-4xl tracking-tight md:mb-16 md:text-6xl",
         isSwap && "home-greeting-swap"
       )}
-      key={pair.greeting}
+      key={greeting}
     >
-      {pair.greeting}
+      {greeting}
     </h1>
   );
 }

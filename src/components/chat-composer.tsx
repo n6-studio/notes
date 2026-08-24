@@ -94,6 +94,9 @@ export function CaptureTypeSelect({
   value,
   onValueChange,
 }: CaptureTypeSelectProps) {
+  const { t } = useLingui();
+  const labelPlaceholder = t`Label`;
+
   return (
     <Select
       items={CAPTURE_TYPE_ITEMS}
@@ -105,7 +108,7 @@ export function CaptureTypeSelect({
       value={value}
     >
       <SelectTrigger
-        aria-label="Capture type"
+        aria-label={t`Capture type`}
         className={cn(
           "w-[min(132px,100%)] shrink-0 border-0 font-medium",
           noteLabelSurfaceClass(value),
@@ -114,12 +117,12 @@ export function CaptureTypeSelect({
         )}
         size="sm"
       >
-        <SelectValue placeholder="Label">
+        <SelectValue placeholder={labelPlaceholder}>
           {(selected: string | null) =>
             selected && isNoteLabel(selected) ? (
               <NoteLabelSelectDisplay label={selected} />
             ) : (
-              "Label"
+              labelPlaceholder
             )
           }
         </SelectValue>
@@ -163,6 +166,7 @@ export function ChatComposer({
   placeholder,
   saveLabel,
 }: ChatComposerProps) {
+  const { i18n, t } = useLingui();
   const router = useRouter();
   const crpc = useCRPC();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -327,7 +331,7 @@ export function ChatComposer({
       onCreated?.();
       await router.invalidate();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong");
+      setError(e instanceof Error ? e.message : t`Something went wrong`);
     } finally {
       setPending(false);
     }
@@ -494,7 +498,7 @@ export function ChatComposer({
                 type="file"
               />
               <Button
-                aria-label="Attach images"
+                aria-label={t`Attach images`}
                 disabled={pending}
                 onClick={() => fileRef.current?.click()}
                 size="icon-sm"
@@ -505,14 +509,14 @@ export function ChatComposer({
               </Button>
               {files.length > 0 ? (
                 <span className="text-muted-foreground text-xs">
-                  {files.length} image{files.length === 1 ? "" : "s"}
+                  <Plural one="# image" other="# images" value={files.length} />
                 </span>
               ) : null}
             </div>
           </div>
 
           <Button
-            aria-label="Save"
+            aria-label={saveLabel}
             className="composer-save relative shrink-0 overflow-visible"
             disabled={sendDisabled}
             onBlur={releaseSaveHover}
@@ -530,7 +534,7 @@ export function ChatComposer({
             ) : null}
             <span className="relative z-1 inline-grid justify-items-center">
               <span aria-hidden className="invisible col-start-1 row-start-1">
-                {HOME_SAVE_LABEL_SIZER}
+                {i18n._(HOME_SAVE_LABEL_SIZER)}
               </span>
               <span
                 className={cn(

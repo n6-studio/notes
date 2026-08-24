@@ -1,12 +1,22 @@
+import { setupI18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
+import type { ReactElement } from "react";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { CaptureTypeSelect } from "~/components/chat-composer";
+import { messages } from "~/locales/en/messages.po";
 
 const EMPTY_SELECT_VALUE = /select-value"[^>]*><\/span>/;
 
+function renderWithEnglish(ui: ReactElement) {
+  const i18n = setupI18n();
+  i18n.loadAndActivate({ locale: "en", messages });
+  return renderToString(<I18nProvider i18n={i18n}>{ui}</I18nProvider>);
+}
+
 describe("CaptureTypeSelect", () => {
   it("includes the selected label in SSR HTML so the trigger is not blank before hydration", () => {
-    const html = renderToString(
+    const html = renderWithEnglish(
       <CaptureTypeSelect onValueChange={() => undefined} value="note" />
     );
     const valueStart = html.indexOf('data-slot="select-value"');

@@ -1,7 +1,9 @@
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useRouter } from "@tanstack/react-router";
 import { ChevronDownIcon } from "lucide-react";
 import { useState } from "react";
+import { LanguageSwitcher } from "~/components/language-switcher";
 import { LogoMark } from "~/components/logo-mark";
 import {
   AlertDialog,
@@ -28,6 +30,7 @@ import { useUser } from "~/lib/convex/use-user";
 
 export function TopNav() {
   const router = useRouter();
+  const { t } = useLingui();
   const { user, isAuthenticated } = useUser();
   const [anonymousSignOutOpen, setAnonymousSignOutOpen] = useState(false);
 
@@ -36,7 +39,7 @@ export function TopNav() {
 
   const isAnonymous = user?.isAnonymous === true;
 
-  const userLabel = user?.name?.trim() || user?.email?.trim() || "Account";
+  const userLabel = user?.name?.trim() || user?.email?.trim() || t`Account`;
 
   return (
     <>
@@ -62,7 +65,7 @@ export function TopNav() {
                   size="sm"
                   variant="ghost"
                 >
-                  Home
+                  <Trans>Home</Trans>
                 </Button>
                 <Button
                   className="h-8 px-2 text-muted-foreground hover:text-foreground"
@@ -71,18 +74,18 @@ export function TopNav() {
                   size="sm"
                   variant="ghost"
                 >
-                  Notes
+                  <Trans>Notes</Trans>
                 </Button>
               </>
             )}
           </nav>
-          <div className="flex shrink-0 items-center">
+          <div className="flex shrink-0 items-center gap-1">
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger
                   render={
                     <Button
-                      className="-mr-2 h-8 gap-1 px-2 text-muted-foreground hover:text-foreground"
+                      className="h-8 gap-1 px-2 text-muted-foreground hover:text-foreground"
                       size="sm"
                       variant="ghost"
                     />
@@ -93,7 +96,7 @@ export function TopNav() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="min-w-44">
                   <DropdownMenuItem render={<Link to="/settings" />}>
-                    Settings
+                    <Trans>Settings</Trans>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -108,7 +111,7 @@ export function TopNav() {
                     }}
                     variant="destructive"
                   >
-                    Sign out
+                    <Trans>Sign out</Trans>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -122,9 +125,10 @@ export function TopNav() {
                 size="sm"
                 variant="ghost"
               >
-                Sign in with Google
+                <Trans>Sign in with Google</Trans>
               </Button>
             )}
+            <LanguageSwitcher />
           </div>
         </div>
       </header>
@@ -139,16 +143,20 @@ export function TopNav() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Sign out and delete your notes?</AlertDialogTitle>
+            <AlertDialogTitle>
+              <Trans>Sign out and delete your notes?</Trans>
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              You&apos;re signed in as a guest. Signing out permanently deletes
-              your account and everything you&apos;ve saved here—every note and
-              attachment—with no way to recover it.
+              <Trans>
+                You&apos;re signed in as a guest. Signing out permanently
+                deletes your account and everything you&apos;ve saved here—every
+                note and attachment—with no way to recover it.
+              </Trans>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={signOut.isPending}>
-              Cancel
+              <Trans>Cancel</Trans>
             </AlertDialogCancel>
             <Button
               disabled={signOut.isPending}
@@ -163,7 +171,7 @@ export function TopNav() {
               }}
               variant="destructive"
             >
-              Sign out
+              <Trans>Sign out</Trans>
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

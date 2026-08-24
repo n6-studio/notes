@@ -1,5 +1,6 @@
 "use client";
 
+import { useLingui } from "@lingui/react/macro";
 import {
   type CSSProperties,
   useEffect,
@@ -261,6 +262,7 @@ function NightSkyFallingStar() {
 }
 
 export function NightSkyBackground() {
+  const { t } = useLingui();
   return (
     <div
       aria-hidden="true"
@@ -272,7 +274,7 @@ export function NightSkyBackground() {
         preserveAspectRatio="xMidYMin slice"
         viewBox="0 0 100 70"
       >
-        <title>Decorative night sky</title>
+        <title>{t`Decorative night sky`}</title>
         <defs>
           <path d={STAR_PATH} id="night-sky-star" />
           <linearGradient id="night-sky-fall-tail" x1="0" x2="1" y1="0" y2="0">

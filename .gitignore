@@ -16,3 +16,6 @@ coverage
 __unconfig*
 todos.json
 .vercel
+src/locales/**/messages.js
+src/locales/**/messages.ts
+src/locales/**/messages.d.ts

@@ -8,6 +8,12 @@ import {
   pickHomeCompanionForPage,
 } from "~/lib/home-greeting";
 
+function sourceText(
+  descriptor: { id?: string; message?: string } | undefined
+): string {
+  return descriptor?.message ?? descriptor?.id ?? "";
+}
+
 describe("companionFirstName", () => {
   it("uses the first word of a real name", () => {
     expect(companionFirstName("Alessandro Narciso")).toBe("Alessandro");
@@ -37,17 +43,27 @@ describe("home companions", () => {
     const named = homeCompanionsFor({ firstName: "Ada", hour: 19 });
     const anonymous = homeCompanionsFor({ hour: 19 });
 
-    expect(named).toContainEqual({
-      greeting: "Evening, Ada",
-      saveLabel: "Drop it",
-    });
-    expect(anonymous).toContainEqual({
-      greeting: "Good evening",
-      saveLabel: "Drop it",
-    });
-    expect(anonymous.map((pair) => pair.greeting).join(" ")).not.toContain(
-      "Ada"
-    );
+    expect(
+      named.some(
+        (pair) =>
+          sourceText(pair.greeting).includes("{firstName}") &&
+          pair.greeting.values?.firstName === "Ada" &&
+          sourceText(pair.saveLabel) === "Drop it"
+      )
+    ).toBe(true);
+    expect(
+      anonymous.some(
+        (pair) =>
+          sourceText(pair.greeting) === "Good evening" &&
+          sourceText(pair.saveLabel) === "Drop it"
+      )
+    ).toBe(true);
+    expect(
+      anonymous
+        .map((pair) => sourceText(pair.greeting))
+        .join(" ")
+        .includes("Ada")
+    ).toBe(false);
   });
 
   it("picks from the resolved pool and skips the previous greeting", () => {
@@ -57,30 +73,30 @@ describe("home companions", () => {
       undefined,
       () => 0
     );
-    expect(first).toEqual(pool[0]);
+    expect(sourceText(first.greeting)).toBe(sourceText(pool[0]?.greeting));
 
     const next = pickHomeCompanion(
       { firstName: "Ada", hour: 8 },
       first,
       () => 0
     );
-    expect(next.greeting).not.toBe(first.greeting);
-    expect(next).toEqual(pool[1]);
+    expect(sourceText(next.greeting)).not.toBe(sourceText(first.greeting));
+    expect(sourceText(next.greeting)).toBe(sourceText(pool[1]?.greeting));
   });
 
   it("keeps every save label in the it-verb pattern", () => {
     const pool = homeCompanionsFor({ firstName: "Ada", hour: 19 });
     for (const pair of pool) {
-      expect(pair.saveLabel.endsWith(" it")).toBe(true);
-      expect(HOME_SAVE_LABEL_SIZER.length).toBeGreaterThanOrEqual(
-        pair.saveLabel.length
+      expect(sourceText(pair.saveLabel).endsWith(" it")).toBe(true);
+      expect(sourceText(HOME_SAVE_LABEL_SIZER).length).toBeGreaterThanOrEqual(
+        sourceText(pair.saveLabel).length
       );
     }
   });
 
   it("uses only companion titles for the logged-out placeholder pool", () => {
     const pool = homeCompanionsFor({ hour: 19, titlesOnly: true });
-    const greetings = pool.map((pair) => pair.greeting);
+    const greetings = pool.map((pair) => sourceText(pair.greeting));
 
     expect(greetings).toContain("What's sitting with you?");
     expect(greetings).not.toContain("Good evening");
@@ -93,9 +109,7 @@ describe("home companions", () => {
       { isAnonymous: false, name: "Ada" },
       () => 0
     );
-    expect(pair).toEqual({
-      greeting: "What's sitting with you?",
-      saveLabel: "Dump it",
-    });
+    expect(sourceText(pair.greeting)).toBe("What's sitting with you?");
+    expect(sourceText(pair.saveLabel)).toBe("Dump it");
   });
 });

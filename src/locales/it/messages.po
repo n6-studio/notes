@@ -1,0 +1,306 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2026-08-27 23:29+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: it\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#. placeholder {0}: files.length
+#: src/components/chat-composer.tsx
+msgid "{0, plural, one {# image} other {# images}}"
+msgstr "{0, plural, one {# immagine} other {# immagini}}"
+
+#: src/components/top-nav.tsx
+#: src/routes/_authed.settings.tsx
+msgid "Account"
+msgstr "Account"
+
+#: src/lib/home-greeting.ts
+msgid "Afternoon, {firstName}"
+msgstr "Pomeriggio, {firstName}"
+
+#: src/routes/_authed.notes.index.tsx
+msgid "All types"
+msgstr "Tutti i tipi"
+
+#: src/routes/_authed.settings.tsx
+msgid "Anonymous session"
+msgstr "Sessione anonima"
+
+#: src/components/chat-composer.tsx
+msgid "Attach images"
+msgstr "Allega immagini"
+
+#: src/components/top-nav.tsx
+msgid "Cancel"
+msgstr "Annulla"
+
+#: src/components/chat-composer.tsx
+msgid "Capture type"
+msgstr "Tipo di nota"
+
+#: src/lib/home-greeting.ts
+msgid "Catch it"
+msgstr "Catturalo"
+
+#: src/lib/home-greeting.ts
+msgid "Catch it while it's here"
+msgstr "Catturalo finché c'è"
+
+#: src/components/target-datetime-button.tsx
+msgid "Clear"
+msgstr "Cancella"
+
+#: src/routes/_authed.notes.index.tsx
+msgid "Copy item"
+msgstr "Copia"
+
+#: src/components/target-datetime-button.tsx
+msgid "Date"
+msgstr "Data"
+
+#: src/routes/_authed.notes.index.tsx
+msgid "Day"
+msgstr "Giorno"
+
+#: src/components/night-sky-background.tsx
+msgid "Decorative night sky"
+msgstr "Cielo notturno decorativo"
+
+#: src/routes/_authed.notes.index.tsx
+msgid "Delete item"
+msgstr "Elimina"
+
+#: src/lib/home-greeting.ts
+msgid "Drop it"
+msgstr "Lascialo"
+
+#: src/lib/home-greeting.ts
+msgid "Dump it"
+msgstr "Scaricalo"
+
+#: src/lib/home-greeting.ts
+msgid "Evening, {firstName}"
+msgstr "Buonasera, {firstName}"
+
+#: src/routes/_authed.notes.index.tsx
+msgid "Full-text search…"
+msgstr "Cerca nel testo…"
+
+#: src/lib/home-greeting.ts
+msgid "Give it somewhere to land"
+msgstr "Dagli un posto dove posarsi"
+
+#: src/routes/index.tsx
+msgid "Give space to your mind"
+msgstr "Fai spazio alla tua mente"
+
+#: src/lib/home-greeting.ts
+msgid "Go on, get it out"
+msgstr "Dai, tiralo fuori"
+
+#: src/lib/home-greeting.ts
+msgid "Good evening"
+msgstr "Buonasera"
+
+#: src/lib/home-greeting.ts
+msgid "Good morning"
+msgstr "Buongiorno"
+
+#: src/lib/home-greeting.ts
+msgid "Hey"
+msgstr "Ehi"
+
+#: src/lib/home-greeting.ts
+msgid "Hey {firstName}"
+msgstr "Ehi {firstName}"
+
+#: src/components/top-nav.tsx
+msgid "Home"
+msgstr "Home"
+
+#: src/lib/home-greeting.ts
+msgid "I'm here when you're ready"
+msgstr "Ci sono quando sei pronto"
+
+#: src/lib/home-greeting.ts
+msgid "I'm listening"
+msgstr "Ti ascolto"
+
+#: src/lib/note-label-styles.tsx
+msgid "Idea"
+msgstr "Idea"
+
+#: src/routes/index.tsx
+msgid "Jot a thought, paste a URL, pick a time, or attach a photo—then send once. Everything lands in your inbox and stays in sync for when you actually need it."
+msgstr "Scrivi un pensiero, incolla un URL, scegli un orario o allega una foto—poi invia una volta. Tutto arriva in inbox e resta sincronizzato per quando ti serve davvero."
+
+#: src/lib/home-greeting.ts
+msgid "Keep it"
+msgstr "Tienilo"
+
+#: src/components/chat-composer.tsx
+msgid "Label"
+msgstr "Etichetta"
+
+#: src/components/language-switcher.tsx
+msgid "Language"
+msgstr "Lingua"
+
+#: src/lib/note-label-styles.tsx
+msgid "Link"
+msgstr "Link"
+
+#: src/routes/_authed.notes.index.tsx
+msgid "Loading…"
+msgstr "Caricamento…"
+
+#: src/lib/home-greeting.ts
+msgid "Log it"
+msgstr "Registralo"
+
+#: src/lib/home-greeting.ts
+msgid "Make a little room"
+msgstr "Fai un po' di spazio"
+
+#: src/lib/home-greeting.ts
+msgid "Morning, {firstName}"
+msgstr "Buongiorno, {firstName}"
+
+#: src/routes/_authed.notes.index.tsx
+msgid "Newest first"
+msgstr "Più recenti"
+
+#: src/lib/note-label-styles.tsx
+msgid "Note"
+msgstr "Nota"
+
+#: src/routes/_authed.notes.index.tsx
+msgid "Note actions"
+msgstr "Azioni nota"
+
+#: src/routes/_authed.home.tsx
+msgid "Note, URL or image"
+msgstr "Nota, URL o immagine"
+
+#: src/components/top-nav.tsx
+#: src/routes/_authed.notes.index.tsx
+msgid "Notes"
+msgstr "Note"
+
+#: src/routes/_authed.notes.index.tsx
+msgid "Nothing here yet. Start on the home page."
+msgstr "Non c'è ancora niente. Inizia dalla home."
+
+#: src/routes/_authed.notes.index.tsx
+msgid "Oldest first"
+msgstr "Più vecchi"
+
+#: src/lib/home-greeting.ts
+msgid "Park it"
+msgstr "Parcheggialo"
+
+#: src/components/target-datetime-button.tsx
+msgid "Pick target date and time"
+msgstr "Scegli data e ora"
+
+#: src/routes/_authed.notes.index.tsx
+msgid "Search"
+msgstr "Cerca"
+
+#: src/lib/home-greeting.ts
+msgid "Send it"
+msgstr "Invialo"
+
+#: src/components/top-nav.tsx
+#: src/routes/_authed.settings.tsx
+msgid "Settings"
+msgstr "Impostazioni"
+
+#: src/components/top-nav.tsx
+msgid "Sign in with Google"
+msgstr "Accedi con Google"
+
+#: src/components/top-nav.tsx
+msgid "Sign out"
+msgstr "Esci"
+
+#: src/components/top-nav.tsx
+msgid "Sign out and delete your notes?"
+msgstr "Uscire ed eliminare le note?"
+
+#: src/routes/_authed.settings.tsx
+msgid "Sign out, clear this site's data, private browsing, or another device can cut off access to your notes."
+msgstr "Uscire, cancellare i dati del sito, la navigazione privata o un altro dispositivo possono farti perdere l'accesso alle note."
+
+#: src/components/chat-composer.tsx
+msgid "Something went wrong"
+msgstr "Qualcosa è andato storto"
+
+#: src/routes/_authed.notes.index.tsx
+msgid "Sort"
+msgstr "Ordina"
+
+#: src/lib/home-greeting.ts
+msgid "Stash it"
+msgstr "Mettilo da parte"
+
+#: src/lib/home-greeting.ts
+msgid "Still up, {firstName}"
+msgstr "Ancora sveglio, {firstName}"
+
+#: src/lib/home-greeting.ts
+msgid "Still up?"
+msgstr "Ancora sveglio?"
+
+#: src/components/target-datetime-button.tsx
+msgid "Target date {labelText}"
+msgstr "Data {labelText}"
+
+#: src/components/target-datetime-button.tsx
+msgid "Time"
+msgstr "Ora"
+
+#: src/lib/note-label-styles.tsx
+msgid "Todo"
+msgstr "Todo"
+
+#: src/lib/home-greeting.ts
+msgid "Toss it"
+msgstr "Buttalo"
+
+#: src/routes/_authed.notes.index.tsx
+msgid "Type"
+msgstr "Tipo"
+
+#: src/lib/home-greeting.ts
+msgid "We'll hold onto it"
+msgstr "Lo teniamo noi"
+
+#: src/lib/home-greeting.ts
+msgid "What's rattling around?"
+msgstr "Cosa ti gira in testa?"
+
+#: src/lib/home-greeting.ts
+msgid "What's sitting with you?"
+msgstr "Cosa ti sta accompagnando?"
+
+#: src/lib/home-greeting.ts
+msgid "Whenever you're ready"
+msgstr "Quando vuoi"
+
+#: src/lib/home-greeting.ts
+msgid "You don't have to finish it"
+msgstr "Non devi finirlo"
+
+#: src/components/top-nav.tsx
+msgid "You're signed in as a guest. Signing out permanently deletes your account and everything you've saved here—every note and attachment—with no way to recover it."
+msgstr "Sei connesso come ospite. Uscendo elimini per sempre l'account e tutto ciò che hai salvato qui—ogni nota e allegato—senza possibilità di recupero."

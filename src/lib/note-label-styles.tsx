@@ -1,9 +1,23 @@
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react/macro";
 import type { LucideIcon } from "lucide-react";
 import { Lightbulb, Link2, ListTodo, StickyNote } from "lucide-react";
 
 /** Capture types / note labels — single source for UI + composer options. */
 export const NOTE_LABELS = ["note", "todo", "link", "idea"] as const;
 export type NoteLabel = (typeof NOTE_LABELS)[number];
+
+const NOTE_LABEL_MESSAGES: Record<NoteLabel, MessageDescriptor> = {
+  idea: msg`Idea`,
+  link: msg`Link`,
+  note: msg`Note`,
+  todo: msg`Todo`,
+};
+
+export function noteLabelMessage(label: NoteLabel): MessageDescriptor {
+  return NOTE_LABEL_MESSAGES[label];
+}
 
 /** Lucide icon per label (capture-type Select, etc.). */
 export const NOTE_LABEL_ICONS: Record<NoteLabel, LucideIcon> = {
@@ -19,11 +33,12 @@ export function NoteLabelSelectDisplay({
 }: {
   label: NoteLabel;
 }) {
+  const { i18n } = useLingui();
   const Icon = NOTE_LABEL_ICONS[labelKey];
   return (
     <>
       <Icon aria-hidden className="size-4 shrink-0 opacity-90" />
-      <span className="capitalize">{labelKey}</span>
+      <span>{i18n._(noteLabelMessage(labelKey))}</span>
     </>
   );
 }

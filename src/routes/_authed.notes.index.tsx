@@ -1,3 +1,4 @@
+import { Trans, useLingui } from "@lingui/react/macro";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useConvexAuth } from "convex/react";
@@ -25,9 +26,11 @@ import {
 } from "~/components/ui/select";
 import { useCRPC } from "~/lib/convex/crpc";
 import {
+  isNoteLabel,
   NOTE_LABELS,
   type NoteLabel,
   NoteLabelSelectDisplay,
+  noteLabelMessage,
   noteLabelSelectItemAccentClass,
   noteLabelSurfaceClass,
 } from "~/lib/note-label-styles";
@@ -36,16 +39,6 @@ import { cn } from "~/lib/utils";
 export const Route = createFileRoute("/_authed/notes/")({
   component: NotesLibrary,
 });
-
-const TYPE_FILTER_ITEMS = [
-  { label: "All types", value: "all" },
-  ...NOTE_LABELS.map((l) => ({ label: l, value: l })),
-] as const;
-
-const SORT_ITEMS = [
-  { label: "Newest first", value: "desc" },
-  { label: "Oldest first", value: "asc" },
-] as const;
 
 /** Normalized filters passed to `notes.list` once Convex auth is ready. */
 interface NotesListInput {
@@ -57,12 +50,25 @@ interface NotesListInput {
 }
 
 function NotesLibrary() {
+  const { i18n, t } = useLingui();
   const { isLoading: authLoading, isAuthenticated: convexAuthed } =
     useConvexAuth();
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<"desc" | "asc">("desc");
   const [typeFilter, setTypeFilter] = useState<NoteLabel | "all">("all");
   const [day, setDay] = useState("");
+
+  const typeFilterItems = [
+    { label: t`All types`, value: "all" },
+    ...NOTE_LABELS.map((label) => ({
+      label: i18n._(noteLabelMessage(label)),
+      value: label,
+    })),
+  ];
+  const sortItems = [
+    { label: t`Newest first`, value: "desc" },
+    { label: t`Oldest first`, value: "asc" },
+  ];
 
   const bounds = useMemo(() => {
     if (!day) {
@@ -90,7 +96,7 @@ function NotesLibrary() {
 
   const emptyMain: ReactNode = (
     <p className="text-muted-foreground text-sm">
-      Nothing here yet. Start on the home page.
+      <Trans>Nothing here yet. Start on the home page.</Trans>
     </p>
   );
 
@@ -98,13 +104,21 @@ function NotesLibrary() {
   if (listReady) {
     listBody = (
       <Suspense
-        fallback={<p className="text-muted-foreground text-sm">Loading…</p>}
+        fallback={
+          <p className="text-muted-foreground text-sm">
+            <Trans>Loading…</Trans>
+          </p>
+        }
       >
         <NotesTimeline emptyMessage={emptyMain} listArgs={listArgs} />
       </Suspense>
     );
   } else {
-    listBody = <p className="text-muted-foreground text-sm">Loading…</p>;
+    listBody = (
+      <p className="text-muted-foreground text-sm">
+        <Trans>Loading…</Trans>
+      </p>
+    );
   }
 
   return (
@@ -112,22 +126,24 @@ function NotesLibrary() {
       <TopNav />
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 pt-8 pb-16">
         <div className="mb-8 flex flex-col gap-4 border-border/40 border-b pb-6">
-          <h1 className="font-semibold text-xl tracking-tight">Notes</h1>
+          <h1 className="font-semibold text-xl tracking-tight">
+            <Trans>Notes</Trans>
+          </h1>
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="space-y-1.5 sm:col-span-2">
               <Label className="text-[11px] text-muted-foreground uppercase tracking-wide">
-                Search
+                <Trans>Search</Trans>
               </Label>
               <Input
                 className="h-9"
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Full-text search…"
+                placeholder={t`Full-text search…`}
                 value={q}
               />
             </div>
             <div className="space-y-1.5">
               <Label className="text-[11px] text-muted-foreground uppercase tracking-wide">
-                Day
+                <Trans>Day</Trans>
               </Label>
               <Input
                 className="h-9"
@@ -139,10 +155,10 @@ function NotesLibrary() {
             <div className="grid gap-3 sm:col-span-3 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label className="text-[11px] text-muted-foreground uppercase tracking-wide">
-                  Type
+                  <Trans>Type</Trans>
                 </Label>
                 <Select
-                  items={[...TYPE_FILTER_ITEMS]}
+                  items={typeFilterItems}
                   onValueChange={(v) => {
                     if (v === null) {
                       return;
@@ -156,7 +172,9 @@ function NotesLibrary() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="all">All types</SelectItem>
+                      <SelectItem value="all">
+                        <Trans>All types</Trans>
+                      </SelectItem>
                       {NOTE_LABELS.map((l) => (
                         <SelectItem
                           className={noteLabelSelectItemAccentClass(l)}
@@ -174,10 +192,10 @@ function NotesLibrary() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-[11px] text-muted-foreground uppercase tracking-wide">
-                  Sort
+                  <Trans>Sort</Trans>
                 </Label>
                 <Select
-                  items={[...SORT_ITEMS]}
+                  items={sortItems}
                   onValueChange={(v) => {
                     if (v === "desc" || v === "asc") {
                       setSort(v);
@@ -190,8 +208,12 @@ function NotesLibrary() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="desc">Newest first</SelectItem>
-                      <SelectItem value="asc">Oldest first</SelectItem>
+                      <SelectItem value="desc">
+                        <Trans>Newest first</Trans>
+                      </SelectItem>
+                      <SelectItem value="asc">
+                        <Trans>Oldest first</Trans>
+                      </SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -214,6 +236,7 @@ function NotesTimeline({
   listArgs: NotesListInput;
 }) {
   const router = useRouter();
+  const { i18n, t } = useLingui();
   const crpc = useCRPC();
   const removeNote = useMutation(crpc.notes.remove.mutationOptions());
   const { data: notes } = useSuspenseQuery({
@@ -244,18 +267,18 @@ function NotesTimeline({
                 {note.body}
               </p>
               <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-muted-foreground">
-                {note.label ? (
+                {note.label && isNoteLabel(note.label) ? (
                   <span
                     className={cn(
-                      "rounded-full border px-2 py-0.5 font-medium capitalize",
+                      "rounded-full border px-2 py-0.5 font-medium",
                       noteLabelSurfaceClass(note.label)
                     )}
                   >
-                    {note.label}
+                    {i18n._(noteLabelMessage(note.label))}
                   </span>
                 ) : null}
                 <time dateTime={new Date(note._creationTime).toISOString()}>
-                  {new Date(note._creationTime).toLocaleString()}
+                  {new Date(note._creationTime).toLocaleString(i18n.locale)}
                 </time>
               </div>
             </div>
@@ -263,7 +286,7 @@ function NotesTimeline({
               <DropdownMenuTrigger
                 render={
                   <Button
-                    aria-label="Note actions"
+                    aria-label={t`Note actions`}
                     className="-me-1 -mt-0.5 shrink-0 text-muted-foreground hover:text-foreground"
                     size="icon-sm"
                     type="button"
@@ -283,7 +306,7 @@ function NotesTimeline({
                     }}
                   >
                     <Copy />
-                    Copy item
+                    <Trans>Copy item</Trans>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -303,7 +326,7 @@ function NotesTimeline({
                     variant="destructive"
                   >
                     <Trash2Icon />
-                    Delete item
+                    <Trans>Delete item</Trans>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>

@@ -1,8 +1,11 @@
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+
 export type DayPart = "morning" | "afternoon" | "evening" | "night";
 
 export interface HomeCompanionPair {
-  greeting: string;
-  saveLabel: string;
+  greeting: MessageDescriptor;
+  saveLabel: MessageDescriptor;
 }
 
 const GUEST_NAME = /^guest[-_]/i;
@@ -10,23 +13,30 @@ const LOOKS_LIKE_EMAIL = /@/;
 const WHITESPACE = /\s+/;
 
 const COMPANION_PAIRS: HomeCompanionPair[] = [
-  { greeting: "What's sitting with you?", saveLabel: "Dump it" },
-  { greeting: "I'm here when you're ready", saveLabel: "Send it" },
-  { greeting: "Go on, get it out", saveLabel: "Dump it" },
-  { greeting: "We'll hold onto it", saveLabel: "Keep it" },
-  { greeting: "What's rattling around?", saveLabel: "Catch it" },
-  { greeting: "Give it somewhere to land", saveLabel: "Park it" },
-  { greeting: "You don't have to finish it", saveLabel: "Toss it" },
-  { greeting: "I'm listening", saveLabel: "Log it" },
-  { greeting: "Make a little room", saveLabel: "Stash it" },
-  { greeting: "Whenever you're ready", saveLabel: "Drop it" },
-  { greeting: "Catch it while it's here", saveLabel: "Catch it" },
+  { greeting: msg`What's sitting with you?`, saveLabel: msg`Dump it` },
+  { greeting: msg`I'm here when you're ready`, saveLabel: msg`Send it` },
+  { greeting: msg`Go on, get it out`, saveLabel: msg`Dump it` },
+  { greeting: msg`We'll hold onto it`, saveLabel: msg`Keep it` },
+  { greeting: msg`What's rattling around?`, saveLabel: msg`Catch it` },
+  { greeting: msg`Give it somewhere to land`, saveLabel: msg`Park it` },
+  { greeting: msg`You don't have to finish it`, saveLabel: msg`Toss it` },
+  { greeting: msg`I'm listening`, saveLabel: msg`Log it` },
+  { greeting: msg`Make a little room`, saveLabel: msg`Stash it` },
+  { greeting: msg`Whenever you're ready`, saveLabel: msg`Drop it` },
+  { greeting: msg`Catch it while it's here`, saveLabel: msg`Catch it` },
 ];
 
-export const HOME_SAVE_LABEL_SIZER = COMPANION_PAIRS.reduce(
-  (longest, pair) =>
-    pair.saveLabel.length > longest.length ? pair.saveLabel : longest,
-  "it"
+export const HOME_SAVE_LABELS: MessageDescriptor[] = [
+  ...new Map(
+    COMPANION_PAIRS.map((pair) => [pair.saveLabel.message, pair.saveLabel])
+  ).values(),
+];
+
+export const HOME_SAVE_LABEL_SIZER = HOME_SAVE_LABELS.reduce(
+  (longest, label) =>
+    (label.message?.length ?? 0) > (longest.message?.length ?? 0)
+      ? label
+      : longest
 );
 
 export function companionFirstName(
@@ -82,13 +92,26 @@ export function homeCompanionsFor({
   ];
 }
 
+export function sameCompanionGreeting(
+  a: MessageDescriptor,
+  b?: MessageDescriptor
+): boolean {
+  if (!b) {
+    return false;
+  }
+  return (
+    (a.id ?? a.message) === (b.id ?? b.message) &&
+    a.values?.firstName === b.values?.firstName
+  );
+}
+
 export function pickHomeCompanion(
   ctx: { firstName?: string; hour: number; titlesOnly?: boolean },
   previous?: HomeCompanionPair,
   random = Math.random
 ): HomeCompanionPair {
   const pool = homeCompanionsFor(ctx).filter(
-    (pair) => pair.greeting !== previous?.greeting
+    (pair) => !sameCompanionGreeting(pair.greeting, previous?.greeting)
   );
   return pool[Math.floor(random() * pool.length)] ?? COMPANION_PAIRS[0];
 }
@@ -130,26 +153,26 @@ const NAMED_TIME_COMPANIONS: Record<
   (firstName: string) => HomeCompanionPair[]
 > = {
   morning: (firstName) => [
-    { greeting: `Morning, ${firstName}`, saveLabel: "Send it" },
-    { greeting: `Hey ${firstName}`, saveLabel: "Drop it" },
+    { greeting: msg`Morning, ${firstName}`, saveLabel: msg`Send it` },
+    { greeting: msg`Hey ${firstName}`, saveLabel: msg`Drop it` },
   ],
   afternoon: (firstName) => [
-    { greeting: `Hey ${firstName}`, saveLabel: "Drop it" },
-    { greeting: `Afternoon, ${firstName}`, saveLabel: "Park it" },
+    { greeting: msg`Hey ${firstName}`, saveLabel: msg`Drop it` },
+    { greeting: msg`Afternoon, ${firstName}`, saveLabel: msg`Park it` },
   ],
   evening: (firstName) => [
-    { greeting: `Evening, ${firstName}`, saveLabel: "Drop it" },
-    { greeting: `Hey ${firstName}`, saveLabel: "Drop it" },
+    { greeting: msg`Evening, ${firstName}`, saveLabel: msg`Drop it` },
+    { greeting: msg`Hey ${firstName}`, saveLabel: msg`Drop it` },
   ],
   night: (firstName) => [
-    { greeting: `Still up, ${firstName}`, saveLabel: "Dump it" },
-    { greeting: `Hey ${firstName}`, saveLabel: "Drop it" },
+    { greeting: msg`Still up, ${firstName}`, saveLabel: msg`Dump it` },
+    { greeting: msg`Hey ${firstName}`, saveLabel: msg`Drop it` },
   ],
 };
 
 const ANON_TIME_COMPANIONS: Record<DayPart, HomeCompanionPair[]> = {
-  morning: [{ greeting: "Good morning", saveLabel: "Send it" }],
-  afternoon: [{ greeting: "Hey", saveLabel: "Drop it" }],
-  evening: [{ greeting: "Good evening", saveLabel: "Drop it" }],
-  night: [{ greeting: "Still up?", saveLabel: "Dump it" }],
+  morning: [{ greeting: msg`Good morning`, saveLabel: msg`Send it` }],
+  afternoon: [{ greeting: msg`Hey`, saveLabel: msg`Drop it` }],
+  evening: [{ greeting: msg`Good evening`, saveLabel: msg`Drop it` }],
+  night: [{ greeting: msg`Still up?`, saveLabel: msg`Dump it` }],
 };
