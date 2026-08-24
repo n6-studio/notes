@@ -1,36 +1,27 @@
 export type DayPart = "morning" | "afternoon" | "evening" | "night";
 
+export interface HomeCompanionPair {
+  greeting: string;
+  saveLabel: string;
+}
+
 const GUEST_NAME = /^guest[-_]/i;
 const LOOKS_LIKE_EMAIL = /@/;
 const WHITESPACE = /\s+/;
 
-const NAMED_TIME_GREETINGS: Record<DayPart, (firstName: string) => string[]> = {
-  morning: (firstName) => [`Morning, ${firstName}`, `Hey ${firstName}`],
-  afternoon: (firstName) => [`Hey ${firstName}`, `Afternoon, ${firstName}`],
-  evening: (firstName) => [`Evening, ${firstName}`, `Hey ${firstName}`],
-  night: (firstName) => [`Still up, ${firstName}`, `Hey ${firstName}`],
-};
-
-const ANON_TIME_GREETINGS: Record<DayPart, string[]> = {
-  morning: ["Good morning"],
-  afternoon: ["Hey"],
-  evening: ["Good evening"],
-  night: ["Still up?"],
-};
-
-const COMPANION_GREETINGS = [
-  "What's sitting with you?",
-  "I'm here when you're ready",
-  "Go on, get it out",
-  "We'll hold onto it",
-  "What's rattling around?",
-  "Give it somewhere to land",
-  "You don't have to finish it",
-  "I'm listening",
-  "Make a little room",
-  "Whenever you're ready",
-  "Catch it while it's here",
-] as const;
+const COMPANION_PAIRS: HomeCompanionPair[] = [
+  { greeting: "What's sitting with you?", saveLabel: "Dump it" },
+  { greeting: "I'm here when you're ready", saveLabel: "Send it" },
+  { greeting: "Go on, get it out", saveLabel: "Dump it" },
+  { greeting: "We'll hold onto it", saveLabel: "Keep it" },
+  { greeting: "What's rattling around?", saveLabel: "Catch it" },
+  { greeting: "Give it somewhere to land", saveLabel: "Park it" },
+  { greeting: "You don't have to finish it", saveLabel: "Toss it" },
+  { greeting: "I'm listening", saveLabel: "Log it" },
+  { greeting: "Make a little room", saveLabel: "Stash it" },
+  { greeting: "Whenever you're ready", saveLabel: "Drop it" },
+  { greeting: "Catch it while it's here", saveLabel: "Catch it" },
+];
 
 export function companionFirstName(
   name: string | null | undefined,
@@ -66,29 +57,72 @@ export function dayPartFromHour(hour: number): DayPart {
   return "night";
 }
 
-export function homeGreetingsFor({
+export function homeCompanionsFor({
   firstName,
   hour,
+  titlesOnly,
 }: {
   firstName?: string;
   hour: number;
-}): string[] {
-  const dayPart = dayPartFromHour(hour);
-  return [...timeGreetings(dayPart, firstName), ...COMPANION_GREETINGS];
-}
-
-export function pickHomeGreeting(
-  ctx: { firstName?: string; hour: number },
-  random = Math.random
-): string {
-  const pool = homeGreetingsFor(ctx);
-  return pool[Math.floor(random() * pool.length)] ?? COMPANION_GREETINGS[0];
-}
-
-function timeGreetings(dayPart: DayPart, firstName?: string): string[] {
-  if (firstName) {
-    return NAMED_TIME_GREETINGS[dayPart](firstName);
+  titlesOnly?: boolean;
+}): HomeCompanionPair[] {
+  if (titlesOnly) {
+    return [...COMPANION_PAIRS];
   }
 
-  return ANON_TIME_GREETINGS[dayPart];
+  return [
+    ...timeCompanions(dayPartFromHour(hour), firstName),
+    ...COMPANION_PAIRS,
+  ];
 }
+
+export function pickHomeCompanion(
+  ctx: { firstName?: string; hour: number; titlesOnly?: boolean },
+  previous?: HomeCompanionPair,
+  random = Math.random
+): HomeCompanionPair {
+  const pool = homeCompanionsFor(ctx).filter(
+    (pair) => pair.greeting !== previous?.greeting
+  );
+  return pool[Math.floor(random() * pool.length)] ?? COMPANION_PAIRS[0];
+}
+
+function timeCompanions(
+  dayPart: DayPart,
+  firstName?: string
+): HomeCompanionPair[] {
+  if (firstName) {
+    return NAMED_TIME_COMPANIONS[dayPart](firstName);
+  }
+
+  return ANON_TIME_COMPANIONS[dayPart];
+}
+
+const NAMED_TIME_COMPANIONS: Record<
+  DayPart,
+  (firstName: string) => HomeCompanionPair[]
+> = {
+  morning: (firstName) => [
+    { greeting: `Morning, ${firstName}`, saveLabel: "Send it" },
+    { greeting: `Hey ${firstName}`, saveLabel: "Drop it" },
+  ],
+  afternoon: (firstName) => [
+    { greeting: `Hey ${firstName}`, saveLabel: "Drop it" },
+    { greeting: `Afternoon, ${firstName}`, saveLabel: "Park it" },
+  ],
+  evening: (firstName) => [
+    { greeting: `Evening, ${firstName}`, saveLabel: "Drop it" },
+    { greeting: `Hey ${firstName}`, saveLabel: "Drop it" },
+  ],
+  night: (firstName) => [
+    { greeting: `Still up, ${firstName}`, saveLabel: "Dump it" },
+    { greeting: `Hey ${firstName}`, saveLabel: "Drop it" },
+  ],
+};
+
+const ANON_TIME_COMPANIONS: Record<DayPart, HomeCompanionPair[]> = {
+  morning: [{ greeting: "Good morning", saveLabel: "Send it" }],
+  afternoon: [{ greeting: "Hey", saveLabel: "Drop it" }],
+  evening: [{ greeting: "Good evening", saveLabel: "Drop it" }],
+  night: [{ greeting: "Still up?", saveLabel: "Dump it" }],
+};

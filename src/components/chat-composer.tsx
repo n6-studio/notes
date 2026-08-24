@@ -172,8 +172,12 @@ export function CaptureTypeSelect({
 interface ChatComposerProps {
   className?: string;
   onCreated?: () => void;
+  /** When set, the save button uses this label instead of an internal random verb. */
+  onCycleSaveLabel?: () => void;
   /** Runs at the start of submit (before uploads). Use for ensuring auth, etc. */
   onPreSubmit?: () => void | Promise<void>;
+  placeholder: string;
+  saveLabel?: string;
   variant: "landing" | "home";
 }
 
@@ -181,7 +185,10 @@ export function ChatComposer({
   variant,
   className,
   onCreated,
+  onCycleSaveLabel,
   onPreSubmit,
+  placeholder,
+  saveLabel: saveLabelProp,
 }: ChatComposerProps) {
   const router = useRouter();
   const crpc = useCRPC();
@@ -195,7 +202,10 @@ export function ChatComposer({
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-  const [saveLabel, setSaveLabel] = useState(() => pickSaveHoverLabel(""));
+  const [internalSaveLabel, setInternalSaveLabel] = useState(() =>
+    pickSaveHoverLabel("")
+  );
+  const saveLabel = saveLabelProp ?? internalSaveLabel;
   const saveHoverArmedRef = useRef(false);
   const saveLabelShouldAnimateRef = useRef(false);
   const bodyRef = useRef(body);
@@ -400,7 +410,11 @@ export function ChatComposer({
       }
       saveHoverArmedRef.current = false;
       saveLabelShouldAnimateRef.current = true;
-      setSaveLabel((current) => pickSaveHoverLabel(current));
+      if (onCycleSaveLabel) {
+        onCycleSaveLabel();
+        return;
+      }
+      setInternalSaveLabel((current) => pickSaveHoverLabel(current));
     });
   };
 
@@ -490,7 +504,7 @@ export function ChatComposer({
           onChange={(e) => setBody(e.target.value)}
           onKeyDown={onBodyKeyDown}
           onPaste={onBodyPaste}
-          placeholder={"What's on your mind — a note, a link, a todo…"}
+          placeholder={placeholder}
           value={body}
         />
         {error ? (
