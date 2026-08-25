@@ -7,6 +7,12 @@
       "skillPath": "skills/better-ui/SKILL.md",
       "computedHash": "f383af38a3718c9f6884ace2d69191c8b7b6d633390873ed9074fe12a1fd3ade"
     },
+    "better-writing": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "skillPath": "skills/better-writing/SKILL.md",
+      "computedHash": "1946c18db173c7bab9a78206e5bc9f48b6beb630a2fcb0dde82ad1328a5f4d17"
+    },
     "caveman": {
       "source": "mattpocock/skills",
       "sourceType": "github",
