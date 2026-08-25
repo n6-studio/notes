@@ -8,12 +8,11 @@ import {
 import { NightSkyBackground } from "~/components/night-sky-background";
 import { TopNav } from "~/components/top-nav";
 import { authClient } from "~/lib/convex/auth-client";
-import { shouldSendAuthenticatedUserHome } from "~/lib/convex/root-auth";
 import { pickHomeCompanionForPage } from "~/lib/home-greeting";
 
 export const Route = createFileRoute("/")({
   beforeLoad: ({ context }) => {
-    if (shouldSendAuthenticatedUserHome(context)) {
+    if (context.isAuthenticated) {
       throw redirect({ replace: true, to: "/home" });
     }
   },

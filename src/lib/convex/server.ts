@@ -1,11 +1,15 @@
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import { createCallerFactory } from "kitcn/server";
 import { getToken } from "~/lib/convex/auth-server";
+import { convexHttpUrl } from "~/lib/convex/convex-http-url";
 import { api } from "../../../convex/_generated/api.js";
 
 const { createContext, createCaller } = createCallerFactory({
   api,
-  convexSiteUrl: import.meta.env.VITE_CONVEX_SITE_URL ?? "",
+  convexSiteUrl: convexHttpUrl(
+    import.meta.env.VITE_CONVEX_URL,
+    import.meta.env.VITE_CONVEX_SITE_URL
+  ),
   auth: {
     getToken: async () => ({
       token: await getToken(),

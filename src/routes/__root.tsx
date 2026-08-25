@@ -16,40 +16,27 @@ import { createServerFn } from "@tanstack/react-start";
 import type { ConvexQueryClient } from "kitcn/react";
 import { getToken } from "~/lib/convex/auth-server";
 import { ConvexAppProvider } from "~/lib/convex/convex-provider";
-import {
-  type RootAuthContext,
-  rootAuthFromGetToken,
-  shouldSkipRootAuthLookup,
-} from "~/lib/convex/root-auth";
 import appCss from "../styles.css?url";
 
-const getAuth = createServerFn({ method: "POST" }).handler(async () => {
+const getAuth = createServerFn({ method: "GET" }).handler(
+  async () => (await getToken()) ?? null
+);
+
+async function loadRootAuth(): Promise<{
+  isAuthenticated: boolean;
+  token: string | null;
+}> {
+  // During SSR, call getToken in-process. createServerFn would HTTP the same
+  // Vercel deployment (`/_serverFn`) and trip INFINITE_LOOP_DETECTED.
   try {
-    return { lookupFailed: false, token: (await getToken()) ?? null };
+    const token = import.meta.env.SSR
+      ? ((await getToken()) ?? null)
+      : await getAuth();
+    return { isAuthenticated: Boolean(token), token };
   } catch (error) {
-    console.error("[auth] getToken failed during SSR", error);
-    return { lookupFailed: true, token: null };
+    console.error("[auth] getToken failed", error);
+    return { isAuthenticated: false, token: null };
   }
-});
-
-async function loadRootAuth(pathname: string): Promise<RootAuthContext> {
-  if (shouldSkipRootAuthLookup(pathname)) {
-    return rootAuthFromGetToken(null, false);
-  }
-
-  // SSR must call getToken in-process. createServerFn POSTs `/_serverFn`,
-  // which Vercel routes back into this same function (508 Loop Detected).
-  if (import.meta.env.SSR) {
-    try {
-      return rootAuthFromGetToken((await getToken()) ?? null, false);
-    } catch (error) {
-      console.error("[auth] getToken failed during SSR", error);
-      return rootAuthFromGetToken(null, true);
-    }
-  }
-
-  const auth = await getAuth();
-  return rootAuthFromGetToken(auth.token, auth.lookupFailed);
 }
 
 export const Route = createRootRouteWithContext<{
@@ -111,8 +98,8 @@ export const Route = createRootRouteWithContext<{
       },
     ],
   }),
-  beforeLoad: async ({ context, location }) => {
-    const auth = await loadRootAuth(location.pathname);
+  beforeLoad: async ({ context }) => {
+    const auth = await loadRootAuth();
     if (auth.token) {
       context.convexQueryClient.serverHttpClient?.setAuth(auth.token);
     }
