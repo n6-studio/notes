@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   companionFirstName,
+  cycleHomeSaveLabel,
   dayPartFromHour,
   HOME_SAVE_LABEL_SIZER,
   homeCompanionsFor,
@@ -111,5 +112,13 @@ describe("home companions", () => {
     );
     expect(sourceText(pair.greeting)).toBe("What's sitting with you?");
     expect(sourceText(pair.saveLabel)).toBe("Dump it");
+  });
+
+  it("cycles only the save label so the SSR greeting stays put", () => {
+    const first = pickHomeCompanionForPage("home", undefined, () => 0);
+    const next = cycleHomeSaveLabel(first, () => 0);
+
+    expect(sourceText(next.greeting)).toBe(sourceText(first.greeting));
+    expect(sourceText(next.saveLabel)).not.toBe(sourceText(first.saveLabel));
   });
 });

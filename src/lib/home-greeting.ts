@@ -137,6 +137,28 @@ export function pickHomeCompanionForPage(
   );
 }
 
+export function cycleHomeSaveLabel(
+  pair: HomeCompanionPair,
+  random = Math.random
+): HomeCompanionPair {
+  const pool = HOME_SAVE_LABELS.filter(
+    (label) => !sameCompanionSaveLabel(label, pair.saveLabel)
+  );
+  const saveLabel = pool[Math.floor(random() * pool.length)] ?? pair.saveLabel;
+
+  return { greeting: pair.greeting, saveLabel };
+}
+
+function sameCompanionSaveLabel(
+  a: MessageDescriptor,
+  b?: MessageDescriptor
+): boolean {
+  if (!b) {
+    return false;
+  }
+  return (a.id ?? a.message) === (b.id ?? b.message);
+}
+
 function timeCompanions(
   dayPart: DayPart,
   firstName?: string

@@ -7,11 +7,9 @@ import {
   useRef,
   useState,
 } from "react";
-import { useUser } from "~/lib/convex/use-user";
 import {
-  companionFirstName,
+  cycleHomeSaveLabel,
   type HomeCompanionPair,
-  pickHomeCompanion,
 } from "~/lib/home-greeting";
 import { cn } from "~/lib/utils";
 
@@ -20,34 +18,19 @@ interface HomeCompanionValue {
   pair: HomeCompanionPair;
 }
 
-type CompanionScope = "home" | "landing";
-
 const HomeCompanionContext = createContext<HomeCompanionValue | null>(null);
 
 export function HomeCompanionProvider({
   children,
   initialPair,
-  scope = "home",
 }: {
   children: ReactNode;
   initialPair: HomeCompanionPair;
-  scope?: CompanionScope;
 }) {
-  const { user } = useUser();
-  const titlesOnly = scope === "landing";
   const [pair, setPair] = useState(initialPair);
 
   const cycle = () => {
-    setPair((current) =>
-      pickHomeCompanion(
-        {
-          firstName: companionFirstName(user?.name, user?.isAnonymous),
-          hour: new Date().getHours(),
-          titlesOnly,
-        },
-        current
-      )
-    );
+    setPair((current) => cycleHomeSaveLabel(current));
   };
 
   return (

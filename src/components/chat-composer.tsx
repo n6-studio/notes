@@ -147,7 +147,7 @@ export function CaptureTypeSelect({
 interface ChatComposerProps {
   className?: string;
   onCreated?: () => void;
-  /** Cycles the companion pair (title/placeholder + save verb) together. */
+  /** Cycles the save verb. Title/placeholder stay as the SSR pick. */
   onCycleSaveLabel?: () => void;
   /** Runs at the start of submit (before uploads). Use for ensuring auth, etc. */
   onPreSubmit?: () => void | Promise<void>;
