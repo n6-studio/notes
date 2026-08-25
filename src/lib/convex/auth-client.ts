@@ -2,6 +2,7 @@ import { anonymousClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 import { convexClient } from "kitcn/auth/client";
 import { createAuthMutations } from "kitcn/react";
+import { serverAuthBaseUrl } from "~/lib/convex/server-auth-base-url";
 
 /**
  * Better Auth types `plugins` as BetterAuthClientPlugin[], so inline arrays widen and inferred client
@@ -16,7 +17,10 @@ const convexAuthPlugins = [anonymousClient(), convexClient()] as [
 export const authClient = createAuthClient({
   baseURL:
     typeof window === "undefined"
-      ? (import.meta.env.VITE_SITE_URL as string | undefined)
+      ? serverAuthBaseUrl(
+          import.meta.env.VITE_SITE_URL as string | undefined,
+          import.meta.env.VITE_CONVEX_SITE_URL as string | undefined
+        )
       : window.location.origin,
   plugins: convexAuthPlugins,
 });

@@ -16,7 +16,11 @@ import { createServerFn } from "@tanstack/react-start";
 import type { ConvexQueryClient } from "kitcn/react";
 import { getToken } from "~/lib/convex/auth-server";
 import { ConvexAppProvider } from "~/lib/convex/convex-provider";
-import { rootAuthFromGetToken } from "~/lib/convex/root-auth";
+import {
+  type RootAuthContext,
+  rootAuthFromGetToken,
+  shouldSkipRootAuthLookup,
+} from "~/lib/convex/root-auth";
 import appCss from "../styles.css?url";
 
 const getAuth = createServerFn({ method: "POST" }).handler(async () => {
@@ -27,6 +31,26 @@ const getAuth = createServerFn({ method: "POST" }).handler(async () => {
     return { lookupFailed: true, token: null };
   }
 });
+
+async function loadRootAuth(pathname: string): Promise<RootAuthContext> {
+  if (shouldSkipRootAuthLookup(pathname)) {
+    return rootAuthFromGetToken(null, false);
+  }
+
+  // SSR must call getToken in-process. createServerFn POSTs `/_serverFn`,
+  // which Vercel routes back into this same function (508 Loop Detected).
+  if (import.meta.env.SSR) {
+    try {
+      return rootAuthFromGetToken((await getToken()) ?? null, false);
+    } catch (error) {
+      console.error("[auth] getToken failed during SSR", error);
+      return rootAuthFromGetToken(null, true);
+    }
+  }
+
+  const auth = await getAuth();
+  return rootAuthFromGetToken(auth.token, auth.lookupFailed);
+}
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -87,12 +111,12 @@ export const Route = createRootRouteWithContext<{
       },
     ],
   }),
-  beforeLoad: async ({ context }) => {
-    const auth = await getAuth();
+  beforeLoad: async ({ context, location }) => {
+    const auth = await loadRootAuth(location.pathname);
     if (auth.token) {
       context.convexQueryClient.serverHttpClient?.setAuth(auth.token);
     }
-    return rootAuthFromGetToken(auth.token, auth.lookupFailed);
+    return auth;
   },
   component: RootComponent,
 });

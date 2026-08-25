@@ -4,6 +4,19 @@ export interface RootAuthContext {
   token: string | null;
 }
 
+/**
+ * Auth API and server-fn endpoints re-enter the root route on Vercel.
+ * Looking up a token there fetches the same deployment and returns 508.
+ */
+export function shouldSkipRootAuthLookup(pathname: string): boolean {
+  return (
+    pathname === "/api/auth" ||
+    pathname.startsWith("/api/auth/") ||
+    pathname === "/_serverFn" ||
+    pathname.startsWith("/_serverFn/")
+  );
+}
+
 export function rootAuthFromGetToken(
   token: string | null | undefined,
   lookupFailed: boolean

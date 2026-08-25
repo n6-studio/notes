@@ -3,7 +3,18 @@ import {
   rootAuthFromGetToken,
   shouldSendAnonymousUserToLanding,
   shouldSendAuthenticatedUserHome,
+  shouldSkipRootAuthLookup,
 } from "~/lib/convex/root-auth";
+
+describe("shouldSkipRootAuthLookup", () => {
+  it("skips auth API and server-fn paths that re-enter the app", () => {
+    expect(shouldSkipRootAuthLookup("/api/auth/convex/token")).toBe(true);
+    expect(shouldSkipRootAuthLookup("/api/auth/get-session")).toBe(true);
+    expect(shouldSkipRootAuthLookup("/_serverFn/abc")).toBe(true);
+    expect(shouldSkipRootAuthLookup("/")).toBe(false);
+    expect(shouldSkipRootAuthLookup("/home")).toBe(false);
+  });
+});
 
 describe("rootAuthFromGetToken", () => {
   it("treats a missing token as logged out", () => {
