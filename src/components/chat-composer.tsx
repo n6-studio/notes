@@ -171,7 +171,9 @@ export function ChatComposer({
   const crpc = useCRPC();
   const fileRef = useRef<HTMLInputElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
-  const accentGradId = `composer-accent-${useId().replaceAll(":", "")}`;
+  const gradUid = useId().replaceAll(":", "");
+  const accentGradId = `composer-accent-${gradUid}`;
+  const hoverGradId = `composer-hover-${gradUid}`;
   const [frameBox, setFrameBox] = useState({ h: 0, rx: 18, w: 0 });
   const [body, setBody] = useState("");
   const [label, setLabel] = useState<NoteLabel>(NOTE_LABELS[0]);
@@ -236,18 +238,18 @@ export function ChatComposer({
       return;
     }
 
-    const spinGradient = () => {
+    const beginSpin = (selector: string) => {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         return;
       }
-      const spin = frame.querySelector(".composer-border-grad-spin");
+      const spin = frame.querySelector(selector);
       if (spin && "beginElement" in spin) {
         (spin as SVGAnimateTransformElement).beginElement();
       }
     };
 
-    const resetGradient = () => {
-      const spin = frame.querySelector(".composer-border-grad-spin");
+    const endSpin = (selector: string) => {
+      const spin = frame.querySelector(selector);
       if (spin && "endElement" in spin) {
         try {
           (spin as SVGAnimateTransformElement).endElement();
@@ -262,7 +264,8 @@ export function ChatComposer({
       if (from instanceof Node && frame.contains(from)) {
         return;
       }
-      spinGradient();
+      endSpin(".composer-border-hover-spin");
+      beginSpin(".composer-border-grad-spin");
     };
 
     const onFocusOut = (event: FocusEvent) => {
@@ -273,14 +276,32 @@ export function ChatComposer({
       if (bodyRef.current.trim().length > 0) {
         return;
       }
-      resetGradient();
+      endSpin(".composer-border-grad-spin");
+      if (frame.matches(":hover")) {
+        beginSpin(".composer-border-hover-spin");
+      }
+    };
+
+    const onMouseEnter = () => {
+      if (frame.matches(":focus-within") || bodyRef.current.trim().length > 0) {
+        return;
+      }
+      beginSpin(".composer-border-hover-spin");
+    };
+
+    const onMouseLeave = () => {
+      endSpin(".composer-border-hover-spin");
     };
 
     frame.addEventListener("focusin", onFocusIn);
     frame.addEventListener("focusout", onFocusOut);
+    frame.addEventListener("mouseenter", onMouseEnter);
+    frame.addEventListener("mouseleave", onMouseLeave);
     return () => {
       frame.removeEventListener("focusin", onFocusIn);
       frame.removeEventListener("focusout", onFocusOut);
+      frame.removeEventListener("mouseenter", onMouseEnter);
+      frame.removeEventListener("mouseleave", onMouseLeave);
     };
   }, []);
 
@@ -417,6 +438,30 @@ export function ChatComposer({
           <defs>
             <linearGradient
               gradientUnits="userSpaceOnUse"
+              id={hoverGradId}
+              x1={0}
+              x2={frameBox.w}
+              y1={borderCy}
+              y2={borderCy}
+            >
+              <stop offset="0%" stopColor="var(--border)" />
+              <stop offset="50%" stopColor="var(--muted)" />
+              <stop offset="100%" stopColor="var(--border)" />
+              <animateTransform
+                attributeName="gradientTransform"
+                begin="indefinite"
+                calcMode="spline"
+                className="composer-border-hover-spin"
+                dur={`${SELECT_SPIN_S}s`}
+                fill="freeze"
+                keySplines="0.12 0.38 0.2 1"
+                keyTimes="0;1"
+                type="rotate"
+                values={`0 ${borderCx} ${borderCy};360 ${borderCx} ${borderCy}`}
+              />
+            </linearGradient>
+            <linearGradient
+              gradientUnits="userSpaceOnUse"
               id={accentGradId}
               x1={0}
               x2={frameBox.w}
@@ -440,6 +485,16 @@ export function ChatComposer({
               />
             </linearGradient>
           </defs>
+          <rect
+            className="composer-border-hover"
+            fill="none"
+            height={borderH}
+            rx={borderRx}
+            stroke={`url(#${hoverGradId})`}
+            width={borderW}
+            x={borderInset}
+            y={borderInset}
+          />
           <rect
             className="composer-border-accent"
             fill="none"
