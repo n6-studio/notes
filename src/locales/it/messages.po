@@ -24,6 +24,10 @@ msgid "Account"
 msgstr "Account"
 
 #: src/lib/home-greeting.ts
+msgid "Add it"
+msgstr "Aggiungilo"
+
+#: src/lib/home-greeting.ts
 msgid "Afternoon, {firstName}"
 msgstr "Pomeriggio, {firstName}"
 
@@ -43,17 +47,13 @@ msgstr "Allega immagini"
 msgid "Cancel"
 msgstr "Annulla"
 
+#: src/routes/index.tsx
+msgid "Capture a note, link, reminder, or photo. Send once—it stays in your inbox."
+msgstr "Cattura una nota, un link, un promemoria o una foto. Invia una volta: resta nella inbox."
+
 #: src/components/chat-composer.tsx
 msgid "Capture type"
 msgstr "Tipo di nota"
-
-#: src/lib/home-greeting.ts
-msgid "Catch it"
-msgstr "Catturalo"
-
-#: src/lib/home-greeting.ts
-msgid "Catch it while it's here"
-msgstr "Catturalo finché c'è"
 
 #: src/components/target-datetime-button.tsx
 msgid "Clear"
@@ -80,14 +80,6 @@ msgid "Delete item"
 msgstr "Elimina"
 
 #: src/lib/home-greeting.ts
-msgid "Drop it"
-msgstr "Lascialo"
-
-#: src/lib/home-greeting.ts
-msgid "Dump it"
-msgstr "Scaricalo"
-
-#: src/lib/home-greeting.ts
 msgid "Evening, {firstName}"
 msgstr "Buonasera, {firstName}"
 
@@ -96,16 +88,12 @@ msgid "Full-text search…"
 msgstr "Cerca nel testo…"
 
 #: src/lib/home-greeting.ts
-msgid "Give it somewhere to land"
+msgid "Give it a place to land"
 msgstr "Dagli un posto dove posarsi"
 
 #: src/routes/index.tsx
 msgid "Give space to your mind"
 msgstr "Fai spazio alla tua mente"
-
-#: src/lib/home-greeting.ts
-msgid "Go on, get it out"
-msgstr "Dai, tiralo fuori"
 
 #: src/lib/home-greeting.ts
 msgid "Good evening"
@@ -123,6 +111,10 @@ msgstr "Ehi"
 msgid "Hey {firstName}"
 msgstr "Ehi {firstName}"
 
+#: src/lib/home-greeting.ts
+msgid "Hold it"
+msgstr "Conservalo"
+
 #: src/components/top-nav.tsx
 msgid "Home"
 msgstr "Home"
@@ -135,13 +127,21 @@ msgstr "Ci sono quando sei pronto"
 msgid "I'm listening"
 msgstr "Ti ascolto"
 
+#: src/lib/home-greeting.ts
+msgid "I'm listening, {firstName}"
+msgstr "Ti ascolto, {firstName}"
+
 #: src/lib/note-label-styles.tsx
 msgid "Idea"
 msgstr "Idea"
 
-#: src/routes/index.tsx
-msgid "Jot a thought, paste a URL, pick a time, or attach a photo—then send once. Everything lands in your inbox and stays in sync for when you actually need it."
-msgstr "Scrivi un pensiero, incolla un URL, scegli un orario o allega una foto—poi invia una volta. Tutto arriva in inbox e resta sincronizzato per quando ti serve davvero."
+#: src/lib/home-greeting.ts
+msgid "It's safe here"
+msgstr "Qui è al sicuro"
+
+#: src/lib/home-greeting.ts
+msgid "It's safe here, {firstName}"
+msgstr "Qui è al sicuro, {firstName}"
 
 #: src/lib/home-greeting.ts
 msgid "Keep it"
@@ -164,10 +164,6 @@ msgid "Loading…"
 msgstr "Caricamento…"
 
 #: src/lib/home-greeting.ts
-msgid "Log it"
-msgstr "Registralo"
-
-#: src/lib/home-greeting.ts
 msgid "Make a little room"
 msgstr "Fai un po' di spazio"
 
@@ -187,6 +183,10 @@ msgstr "Nota"
 msgid "Note actions"
 msgstr "Azioni nota"
 
+#: src/lib/home-greeting.ts
+msgid "Note it"
+msgstr "Annotalo"
+
 #: src/routes/_authed.home.tsx
 msgid "Note, URL or image"
 msgstr "Nota, URL o immagine"
@@ -204,13 +204,13 @@ msgstr "Non c'è ancora niente. Inizia dalla home."
 msgid "Oldest first"
 msgstr "Più vecchi"
 
-#: src/lib/home-greeting.ts
-msgid "Park it"
-msgstr "Parcheggialo"
-
 #: src/components/target-datetime-button.tsx
 msgid "Pick target date and time"
 msgstr "Scegli data e ora"
+
+#: src/lib/home-greeting.ts
+msgid "Save it"
+msgstr "Salvalo"
 
 #: src/routes/_authed.notes.index.tsx
 msgid "Search"
@@ -250,10 +250,6 @@ msgid "Sort"
 msgstr "Ordina"
 
 #: src/lib/home-greeting.ts
-msgid "Stash it"
-msgstr "Mettilo da parte"
-
-#: src/lib/home-greeting.ts
 msgid "Still up, {firstName}"
 msgstr "Ancora sveglio, {firstName}"
 
@@ -273,33 +269,45 @@ msgstr "Ora"
 msgid "Todo"
 msgstr "Todo"
 
-#: src/lib/home-greeting.ts
-msgid "Toss it"
-msgstr "Buttalo"
-
 #: src/routes/_authed.notes.index.tsx
 msgid "Type"
 msgstr "Tipo"
 
 #: src/lib/home-greeting.ts
-msgid "We'll hold onto it"
-msgstr "Lo teniamo noi"
+msgid "What do you want to keep?"
+msgstr "Cosa vuoi tenere?"
 
 #: src/lib/home-greeting.ts
-msgid "What's rattling around?"
-msgstr "Cosa ti gira in testa?"
+msgid "What's on your mind, {firstName}?"
+msgstr "A cosa stai pensando, {firstName}?"
 
 #: src/lib/home-greeting.ts
-msgid "What's sitting with you?"
-msgstr "Cosa ti sta accompagnando?"
+msgid "What's on your mind?"
+msgstr "A cosa stai pensando?"
 
 #: src/lib/home-greeting.ts
 msgid "Whenever you're ready"
 msgstr "Quando vuoi"
 
 #: src/lib/home-greeting.ts
-msgid "You don't have to finish it"
+msgid "Whenever you're ready, {firstName}"
+msgstr "Quando vuoi, {firstName}"
+
+#: src/lib/home-greeting.ts
+msgid "While it's still here"
+msgstr "Finché c'è ancora"
+
+#: src/lib/home-greeting.ts
+msgid "Write it down"
+msgstr "Scrivilo"
+
+#: src/lib/home-greeting.ts
+msgid "You don't have to finish"
 msgstr "Non devi finirlo"
+
+#: src/lib/home-greeting.ts
+msgid "You don't have to finish, {firstName}"
+msgstr "Non devi finirlo, {firstName}"
 
 #: src/components/top-nav.tsx
 msgid "You're signed in as a guest. Signing out permanently deletes your account and everything you've saved here—every note and attachment—with no way to recover it."

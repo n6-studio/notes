@@ -49,14 +49,14 @@ describe("home companions", () => {
         (pair) =>
           sourceText(pair.greeting).includes("{firstName}") &&
           pair.greeting.values?.firstName === "Ada" &&
-          sourceText(pair.saveLabel) === "Drop it"
+          sourceText(pair.saveLabel) === "Save it"
       )
     ).toBe(true);
     expect(
       anonymous.some(
         (pair) =>
           sourceText(pair.greeting) === "Good evening" &&
-          sourceText(pair.saveLabel) === "Drop it"
+          sourceText(pair.saveLabel) === "Save it"
       )
     ).toBe(true);
     expect(
@@ -99,9 +99,10 @@ describe("home companions", () => {
     const pool = homeCompanionsFor({ hour: 19, titlesOnly: true });
     const greetings = pool.map((pair) => sourceText(pair.greeting));
 
-    expect(greetings).toContain("What's sitting with you?");
+    expect(greetings).toContain("What's on your mind?");
     expect(greetings).not.toContain("Good evening");
     expect(greetings).not.toContain("Hey");
+    expect(greetings.join(" ")).not.toContain("{firstName}");
   });
 
   it("picks a landing companion without time-of-day greetings", () => {
@@ -110,8 +111,37 @@ describe("home companions", () => {
       { isAnonymous: false, name: "Ada" },
       () => 0
     );
-    expect(sourceText(pair.greeting)).toBe("What's sitting with you?");
-    expect(sourceText(pair.saveLabel)).toBe("Dump it");
+    expect(sourceText(pair.greeting)).toBe("What's on your mind?");
+    expect(sourceText(pair.saveLabel)).toBe("Save it");
+  });
+
+  it("mixes named companion titles into the home pool only", () => {
+    const named = homeCompanionsFor({ firstName: "Ada", hour: 19 });
+    const namedGreetings = named.map((pair) => sourceText(pair.greeting));
+    const anonymous = homeCompanionsFor({ hour: 19 });
+    const landing = homeCompanionsFor({
+      firstName: "Ada",
+      hour: 19,
+      titlesOnly: true,
+    });
+
+    expect(namedGreetings).toContain("What's on your mind, {firstName}?");
+    expect(namedGreetings).toContain("I'm listening, {firstName}");
+    expect(namedGreetings).toContain("What's on your mind?");
+    expect(
+      named.some(
+        (pair) =>
+          sourceText(pair.greeting) === "What's on your mind, {firstName}?" &&
+          pair.greeting.values?.firstName === "Ada"
+      )
+    ).toBe(true);
+
+    expect(
+      anonymous.map((pair) => sourceText(pair.greeting)).join(" ")
+    ).not.toContain("{firstName}");
+    expect(
+      landing.map((pair) => sourceText(pair.greeting)).join(" ")
+    ).not.toContain("{firstName}");
   });
 
   it("cycles only the save label so the SSR greeting stays put", () => {

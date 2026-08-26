@@ -13,17 +13,17 @@ const LOOKS_LIKE_EMAIL = /@/;
 const WHITESPACE = /\s+/;
 
 const COMPANION_PAIRS: HomeCompanionPair[] = [
-  { greeting: msg`What's sitting with you?`, saveLabel: msg`Dump it` },
+  { greeting: msg`What's on your mind?`, saveLabel: msg`Save it` },
   { greeting: msg`I'm here when you're ready`, saveLabel: msg`Send it` },
-  { greeting: msg`Go on, get it out`, saveLabel: msg`Dump it` },
-  { greeting: msg`We'll hold onto it`, saveLabel: msg`Keep it` },
-  { greeting: msg`What's rattling around?`, saveLabel: msg`Catch it` },
-  { greeting: msg`Give it somewhere to land`, saveLabel: msg`Park it` },
-  { greeting: msg`You don't have to finish it`, saveLabel: msg`Toss it` },
-  { greeting: msg`I'm listening`, saveLabel: msg`Log it` },
-  { greeting: msg`Make a little room`, saveLabel: msg`Stash it` },
-  { greeting: msg`Whenever you're ready`, saveLabel: msg`Drop it` },
-  { greeting: msg`Catch it while it's here`, saveLabel: msg`Catch it` },
+  { greeting: msg`Write it down`, saveLabel: msg`Note it` },
+  { greeting: msg`It's safe here`, saveLabel: msg`Hold it` },
+  { greeting: msg`What do you want to keep?`, saveLabel: msg`Keep it` },
+  { greeting: msg`Give it a place to land`, saveLabel: msg`Keep it` },
+  { greeting: msg`You don't have to finish`, saveLabel: msg`Save it` },
+  { greeting: msg`I'm listening`, saveLabel: msg`Add it` },
+  { greeting: msg`Make a little room`, saveLabel: msg`Save it` },
+  { greeting: msg`Whenever you're ready`, saveLabel: msg`Send it` },
+  { greeting: msg`While it's still here`, saveLabel: msg`Keep it` },
 ];
 
 export const HOME_SAVE_LABELS: MessageDescriptor[] = [
@@ -88,6 +88,7 @@ export function homeCompanionsFor({
 
   return [
     ...timeCompanions(dayPartFromHour(hour), firstName),
+    ...(firstName ? namedCompanionPairs(firstName) : []),
     ...COMPANION_PAIRS,
   ];
 }
@@ -159,6 +160,25 @@ function sameCompanionSaveLabel(
   return (a.id ?? a.message) === (b.id ?? b.message);
 }
 
+function namedCompanionPairs(firstName: string): HomeCompanionPair[] {
+  return [
+    {
+      greeting: msg`What's on your mind, ${firstName}?`,
+      saveLabel: msg`Save it`,
+    },
+    { greeting: msg`I'm listening, ${firstName}`, saveLabel: msg`Add it` },
+    {
+      greeting: msg`Whenever you're ready, ${firstName}`,
+      saveLabel: msg`Send it`,
+    },
+    {
+      greeting: msg`You don't have to finish, ${firstName}`,
+      saveLabel: msg`Save it`,
+    },
+    { greeting: msg`It's safe here, ${firstName}`, saveLabel: msg`Hold it` },
+  ];
+}
+
 function timeCompanions(
   dayPart: DayPart,
   firstName?: string
@@ -176,25 +196,25 @@ const NAMED_TIME_COMPANIONS: Record<
 > = {
   morning: (firstName) => [
     { greeting: msg`Morning, ${firstName}`, saveLabel: msg`Send it` },
-    { greeting: msg`Hey ${firstName}`, saveLabel: msg`Drop it` },
+    { greeting: msg`Hey ${firstName}`, saveLabel: msg`Save it` },
   ],
   afternoon: (firstName) => [
-    { greeting: msg`Hey ${firstName}`, saveLabel: msg`Drop it` },
-    { greeting: msg`Afternoon, ${firstName}`, saveLabel: msg`Park it` },
+    { greeting: msg`Hey ${firstName}`, saveLabel: msg`Save it` },
+    { greeting: msg`Afternoon, ${firstName}`, saveLabel: msg`Keep it` },
   ],
   evening: (firstName) => [
-    { greeting: msg`Evening, ${firstName}`, saveLabel: msg`Drop it` },
-    { greeting: msg`Hey ${firstName}`, saveLabel: msg`Drop it` },
+    { greeting: msg`Evening, ${firstName}`, saveLabel: msg`Save it` },
+    { greeting: msg`Hey ${firstName}`, saveLabel: msg`Save it` },
   ],
   night: (firstName) => [
-    { greeting: msg`Still up, ${firstName}`, saveLabel: msg`Dump it` },
-    { greeting: msg`Hey ${firstName}`, saveLabel: msg`Drop it` },
+    { greeting: msg`Still up, ${firstName}`, saveLabel: msg`Keep it` },
+    { greeting: msg`Hey ${firstName}`, saveLabel: msg`Save it` },
   ],
 };
 
 const ANON_TIME_COMPANIONS: Record<DayPart, HomeCompanionPair[]> = {
   morning: [{ greeting: msg`Good morning`, saveLabel: msg`Send it` }],
-  afternoon: [{ greeting: msg`Hey`, saveLabel: msg`Drop it` }],
-  evening: [{ greeting: msg`Good evening`, saveLabel: msg`Drop it` }],
-  night: [{ greeting: msg`Still up?`, saveLabel: msg`Dump it` }],
+  afternoon: [{ greeting: msg`Hey`, saveLabel: msg`Save it` }],
+  evening: [{ greeting: msg`Good evening`, saveLabel: msg`Save it` }],
+  night: [{ greeting: msg`Still up?`, saveLabel: msg`Keep it` }],
 };

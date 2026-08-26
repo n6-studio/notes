@@ -35,9 +35,8 @@ function Landing() {
             </h1>
             <p className="text-pretty text-base text-muted-foreground md:text-lg">
               <Trans>
-                Jot a thought, paste a URL, pick a time, or attach a photo—then
-                send once. Everything lands in your inbox and stays in sync for
-                when you actually need it.
+                Capture a note, link, reminder, or photo. Send once—it stays in
+                your inbox.
               </Trans>
             </p>
           </div>
