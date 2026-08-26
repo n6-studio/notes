@@ -525,7 +525,7 @@ export function ChatComposer({
           onChange={(e) => setBody(e.target.value)}
           onKeyDown={onBodyKeyDown}
           onPaste={onBodyPaste}
-          placeholder={placeholder}
+          placeholder={`${placeholder}...`}
           value={body}
         />
         {error ? (
