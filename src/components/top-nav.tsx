@@ -46,13 +46,23 @@ export function TopNav() {
       <header className="sticky top-0 z-50 border-border/40 border-b bg-background/10 backdrop-blur-md">
         <div className="mx-auto flex h-11 max-w-4xl items-center justify-between gap-4 px-4">
           <nav className="flex min-w-0 flex-1 items-center gap-1 text-sm">
-            <Link
-              className="mr-2 flex shrink-0 items-center gap-2 font-medium text-foreground/90 tracking-tight transition-opacity hover:opacity-80"
-              to={isAuthenticated ? "/home" : "/"}
-            >
-              <LogoMark className="size-5 shrink-0 text-foreground/90" />
-              <span className="font-bold text-foreground text-sm">NOTES</span>
-            </Link>
+            <div className="mr-2 flex shrink-0 items-baseline gap-2">
+              <Link
+                className="flex items-center gap-2 font-medium text-foreground/90 tracking-tight transition-opacity hover:opacity-80"
+                to={isAuthenticated ? "/home" : "/"}
+              >
+                <LogoMark className="size-5 shrink-0 text-foreground/90" />
+                <span className="font-bold text-foreground text-sm">NOTES</span>
+              </Link>
+              <a
+                className="text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+                href="https://n6.studio"
+                rel="noreferrer"
+                target="_blank"
+              >
+                by N6 Studio
+              </a>
+            </div>
             <span className="font-semibold text-lg text-muted-foreground/30">
               /
             </span>
