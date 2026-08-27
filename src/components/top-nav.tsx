@@ -44,28 +44,32 @@ export function TopNav() {
   return (
     <>
       <header className="sticky top-0 z-50 border-border/40 border-b bg-background/10 backdrop-blur-md">
-        <div className="mx-auto flex h-11 max-w-4xl items-center justify-between gap-4 px-4">
-          <nav className="flex min-w-0 flex-1 items-center gap-1 text-sm">
-            <div className="mr-2 flex shrink-0 items-baseline gap-2">
+        <div className="mx-auto flex h-12 max-w-4xl items-center justify-between gap-4 px-4">
+          <nav className="flex min-w-0 flex-1 items-center gap-3 text-sm">
+            <div className="grid shrink-0 grid-cols-[auto_auto] items-center gap-x-2 gap-y-[3px]">
               <Link
-                className="flex items-center gap-2 font-medium text-foreground/90 tracking-tight transition-opacity hover:opacity-80"
+                aria-hidden="true"
+                className="col-start-1 row-span-2 row-start-1 flex items-center transition-opacity hover:opacity-80"
+                tabIndex={-1}
                 to={isAuthenticated ? "/home" : "/"}
               >
                 <LogoMark className="size-5 shrink-0 text-foreground/90" />
-                <span className="font-bold text-foreground text-sm">NOTES</span>
+              </Link>
+              <Link
+                className="col-start-2 row-start-1 font-bold text-foreground text-sm leading-none tracking-tight transition-opacity hover:opacity-80"
+                to={isAuthenticated ? "/home" : "/"}
+              >
+                NOTES
               </Link>
               <a
-                className="text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+                className="col-start-2 row-start-2 w-fit text-[10px] text-muted-foreground leading-none transition-colors hover:text-foreground"
                 href="https://n6.studio"
                 rel="noreferrer"
                 target="_blank"
               >
-                by N6 Studio
+                <Trans>by N6 Studio</Trans>
               </a>
             </div>
-            <span className="font-semibold text-lg text-muted-foreground/30">
-              /
-            </span>
             {isAuthenticated && (
               <>
                 <Button

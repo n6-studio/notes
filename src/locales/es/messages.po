@@ -44,6 +44,10 @@ msgid "Attach images"
 msgstr "Adjuntar imágenes"
 
 #: src/components/top-nav.tsx
+msgid "by N6 Studio"
+msgstr "por N6 Studio"
+
+#: src/components/top-nav.tsx
 msgid "Cancel"
 msgstr "Cancelar"
 
