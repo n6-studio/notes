@@ -24,17 +24,17 @@ function filterByDates<T extends { _creationTime: number }>(
 }
 
 const listInputSchema = z.object({
-  q: z.string().optional(),
   dateFrom: z.number().optional(),
   dateTo: z.number().optional(),
-  sort: z.enum(["desc", "asc"]).optional(),
   label: z.enum(["note", "todo", "link", "idea"]).optional(),
+  q: z.string().optional(),
+  sort: z.enum(["desc", "asc"]).optional(),
 });
 
 export const list = authQuery
   .input(listInputSchema)
   .query(async ({ ctx, input }) => {
-    const user = ctx.user;
+    const { user } = ctx;
     const sort = input.sort ?? "desc";
     const qText = input.q?.trim();
     const labelFilter = input.label;
@@ -84,7 +84,7 @@ const getInputSchema = z.object({
 export const get = authQuery
   .input(getInputSchema)
   .query(async ({ ctx, input }) => {
-    const user = ctx.user;
+    const { user } = ctx;
     const id = input.id as Id<"notes">;
     const note = await ctx.db.get(id);
     if (!note || note.userId !== user._id) {
@@ -97,7 +97,7 @@ export const get = authQuery
       .query("attachments")
       .withIndex("by_note", (q) => q.eq("noteId", id))
       .collect();
-    return { note, attachments };
+    return { attachments, note };
   }) as RegisteredQuery<
   "public",
   z.infer<typeof getInputSchema>,
@@ -108,16 +108,16 @@ const createInputSchema = z.object({
   body: z.string(),
   label: z.string().optional(),
   linkUrl: z.string().optional(),
-  targetAt: z.number().optional(),
   storageIds: z
     .array(z.custom<Id<"_storage">>((v) => typeof v === "string"))
     .optional(),
+  targetAt: z.number().optional(),
 });
 
 export const create = authMutation
   .input(createInputSchema)
   .mutation(async ({ ctx, input }) => {
-    const user = ctx.user;
+    const { user } = ctx;
     const trimmedLink = input.linkUrl?.trim();
     const body = input.body.trim();
     if (
@@ -134,21 +134,23 @@ export const create = authMutation
     }
 
     const noteId = await ctx.db.insert("notes", {
-      userId: user._id,
       body: body || trimmedLink || "(attachment)",
       label: input.label,
       linkUrl: trimmedLink,
       targetAt: input.targetAt,
+      userId: user._id,
     });
 
     if (input.storageIds?.length) {
-      for (const storageId of input.storageIds) {
-        await ctx.db.insert("attachments", {
-          noteId,
-          userId: user._id,
-          storageId,
-        });
-      }
+      await Promise.all(
+        input.storageIds.map((storageId) =>
+          ctx.db.insert("attachments", {
+            noteId,
+            storageId,
+            userId: user._id,
+          })
+        )
+      );
     }
 
     return noteId;
@@ -169,7 +171,7 @@ const removeInputSchema = z.object({
 export const remove = authMutation
   .input(removeInputSchema)
   .mutation(async ({ ctx, input }) => {
-    const user = ctx.user;
+    const { user } = ctx;
     const id = input.id as Id<"notes">;
     const note = await ctx.db.get(id);
     if (!note || note.userId !== user._id) {
@@ -184,10 +186,12 @@ export const remove = authMutation
       .withIndex("by_note", (q) => q.eq("noteId", id))
       .collect();
 
-    for (const att of attachments) {
-      await ctx.storage.delete(att.storageId);
-      await ctx.db.delete(att._id);
-    }
+    await Promise.all(
+      attachments.map(async (att) => {
+        await ctx.storage.delete(att.storageId);
+        await ctx.db.delete(att._id);
+      })
+    );
 
     await ctx.db.delete(id);
   }) as RegisteredMutation<
@@ -203,8 +207,8 @@ const attachmentUrlInputSchema = z.object({
 export const getAttachmentUrl = authQuery
   .input(attachmentUrlInputSchema)
   .query(async ({ ctx, input }) => {
-    const user = ctx.user;
-    const storageId = input.storageId;
+    const { user } = ctx;
+    const { storageId } = input;
     const mine = await ctx.db
       .query("attachments")
       .withIndex("by_user", (q) => q.eq("userId", user._id))

@@ -22,6 +22,7 @@ export function ConvexAppProvider({
     <ConvexAuthProvider
       authClient={authClient}
       client={convexQueryClient.convexClient}
+      convexQueryClient={convexQueryClient}
       initialToken={initialToken ?? undefined}
     >
       <TanstackQueryClientProvider client={queryClient}>

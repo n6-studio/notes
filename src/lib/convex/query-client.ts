@@ -38,13 +38,6 @@ export function attachConvexQueryClient(
 
 export function createQueryClient(): QueryClient {
   return new QueryClient({
-    queryCache: new QueryCache({
-      onError: (error) => {
-        if (isCRPCClientError(error)) {
-          console.warn("[CRPC]", error.code, error.functionName);
-        }
-      },
-    }),
     defaultOptions: {
       ...hydrationConfig,
       queries: {
@@ -56,5 +49,12 @@ export function createQueryClient(): QueryClient {
         },
       },
     },
+    queryCache: new QueryCache({
+      onError: (error) => {
+        if (isCRPCClientError(error)) {
+          console.warn("[CRPC]", error.code, error.functionName);
+        }
+      },
+    }),
   });
 }

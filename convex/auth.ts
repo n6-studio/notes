@@ -48,13 +48,6 @@ export default defineAuth(() => {
 
   return {
     baseURL: siteUrl,
-    trustedOrigins: betterAuthTrustedOrigins(siteUrl, process.env.DEPLOY_ENV),
-    socialProviders: {
-      google: {
-        clientId: process.env.GOOGLE_CLIENT_ID as string,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      },
-    },
     plugins: [
       anonymous({
         emailDomainName: guestEmailDomain(siteUrl),
@@ -66,6 +59,12 @@ export default defineAuth(() => {
         jwks: process.env.JWKS,
       }),
     ],
+    socialProviders: {
+      google: {
+        clientId: process.env.GOOGLE_CLIENT_ID as string,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      },
+    },
     triggers: {
       user: {
         delete: {
@@ -93,5 +92,6 @@ export default defineAuth(() => {
         },
       },
     },
+    trustedOrigins: betterAuthTrustedOrigins(siteUrl, process.env.DEPLOY_ENV),
   };
 });

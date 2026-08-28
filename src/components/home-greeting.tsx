@@ -54,9 +54,8 @@ export function HomeGreeting() {
   const { i18n } = useLingui();
   const { pair } = useHomeCompanion();
   const greeting = i18n._(pair.greeting);
-  const previousPhrase = useRef<string | null>(null);
-  const isSwap =
-    previousPhrase.current != null && previousPhrase.current !== greeting;
+  const previousPhrase = useRef(greeting);
+  const isSwap = previousPhrase.current !== greeting;
 
   useEffect(() => {
     previousPhrase.current = greeting;

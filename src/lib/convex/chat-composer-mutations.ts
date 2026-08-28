@@ -28,21 +28,21 @@ export async function uploadNoteFiles(
   files: File[],
   getUploadPostUrl: () => Promise<string>
 ): Promise<Id<"_storage">[]> {
-  const storageIds: Id<"_storage">[] = [];
-  for (const file of files) {
-    const postUrl = await getUploadPostUrl();
-    const res = await fetch(postUrl, {
-      method: "POST",
-      headers: { "Content-Type": file.type },
-      body: file,
-    });
-    if (!res.ok) {
-      throw new Error("Upload failed");
-    }
-    const json = (await res.json()) as { storageId: Id<"_storage"> };
-    storageIds.push(json.storageId);
-  }
-  return storageIds;
+  return await Promise.all(
+    files.map(async (file) => {
+      const postUrl = await getUploadPostUrl();
+      const res = await fetch(postUrl, {
+        body: file,
+        headers: { "Content-Type": file.type },
+        method: "POST",
+      });
+      if (!res.ok) {
+        throw new Error("Upload failed");
+      }
+      const json = (await res.json()) as { storageId: Id<"_storage"> };
+      return json.storageId;
+    })
+  );
 }
 
 function requireConvexUrl(): string {
@@ -79,8 +79,8 @@ export async function submitNoteCaptureOverHttp(
     body: payload.body,
     label: payload.label,
     linkUrl: payload.linkUrl,
-    targetAt: payload.targetAt,
     storageIds: storageIds.length ? storageIds : undefined,
+    targetAt: payload.targetAt,
   });
 }
 
@@ -97,7 +97,7 @@ export async function submitNoteCaptureOverCrpc(
     body: payload.body,
     label: payload.label,
     linkUrl: payload.linkUrl,
-    targetAt: payload.targetAt,
     storageIds: storageIds.length ? storageIds : undefined,
+    targetAt: payload.targetAt,
   });
 }

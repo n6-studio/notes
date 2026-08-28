@@ -43,7 +43,7 @@ export function matchLocale(
     return normalized;
   }
 
-  const base = normalized.split("-")[0];
+  const [base] = normalized.split("-");
   if (base && isLocale(base)) {
     return base;
   }

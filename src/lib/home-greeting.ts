@@ -52,7 +52,7 @@ export function companionFirstName(
     return;
   }
 
-  const first = trimmed.split(WHITESPACE)[0];
+  const [first] = trimmed.split(WHITESPACE);
   if (!first || first.length < 2) {
     return;
   }
@@ -194,16 +194,16 @@ const NAMED_TIME_COMPANIONS: Record<
   DayPart,
   (firstName: string) => HomeCompanionPair[]
 > = {
-  morning: (firstName) => [
-    { greeting: msg`Morning, ${firstName}`, saveLabel: msg`Send it` },
-    { greeting: msg`Hey ${firstName}`, saveLabel: msg`Save it` },
-  ],
   afternoon: (firstName) => [
     { greeting: msg`Hey ${firstName}`, saveLabel: msg`Save it` },
     { greeting: msg`Afternoon, ${firstName}`, saveLabel: msg`Keep it` },
   ],
   evening: (firstName) => [
     { greeting: msg`Evening, ${firstName}`, saveLabel: msg`Save it` },
+    { greeting: msg`Hey ${firstName}`, saveLabel: msg`Save it` },
+  ],
+  morning: (firstName) => [
+    { greeting: msg`Morning, ${firstName}`, saveLabel: msg`Send it` },
     { greeting: msg`Hey ${firstName}`, saveLabel: msg`Save it` },
   ],
   night: (firstName) => [
@@ -213,8 +213,8 @@ const NAMED_TIME_COMPANIONS: Record<
 };
 
 const ANON_TIME_COMPANIONS: Record<DayPart, HomeCompanionPair[]> = {
-  morning: [{ greeting: msg`Good morning`, saveLabel: msg`Send it` }],
   afternoon: [{ greeting: msg`Hey`, saveLabel: msg`Save it` }],
   evening: [{ greeting: msg`Good evening`, saveLabel: msg`Save it` }],
+  morning: [{ greeting: msg`Good morning`, saveLabel: msg`Send it` }],
   night: [{ greeting: msg`Still up?`, saveLabel: msg`Keep it` }],
 };

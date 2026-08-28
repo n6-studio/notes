@@ -10,12 +10,6 @@ import { nitro } from "nitro/vite";
 import { defineConfig } from "vite";
 
 const config = defineConfig({
-  resolve: {
-    tsconfigPaths: true,
-  },
-  ssr: {
-    noExternal: ["kitcn"],
-  },
   plugins: [
     devtools(),
     nitro(),
@@ -27,6 +21,12 @@ const config = defineConfig({
       plugins: ["@lingui/babel-plugin-lingui-macro"],
     }),
   ],
+  resolve: {
+    tsconfigPaths: true,
+  },
+  ssr: {
+    noExternal: ["kitcn"],
+  },
 });
 
 export default config;

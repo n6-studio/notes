@@ -44,12 +44,12 @@ export function getRouter() {
   const i18n = globalContext?.i18n ?? setupI18n();
 
   const router = createTanStackRouter({
-    routeTree,
-    defaultPreload: "intent",
     context: {
-      queryClient,
       convexQueryClient,
+      queryClient,
     },
+    defaultPreload: "intent",
+    routeTree,
     scrollRestoration: true,
     Wrap: ({ children }) => <I18nProvider i18n={i18n}>{children}</I18nProvider>,
   });
@@ -67,8 +67,8 @@ export function getRouter() {
   }
 
   setupRouterSsrQueryIntegration({
-    router,
     queryClient,
+    router,
     wrapQueryClient: false,
   });
 

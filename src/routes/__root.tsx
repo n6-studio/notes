@@ -3,7 +3,7 @@
 import { useLingui } from "@lingui/react";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import {
   createRootRouteWithContext,
   HeadContent,
@@ -11,8 +11,9 @@ import {
   Scripts,
   useRouteContext,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { createServerFn } from "@tanstack/react-start";
+import { syncConvexAuthForStartLoader } from "kitcn/auth/start";
 import type { ConvexQueryClient } from "kitcn/react";
 import { getToken } from "~/lib/convex/auth-server";
 import { ConvexAppProvider } from "~/lib/convex/convex-provider";
@@ -22,90 +23,80 @@ const getAuth = createServerFn({ method: "GET" }).handler(
   async () => (await getToken()) ?? null
 );
 
-async function loadRootAuth(): Promise<{
-  isAuthenticated: boolean;
-  token: string | null;
-}> {
-  // During SSR, call getToken in-process. createServerFn would HTTP the same
-  // Vercel deployment (`/_serverFn`) and trip INFINITE_LOOP_DETECTED.
-  try {
-    const token = import.meta.env.SSR
-      ? ((await getToken()) ?? null)
-      : await getAuth();
-    return { isAuthenticated: Boolean(token), token };
-  } catch (error) {
-    console.error("[auth] getToken failed", error);
-    return { isAuthenticated: false, token: null };
-  }
-}
-
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
   convexQueryClient: ConvexQueryClient;
 }>()({
+  beforeLoad: async ({ context }) => {
+    try {
+      return await syncConvexAuthForStartLoader({
+        convex: context.convexQueryClient,
+        getToken: async () =>
+          // During SSR, call getToken in-process. createServerFn would HTTP the
+          // same Vercel deployment (`/_serverFn`) and trip INFINITE_LOOP_DETECTED.
+          import.meta.env.SSR ? await getToken() : await getAuth(),
+      });
+    } catch (error) {
+      console.error("[auth] getToken failed", error);
+      return { isAuthenticated: false, token: null };
+    }
+  },
+  component: RootComponent,
   head: () => ({
+    links: [
+      {
+        href: appCss,
+        rel: "stylesheet",
+      },
+    ],
     meta: [
       {
         charSet: "utf-8",
       },
       {
-        name: "viewport",
         content: "width=device-width, initial-scale=1",
+        name: "viewport",
       },
       {
         title: "Notes — Capture ideas, links & todos in one line",
       },
       {
-        name: "description",
         content:
           "Jot ideas, todos, bookmarks, and due dates in a single send—optional links, times, and images included. Start free with anonymous sign-in or Google.",
+        name: "description",
       },
       {
-        name: "application-name",
         content: "Notes",
+        name: "application-name",
       },
       {
+        content: "Notes — Capture ideas, links & todos in one line",
         property: "og:title",
-        content: "Notes — Capture ideas, links & todos in one line",
       },
       {
+        content:
+          "One box for everything you need to remember. Type, add context, send once, and come back when you are ready—real-time sync keeps it waiting.",
         property: "og:description",
-        content:
-          "One box for everything you need to remember. Type, add context, send once, and come back when you are ready—real-time sync keeps it waiting.",
       },
       {
-        property: "og:type",
         content: "website",
+        property: "og:type",
       },
       {
-        name: "twitter:card",
         content: "summary",
+        name: "twitter:card",
       },
       {
-        name: "twitter:title",
         content: "Notes — Capture ideas, links & todos in one line",
+        name: "twitter:title",
       },
       {
-        name: "twitter:description",
         content:
           "One box for everything you need to remember. Type, add context, send once, and come back when you are ready—real-time sync keeps it waiting.",
-      },
-    ],
-    links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
+        name: "twitter:description",
       },
     ],
   }),
-  beforeLoad: async ({ context }) => {
-    const auth = await loadRootAuth();
-    if (auth.token) {
-      context.convexQueryClient.serverHttpClient?.setAuth(auth.token);
-    }
-    return auth;
-  },
-  component: RootComponent,
 });
 
 function RootComponent() {
@@ -132,15 +123,18 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="min-h-screen bg-background font-sans text-foreground antialiased">
         {children}
-        <ReactQueryDevtools />
         <TanStackDevtools
           config={{
             position: "bottom-right",
           }}
           plugins={[
             {
-              name: "Tanstack Router",
-              render: <TanStackRouterDevtools />,
+              name: "TanStack Query",
+              render: <ReactQueryDevtoolsPanel />,
+            },
+            {
+              name: "TanStack Router",
+              render: <TanStackRouterDevtoolsPanel />,
             },
           ]}
         />

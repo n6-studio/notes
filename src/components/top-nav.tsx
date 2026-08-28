@@ -2,7 +2,7 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useRouter } from "@tanstack/react-router";
 import { ChevronDownIcon } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { LanguageSwitcher } from "~/components/language-switcher";
 import { LogoMark } from "~/components/logo-mark";
 import {
@@ -41,6 +41,38 @@ export function TopNav() {
 
   const userLabel = user?.name?.trim() || user?.email?.trim() || t`Account`;
 
+  const onSignOutClick = useCallback(() => {
+    if (isAnonymous) {
+      setAnonymousSignOutOpen(true);
+      return;
+    }
+    signOut.mutateAsync().then(() => router.invalidate());
+  }, [isAnonymous, router, signOut]);
+
+  const onGoogleSignIn = useCallback(async () => {
+    await signInSocial.mutateAsync({ provider: "google" });
+  }, [signInSocial]);
+
+  const onAnonymousSignOutOpenChange = useCallback(
+    (open: boolean) => {
+      if (!open && signOut.isPending) {
+        return;
+      }
+      setAnonymousSignOutOpen(open);
+    },
+    [signOut.isPending]
+  );
+
+  const onConfirmAnonymousSignOut = useCallback(async () => {
+    try {
+      await signOut.mutateAsync();
+      setAnonymousSignOutOpen(false);
+      router.invalidate();
+    } catch {
+      /* sign-out failed; leave dialog open */
+    }
+  }, [router, signOut]);
+
   return (
     <>
       <header className="sticky top-0 z-50 border-border/40 border-b bg-background/10 backdrop-blur-md">
@@ -70,7 +102,7 @@ export function TopNav() {
                 <Trans>by N6 Studio</Trans>
               </a>
             </div>
-            {isAuthenticated && (
+            {isAuthenticated ? (
               <>
                 <Button
                   className="h-8 px-2 text-muted-foreground hover:text-foreground"
@@ -91,7 +123,7 @@ export function TopNav() {
                   <Trans>Notes</Trans>
                 </Button>
               </>
-            )}
+            ) : null}
           </nav>
           <div className="flex shrink-0 items-center gap-1">
             {isAuthenticated ? (
@@ -116,13 +148,7 @@ export function TopNav() {
                   <DropdownMenuItem
                     closeOnClick={!isAnonymous}
                     disabled={signOut.isPending}
-                    onClick={() => {
-                      if (isAnonymous) {
-                        setAnonymousSignOutOpen(true);
-                        return;
-                      }
-                      signOut.mutateAsync().then(() => router.invalidate());
-                    }}
+                    onClick={onSignOutClick}
                     variant="destructive"
                   >
                     <Trans>Sign out</Trans>
@@ -133,9 +159,7 @@ export function TopNav() {
               <Button
                 className="h-8 px-2"
                 disabled={signInSocial.isPending}
-                onClick={async () => {
-                  await signInSocial.mutateAsync({ provider: "google" });
-                }}
+                onClick={onGoogleSignIn}
                 size="sm"
                 variant="ghost"
               >
@@ -147,12 +171,7 @@ export function TopNav() {
         </div>
       </header>
       <AlertDialog
-        onOpenChange={(open) => {
-          if (!open && signOut.isPending) {
-            return;
-          }
-          setAnonymousSignOutOpen(open);
-        }}
+        onOpenChange={onAnonymousSignOutOpenChange}
         open={anonymousSignOutOpen}
       >
         <AlertDialogContent>
@@ -174,15 +193,7 @@ export function TopNav() {
             </AlertDialogCancel>
             <Button
               disabled={signOut.isPending}
-              onClick={async () => {
-                try {
-                  await signOut.mutateAsync();
-                  setAnonymousSignOutOpen(false);
-                  router.invalidate();
-                } catch {
-                  /* sign-out failed; leave dialog open */
-                }
-              }}
+              onClick={onConfirmAnonymousSignOut}
               variant="destructive"
             >
               <Trans>Sign out</Trans>

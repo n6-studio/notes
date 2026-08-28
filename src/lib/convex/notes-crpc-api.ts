@@ -20,8 +20,8 @@ function crpcLeaf(
 
   return {
     ...leaf,
-    type: kind,
     functionRef,
+    type: kind,
   };
 }
 
@@ -35,15 +35,15 @@ type ConvexCodegenApiType =
  */
 export const notesCrpcApi = {
   notes: {
-    list: crpcLeaf("query", "notes:list", { auth: "required" }),
+    create: crpcLeaf("mutation", "notes:create", { auth: "optional" }),
+    generateUploadUrl: crpcLeaf("mutation", "notes:generateUploadUrl", {
+      auth: "optional",
+    }),
     get: crpcLeaf("query", "notes:get", { auth: "required" }),
     getAttachmentUrl: crpcLeaf("query", "notes:getAttachmentUrl", {
       auth: "required",
     }),
-    create: crpcLeaf("mutation", "notes:create", { auth: "optional" }),
+    list: crpcLeaf("query", "notes:list", { auth: "required" }),
     remove: crpcLeaf("mutation", "notes:remove", { auth: "required" }),
-    generateUploadUrl: crpcLeaf("mutation", "notes:generateUploadUrl", {
-      auth: "optional",
-    }),
   },
 } as unknown as ConvexCodegenApiType;

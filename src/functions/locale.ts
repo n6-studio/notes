@@ -7,7 +7,7 @@ import {
 } from "~/i18n/locales";
 
 export const updateLocale = createServerFn({ method: "POST" })
-  .inputValidator((locale: string) => resolveLocale(locale))
+  .validator((locale: string) => resolveLocale(locale))
   .handler(({ data }) => {
     setCookie(LOCALE_COOKIE, data, localeCookieOptions);
   });

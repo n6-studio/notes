@@ -15,7 +15,7 @@ export function useUser() {
   const user = data ?? null;
 
   return {
+    isAuthenticated: user !== null,
     user,
-    isAuthenticated: user != null,
   };
 }

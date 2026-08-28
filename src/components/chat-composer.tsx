@@ -3,8 +3,10 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { ImagePlus, Loader2 } from "lucide-react";
 import {
+  type ChangeEvent,
   type ClipboardEvent,
   type KeyboardEvent as ReactKeyboardEvent,
+  useCallback,
   useEffect,
   useId,
   useRef,
@@ -80,8 +82,11 @@ function singleHttpUrlFromCaptureText(text: string): string | undefined {
       return;
     }
     return url.href;
-  } catch {
-    return;
+  } catch (error) {
+    if (error instanceof TypeError) {
+      return;
+    }
+    throw error;
   }
 }
 
@@ -97,14 +102,26 @@ export function CaptureTypeSelect({
   const { t } = useLingui();
   const labelPlaceholder = t`Label`;
 
+  const handleValueChange = useCallback(
+    (next: string | null) => {
+      if (typeof next === "string" && isNoteLabel(next)) {
+        onValueChange(next);
+      }
+    },
+    [onValueChange]
+  );
+
+  const renderSelectedLabel = (selected: string | null) =>
+    selected && isNoteLabel(selected) ? (
+      <NoteLabelSelectDisplay label={selected} />
+    ) : (
+      labelPlaceholder
+    );
+
   return (
     <Select
       items={CAPTURE_TYPE_ITEMS}
-      onValueChange={(next) => {
-        if (typeof next === "string" && isNoteLabel(next)) {
-          onValueChange(next);
-        }
-      }}
+      onValueChange={handleValueChange}
       value={value}
     >
       <SelectTrigger
@@ -118,13 +135,7 @@ export function CaptureTypeSelect({
         size="sm"
       >
         <SelectValue placeholder={labelPlaceholder}>
-          {(selected: string | null) =>
-            selected && isNoteLabel(selected) ? (
-              <NoteLabelSelectDisplay label={selected} />
-            ) : (
-              labelPlaceholder
-            )
-          }
+          {renderSelectedLabel}
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
@@ -169,8 +180,8 @@ export function ChatComposer({
   const { i18n, t } = useLingui();
   const router = useRouter();
   const crpc = useCRPC();
-  const fileRef = useRef<HTMLInputElement>(null);
-  const frameRef = useRef<HTMLDivElement>(null);
+  const [fileInput, setFileInput] = useState<HTMLInputElement | null>(null);
+  const [frameEl, setFrameEl] = useState<HTMLDivElement | null>(null);
   const gradUid = useId().replaceAll(":", "");
   const accentGradId = `composer-accent-${gradUid}`;
   const hoverGradId = `composer-hover-${gradUid}`;
@@ -181,8 +192,7 @@ export function ChatComposer({
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-  const saveHoverArmedRef = useRef(false);
-  const saveLabelShouldAnimateRef = useRef(false);
+  const [saveLabelShouldAnimate, setSaveLabelShouldAnimate] = useState(false);
   const cycleSaveLabelRef = useRef(onCycleSaveLabel);
   cycleSaveLabelRef.current = onCycleSaveLabel;
   const bodyRef = useRef(body);
@@ -215,26 +225,26 @@ export function ChatComposer({
   }, []);
 
   useEffect(() => {
-    const frame = frameRef.current;
-    if (!frame) {
+    if (frameEl === null) {
       return;
     }
 
     const syncFrameBox = () => {
-      const rect = frame.getBoundingClientRect();
-      const rx = Number.parseFloat(getComputedStyle(frame).borderTopLeftRadius);
+      const rect = frameEl.getBoundingClientRect();
+      const rx = Number.parseFloat(
+        getComputedStyle(frameEl).borderTopLeftRadius
+      );
       setFrameBox((prev) => nextComposerFrameBox(prev, rect, rx));
     };
 
     const observer = new ResizeObserver(syncFrameBox);
-    observer.observe(frame);
+    observer.observe(frameEl);
     syncFrameBox();
     return () => observer.disconnect();
-  }, []);
+  }, [frameEl]);
 
   useEffect(() => {
-    const frame = frameRef.current;
-    if (!frame) {
+    if (frameEl === null) {
       return;
     }
 
@@ -242,14 +252,14 @@ export function ChatComposer({
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         return;
       }
-      const spin = frame.querySelector(selector);
+      const spin = frameEl.querySelector(selector);
       if (spin && "beginElement" in spin) {
         (spin as SVGAnimateTransformElement).beginElement();
       }
     };
 
     const endSpin = (selector: string) => {
-      const spin = frame.querySelector(selector);
+      const spin = frameEl.querySelector(selector);
       if (spin && "endElement" in spin) {
         try {
           (spin as SVGAnimateTransformElement).endElement();
@@ -261,7 +271,7 @@ export function ChatComposer({
 
     const onFocusIn = (event: FocusEvent) => {
       const from = event.relatedTarget;
-      if (from instanceof Node && frame.contains(from)) {
+      if (from instanceof Node && frameEl.contains(from)) {
         return;
       }
       endSpin(".composer-border-hover-spin");
@@ -270,20 +280,23 @@ export function ChatComposer({
 
     const onFocusOut = (event: FocusEvent) => {
       const to = event.relatedTarget;
-      if (to instanceof Node && frame.contains(to)) {
+      if (to instanceof Node && frameEl.contains(to)) {
         return;
       }
       if (bodyRef.current.trim().length > 0) {
         return;
       }
       endSpin(".composer-border-grad-spin");
-      if (frame.matches(":hover")) {
+      if (frameEl.matches(":hover")) {
         beginSpin(".composer-border-hover-spin");
       }
     };
 
     const onMouseEnter = () => {
-      if (frame.matches(":focus-within") || bodyRef.current.trim().length > 0) {
+      if (
+        frameEl.matches(":focus-within") ||
+        bodyRef.current.trim().length > 0
+      ) {
         return;
       }
       beginSpin(".composer-border-hover-spin");
@@ -293,26 +306,26 @@ export function ChatComposer({
       endSpin(".composer-border-hover-spin");
     };
 
-    frame.addEventListener("focusin", onFocusIn);
-    frame.addEventListener("focusout", onFocusOut);
-    frame.addEventListener("mouseenter", onMouseEnter);
-    frame.addEventListener("mouseleave", onMouseLeave);
+    frameEl.addEventListener("focusin", onFocusIn);
+    frameEl.addEventListener("focusout", onFocusOut);
+    frameEl.addEventListener("mouseenter", onMouseEnter);
+    frameEl.addEventListener("mouseleave", onMouseLeave);
     return () => {
-      frame.removeEventListener("focusin", onFocusIn);
-      frame.removeEventListener("focusout", onFocusOut);
-      frame.removeEventListener("mouseenter", onMouseEnter);
-      frame.removeEventListener("mouseleave", onMouseLeave);
+      frameEl.removeEventListener("focusin", onFocusIn);
+      frameEl.removeEventListener("focusout", onFocusOut);
+      frameEl.removeEventListener("mouseenter", onMouseEnter);
+      frameEl.removeEventListener("mouseleave", onMouseLeave);
     };
-  }, []);
+  }, [frameEl]);
 
-  const onPickFiles = (list: FileList | null) => {
+  const onPickFiles = useCallback((list: FileList | null) => {
     if (!list?.length) {
       return;
     }
     setFiles((prev) => [...prev, ...Array.from(list)]);
-  };
+  }, []);
 
-  const submit = async () => {
+  const submit = useCallback(async () => {
     setError(null);
     setPending(true);
     try {
@@ -327,26 +340,26 @@ export function ChatComposer({
 
       const payload = {
         body: trimmedBody,
+        files,
         label,
         linkUrl,
         targetAt,
-        files,
       };
 
       if (variant === "landing") {
         await submitNoteCaptureOverHttp(payload);
       } else {
         await submitNoteCaptureOverCrpc(payload, {
-          generateUploadUrl: () => generateUploadUrl({}),
           createNote,
+          generateUploadUrl: () => generateUploadUrl({}),
         });
       }
 
       setBody("");
       setTargetAtLocal("");
       setFiles([]);
-      if (fileRef.current) {
-        fileRef.current.value = "";
+      if (fileInput !== null) {
+        fileInput.value = "";
       }
 
       onCreated?.();
@@ -356,7 +369,20 @@ export function ChatComposer({
     } finally {
       setPending(false);
     }
-  };
+  }, [
+    body,
+    createNote,
+    fileInput,
+    files,
+    generateUploadUrl,
+    label,
+    onCreated,
+    onPreSubmit,
+    router,
+    t,
+    targetAtLocal,
+    variant,
+  ]);
 
   const canSend = body.trim().length > 0 || files.length > 0;
   const sendDisabled = !canSend || pending;
@@ -372,52 +398,75 @@ export function ChatComposer({
   const borderCx = frameBox.w / 2;
   const borderCy = frameBox.h / 2;
 
-  const onBodyKeyDown = (e: ReactKeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key !== "Enter" || e.repeat) {
-      return;
-    }
-    if (!(e.metaKey || e.ctrlKey)) {
-      return;
-    }
-    e.preventDefault();
-    if (sendDisabled) {
-      return;
-    }
+  const onBodyKeyDown = useCallback(
+    (e: ReactKeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key !== "Enter" || e.repeat) {
+        return;
+      }
+      if (!(e.metaKey || e.ctrlKey)) {
+        return;
+      }
+      e.preventDefault();
+      if (sendDisabled) {
+        return;
+      }
+      submit().catch(() => undefined);
+    },
+    [sendDisabled, submit]
+  );
+
+  const releaseSaveHover = useCallback(
+    (event: { currentTarget: HTMLElement }) => {
+      const el = event.currentTarget;
+      requestAnimationFrame(() => {
+        if (el.matches(":hover") || el.matches(":focus-visible")) {
+          return;
+        }
+        setSaveLabelShouldAnimate(true);
+        cycleSaveLabelRef.current?.();
+      });
+    },
+    []
+  );
+
+  const onBodyPaste = useCallback(
+    (e: ClipboardEvent<HTMLTextAreaElement>) => {
+      const el = e.currentTarget;
+      const start = el.selectionStart ?? 0;
+      const end = el.selectionEnd ?? 0;
+      if (body.slice(0, start).trim() !== "") {
+        return;
+      }
+      const merged = `${body.slice(0, start)}${e.clipboardData.getData("text")}${body.slice(end)}`;
+      const first = firstTokenAfterTrimStart(merged);
+      if (first && singleHttpUrlFromCaptureText(first)) {
+        setLabel("link");
+      }
+    },
+    [body]
+  );
+
+  const onBodyChange = useCallback(
+    (event: ChangeEvent<HTMLTextAreaElement>) => {
+      setBody(event.target.value);
+    },
+    []
+  );
+
+  const onFileChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      onPickFiles(event.target.files);
+    },
+    [onPickFiles]
+  );
+
+  const onAttachClick = useCallback(() => {
+    fileInput?.click();
+  }, [fileInput]);
+
+  const onSaveClick = useCallback(() => {
     submit().catch(() => undefined);
-  };
-
-  const armSaveHover = () => {
-    saveHoverArmedRef.current = true;
-  };
-
-  const releaseSaveHover = (event: { currentTarget: HTMLElement }) => {
-    const el = event.currentTarget;
-    requestAnimationFrame(() => {
-      if (el.matches(":hover") || el.matches(":focus-visible")) {
-        return;
-      }
-      if (!saveHoverArmedRef.current) {
-        return;
-      }
-      saveHoverArmedRef.current = false;
-      saveLabelShouldAnimateRef.current = true;
-      cycleSaveLabelRef.current?.();
-    });
-  };
-
-  const onBodyPaste = (e: ClipboardEvent<HTMLTextAreaElement>) => {
-    const el = e.currentTarget;
-    const start = el.selectionStart ?? 0;
-    const end = el.selectionEnd ?? 0;
-    if (body.slice(0, start).trim() !== "") {
-      return;
-    }
-    const merged = `${body.slice(0, start)}${e.clipboardData.getData("text")}${body.slice(end)}`;
-    const first = firstTokenAfterTrimStart(merged);
-    if (first && singleHttpUrlFromCaptureText(first)) {
-      setLabel("link");
-    }
-  };
+  }, [submit]);
 
   return (
     <div
@@ -426,7 +475,7 @@ export function ChatComposer({
         hasText && "composer-frame-filled",
         className
       )}
-      ref={frameRef}
+      ref={setFrameEl}
     >
       {frameBox.w > 2 && frameBox.h > 2 ? (
         <svg
@@ -522,7 +571,7 @@ export function ChatComposer({
               : "max-h-45 min-h-35 md:max-h-55 md:min-h-45"
           )}
           name="body"
-          onChange={(e) => setBody(e.target.value)}
+          onChange={onBodyChange}
           onKeyDown={onBodyKeyDown}
           onPaste={onBodyPaste}
           placeholder={`${placeholder}...`}
@@ -548,14 +597,14 @@ export function ChatComposer({
                 accept="image/*"
                 className="hidden"
                 multiple
-                onChange={(e) => onPickFiles(e.target.files)}
-                ref={fileRef}
+                onChange={onFileChange}
+                ref={setFileInput}
                 type="file"
               />
               <Button
                 aria-label={t`Attach images`}
                 disabled={pending}
-                onClick={() => fileRef.current?.click()}
+                onClick={onAttachClick}
                 size="icon-sm"
                 type="button"
                 variant="ghost"
@@ -575,11 +624,7 @@ export function ChatComposer({
             className="composer-save relative shrink-0 overflow-visible"
             disabled={sendDisabled}
             onBlur={releaseSaveHover}
-            onClick={() => {
-              submit().catch(() => undefined);
-            }}
-            onFocus={armSaveHover}
-            onPointerEnter={armSaveHover}
+            onClick={onSaveClick}
             onPointerLeave={releaseSaveHover}
             type="button"
           >
@@ -594,8 +639,7 @@ export function ChatComposer({
               <span
                 className={cn(
                   "col-start-1 row-start-1",
-                  saveLabelShouldAnimateRef.current &&
-                    "composer-save-label-swap"
+                  saveLabelShouldAnimate && "composer-save-label-swap"
                 )}
                 key={saveLabel}
               >

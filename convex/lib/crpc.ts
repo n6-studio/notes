@@ -10,12 +10,12 @@ import {
 } from "../_generated/server.js";
 
 const c = initCRPC.dataModel<DataModel>().create({
-  query,
-  mutation,
-  internalQuery,
-  internalMutation,
   action,
   internalAction,
+  internalMutation,
+  internalQuery,
+  mutation,
+  query,
 });
 
 export { c };

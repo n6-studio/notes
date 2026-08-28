@@ -1,5 +1,6 @@
 import { useLingui } from "@lingui/react/macro";
 import { CheckIcon, LanguagesIcon } from "lucide-react";
+import { useCallback } from "react";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -11,17 +12,39 @@ import {
 import { updateLocale } from "~/functions/locale";
 import { type Locale, localeDisplayNames, locales } from "~/i18n/locales";
 
-export function LanguageSwitcher() {
-  const { i18n, t } = useLingui();
-  const activeLocale = i18n.locale;
-
-  const onSelect = async (locale: Locale) => {
+function LanguageOption({
+  activeLocale,
+  locale,
+}: {
+  activeLocale: string;
+  locale: Locale;
+}) {
+  const handleClick = useCallback(() => {
     if (locale === activeLocale) {
       return;
     }
-    await updateLocale({ data: locale });
-    window.location.reload();
-  };
+    updateLocale({ data: locale })
+      .then(() => {
+        window.location.reload();
+      })
+      .catch(() => {
+        /* cookie write failed; stay on current locale */
+      });
+  }, [activeLocale, locale]);
+
+  return (
+    <DropdownMenuItem onClick={handleClick}>
+      <span className="flex-1">{localeDisplayNames[locale]}</span>
+      {locale === activeLocale ? (
+        <CheckIcon className="text-foreground" />
+      ) : null}
+    </DropdownMenuItem>
+  );
+}
+
+export function LanguageSwitcher() {
+  const { i18n, t } = useLingui();
+  const activeLocale = i18n.locale;
 
   return (
     <DropdownMenu>
@@ -40,19 +63,11 @@ export function LanguageSwitcher() {
       <DropdownMenuContent align="end" className="min-w-40">
         <DropdownMenuGroup>
           {locales.map((locale) => (
-            <DropdownMenuItem
+            <LanguageOption
+              activeLocale={activeLocale}
               key={locale}
-              onClick={() => {
-                onSelect(locale).catch(() => {
-                  /* cookie write failed; stay on current locale */
-                });
-              }}
-            >
-              <span className="flex-1">{localeDisplayNames[locale]}</span>
-              {locale === activeLocale ? (
-                <CheckIcon className="text-foreground" />
-              ) : null}
-            </DropdownMenuItem>
+              locale={locale}
+            />
           ))}
         </DropdownMenuGroup>
       </DropdownMenuContent>

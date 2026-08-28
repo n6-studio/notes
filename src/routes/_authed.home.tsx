@@ -15,13 +15,13 @@ import {
 } from "~/lib/home-greeting";
 
 export const Route = createFileRoute("/_authed/home")({
+  component: Home,
   loader: ({ context }) => {
     const user = context.queryClient.getQueryData<CompanionUser | null>(
       crpcOptions.auth.me.staticQueryOptions({}, { skipUnauth: true }).queryKey
     );
     return { companion: pickHomeCompanionForPage("home", user) };
   },
-  component: Home,
 });
 
 function Home() {
@@ -32,7 +32,7 @@ function Home() {
       <NightSkyBackground />
       <TopNav />
       <HomeCompanionProvider initialPair={companion}>
-        <main className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center px-4 pt-8 pb-[max(4.5rem,20vh)] md:pt-12">
+        <main className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center px-4 pt-8 pb-[max(3rem,11vh)] md:pt-12 md:pb-[max(4.5rem,20vh)]">
           <HomeGreeting />
           <HomeComposer />
         </main>

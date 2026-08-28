@@ -1,13 +1,7 @@
 "use client";
 
 import { useLingui } from "@lingui/react/macro";
-import {
-  type CSSProperties,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { type CSSProperties, useEffect, useState } from "react";
 import { GrassHill } from "~/components/grass-hill";
 
 interface SkyStar {
@@ -137,16 +131,15 @@ function sparkleStyle(star: SkyStar): CSSProperties | undefined {
   }
 
   return {
-    animationDelay: star.twinkleDelay,
-    "--twinkle-min": (Math.round(star.opacity * 58) / 100).toString(),
     "--twinkle-max": (
       Math.round(Math.min(star.opacity * 1.18, 0.5) * 100) / 100
     ).toString(),
+    "--twinkle-min": (Math.round(star.opacity * 58) / 100).toString(),
+    animationDelay: star.twinkleDelay,
   } as CSSProperties;
 }
 
 function NightSkyFallingStar() {
-  const groupRef = useRef<SVGGElement>(null);
   const [flight, setFlight] = useState<FallFlight | null>(null);
 
   useEffect(() => {
@@ -157,20 +150,9 @@ function NightSkyFallingStar() {
     setFlight(nextFallFlight());
   }, []);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!flight) {
       return;
-    }
-
-    const group = groupRef.current;
-    if (group) {
-      for (const node of group.querySelectorAll(
-        "animate, animateMotion, animateTransform"
-      )) {
-        if ("beginElement" in node) {
-          (node as SVGAnimationElement).beginElement();
-        }
-      }
     }
 
     const waitMs = (flight.durationS + flight.restS) * 1000;
@@ -191,7 +173,7 @@ function NightSkyFallingStar() {
   const tailTip = (-flight.tail).toString();
   const shineTail = (-flight.tail * 1.18).toString();
   const motion = {
-    begin: "indefinite",
+    begin: "0s",
     calcMode: "spline",
     dur,
     keyPoints: "0;0.82;1",
@@ -202,10 +184,14 @@ function NightSkyFallingStar() {
   } as const;
 
   return (
-    <g className="night-sky-fall" opacity={0} ref={groupRef}>
+    <g
+      className="night-sky-fall"
+      key={`${flight.path}:${flight.durationS}:${flight.restS}`}
+      opacity={0}
+    >
       <animate
         attributeName="opacity"
-        begin="indefinite"
+        begin="0s"
         calcMode="spline"
         dur={dur}
         keySplines={SHINE_SPLINES}
@@ -226,7 +212,7 @@ function NightSkyFallingStar() {
         >
           <animate
             attributeName="x1"
-            begin="indefinite"
+            begin="0s"
             calcMode="spline"
             dur={dur}
             keySplines={SHINE_SPLINES}
@@ -242,7 +228,7 @@ function NightSkyFallingStar() {
           <animateTransform
             additive="sum"
             attributeName="transform"
-            begin="indefinite"
+            begin="0s"
             calcMode="spline"
             dur={dur}
             keySplines={`${UI_EASE_SPLINE}; ${UI_EASE_SPLINE}; ${UI_EASE_SPLINE}; ${UI_EASE_SPLINE}`}

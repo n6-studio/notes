@@ -1,4 +1,6 @@
 minimumReleaseAge: 4320 # 3 days
+saveExact: true
 allowBuilds:
   esbuild: false
   lightningcss: true
+  msw: false

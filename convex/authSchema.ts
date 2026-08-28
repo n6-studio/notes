@@ -6,24 +6,36 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export const authSchema = {
-  user: defineTable({
-    name: v.string(),
-    email: v.string(),
-    emailVerified: v.boolean(),
-    image: v.optional(v.union(v.null(), v.string())),
+  account: defineTable({
+    accessToken: v.optional(v.union(v.null(), v.string())),
+    accessTokenExpiresAt: v.optional(v.union(v.null(), v.number())),
+    accountId: v.string(),
     createdAt: v.number(),
+    idToken: v.optional(v.union(v.null(), v.string())),
+    password: v.optional(v.union(v.null(), v.string())),
+    providerId: v.string(),
+    refreshToken: v.optional(v.union(v.null(), v.string())),
+    refreshTokenExpiresAt: v.optional(v.union(v.null(), v.number())),
+    scope: v.optional(v.union(v.null(), v.string())),
     updatedAt: v.number(),
-    isAnonymous: v.optional(v.union(v.null(), v.boolean())),
-    userId: v.optional(v.union(v.null(), v.string())),
+    userId: v.string(),
   })
-    .index("email_name", ["email", "name"])
-    .index("name", ["name"]),
-  session: defineTable({
-    expiresAt: v.number(),
-    token: v.string(),
+    .index("accountId", ["accountId"])
+    .index("accountId_providerId", ["accountId", "providerId"])
+    .index("providerId_userId", ["providerId", "userId"])
+    .index("userId", ["userId"]),
+  jwks: defineTable({
     createdAt: v.number(),
-    updatedAt: v.number(),
+    expiresAt: v.optional(v.union(v.null(), v.number())),
+    privateKey: v.string(),
+    publicKey: v.string(),
+  }),
+  session: defineTable({
+    createdAt: v.number(),
+    expiresAt: v.number(),
     ipAddress: v.optional(v.union(v.null(), v.string())),
+    token: v.string(),
+    updatedAt: v.number(),
     userAgent: v.optional(v.union(v.null(), v.string())),
     userId: v.string(),
   })
@@ -31,39 +43,27 @@ export const authSchema = {
     .index("expiresAt_userId", ["expiresAt", "userId"])
     .index("token", ["token"])
     .index("userId", ["userId"]),
-  account: defineTable({
-    accountId: v.string(),
-    providerId: v.string(),
-    userId: v.string(),
-    accessToken: v.optional(v.union(v.null(), v.string())),
-    refreshToken: v.optional(v.union(v.null(), v.string())),
-    idToken: v.optional(v.union(v.null(), v.string())),
-    accessTokenExpiresAt: v.optional(v.union(v.null(), v.number())),
-    refreshTokenExpiresAt: v.optional(v.union(v.null(), v.number())),
-    scope: v.optional(v.union(v.null(), v.string())),
-    password: v.optional(v.union(v.null(), v.string())),
+  user: defineTable({
     createdAt: v.number(),
+    email: v.string(),
+    emailVerified: v.boolean(),
+    image: v.optional(v.union(v.null(), v.string())),
+    isAnonymous: v.optional(v.union(v.null(), v.boolean())),
+    name: v.string(),
     updatedAt: v.number(),
+    userId: v.optional(v.union(v.null(), v.string())),
   })
-    .index("accountId", ["accountId"])
-    .index("accountId_providerId", ["accountId", "providerId"])
-    .index("providerId_userId", ["providerId", "userId"])
-    .index("userId", ["userId"]),
+    .index("email_name", ["email", "name"])
+    .index("name", ["name"]),
   verification: defineTable({
-    identifier: v.string(),
-    value: v.string(),
-    expiresAt: v.number(),
     createdAt: v.number(),
+    expiresAt: v.number(),
+    identifier: v.string(),
     updatedAt: v.number(),
+    value: v.string(),
   })
     .index("expiresAt", ["expiresAt"])
     .index("identifier", ["identifier"]),
-  jwks: defineTable({
-    publicKey: v.string(),
-    privateKey: v.string(),
-    createdAt: v.number(),
-    expiresAt: v.optional(v.union(v.null(), v.number())),
-  }),
 };
 
 const schema = defineSchema(authSchema);

@@ -3,7 +3,14 @@ import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useConvexAuth } from "convex/react";
 import { Copy, MoreVerticalIcon, Trash2Icon } from "lucide-react";
-import { type ReactNode, Suspense, useMemo, useState } from "react";
+import {
+  type ChangeEvent,
+  type ReactNode,
+  Suspense,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import { TopNav } from "~/components/top-nav";
 import { Button } from "~/components/ui/button";
 import {
@@ -35,6 +42,7 @@ import {
   noteLabelSurfaceClass,
 } from "~/lib/note-label-styles";
 import { cn } from "~/lib/utils";
+import type { Id } from "../../convex/_generated/dataModel";
 
 export const Route = createFileRoute("/_authed/notes/")({
   component: NotesLibrary,
@@ -94,6 +102,27 @@ function NotesLibrary() {
 
   const listReady = convexAuthed && !authLoading;
 
+  const onSearchChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setQ(event.target.value);
+  }, []);
+
+  const onDayChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setDay(event.target.value);
+  }, []);
+
+  const onTypeFilterChange = useCallback((value: string | null) => {
+    if (value === null) {
+      return;
+    }
+    setTypeFilter(value === "all" ? "all" : (value as NoteLabel));
+  }, []);
+
+  const onSortChange = useCallback((value: string | null) => {
+    if (value === "desc" || value === "asc") {
+      setSort(value);
+    }
+  }, []);
+
   const emptyMain: ReactNode = (
     <p className="text-muted-foreground text-sm">
       <Trans>Nothing here yet. Start on the home page.</Trans>
@@ -136,7 +165,7 @@ function NotesLibrary() {
               </Label>
               <Input
                 className="h-9"
-                onChange={(e) => setQ(e.target.value)}
+                onChange={onSearchChange}
                 placeholder={t`Full-text search…`}
                 value={q}
               />
@@ -147,7 +176,7 @@ function NotesLibrary() {
               </Label>
               <Input
                 className="h-9"
-                onChange={(e) => setDay(e.target.value)}
+                onChange={onDayChange}
                 type="date"
                 value={day}
               />
@@ -159,12 +188,7 @@ function NotesLibrary() {
                 </Label>
                 <Select
                   items={typeFilterItems}
-                  onValueChange={(v) => {
-                    if (v === null) {
-                      return;
-                    }
-                    setTypeFilter(v === "all" ? "all" : (v as NoteLabel));
-                  }}
+                  onValueChange={onTypeFilterChange}
                   value={typeFilter}
                 >
                   <SelectTrigger className="h-9 w-full">
@@ -196,11 +220,7 @@ function NotesLibrary() {
                 </Label>
                 <Select
                   items={sortItems}
-                  onValueChange={(v) => {
-                    if (v === "desc" || v === "asc") {
-                      setSort(v);
-                    }
-                  }}
+                  onValueChange={onSortChange}
                   value={sort}
                 >
                   <SelectTrigger className="h-9 w-full">
@@ -236,7 +256,6 @@ function NotesTimeline({
   listArgs: NotesListInput;
 }) {
   const router = useRouter();
-  const { i18n, t } = useLingui();
   const crpc = useCRPC();
   const removeNote = useMutation(crpc.notes.remove.mutationOptions());
   const { data: notes } = useSuspenseQuery({
@@ -250,90 +269,123 @@ function NotesTimeline({
   return (
     <ol className="relative border-border/50 border-s ps-4">
       {notes.map((note, i) => (
-        <li
-          className="ms-2 mb-8"
+        <NoteTimelineItem
+          delayMs={i * 25}
           key={note._id}
-          style={{ animationDelay: `${i * 25}ms` }}
-        >
-          <div
-            className={cn(
-              "absolute -start-[5px] mt-1.5 size-2 rounded-full",
-              "bg-muted-foreground/60"
-            )}
-          />
-          <div className="flex gap-2 rounded-lg border border-transparent p-3">
-            <div className="min-w-0 flex-1">
-              <p className="line-clamp-3 text-sm leading-relaxed">
-                {note.body}
-              </p>
-              <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-muted-foreground">
-                {note.label && isNoteLabel(note.label) ? (
-                  <span
-                    className={cn(
-                      "rounded-full border px-2 py-0.5 font-medium",
-                      noteLabelSurfaceClass(note.label)
-                    )}
-                  >
-                    {i18n._(noteLabelMessage(note.label))}
-                  </span>
-                ) : null}
-                <time dateTime={new Date(note._creationTime).toISOString()}>
-                  {new Date(note._creationTime).toLocaleString(i18n.locale)}
-                </time>
-              </div>
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <Button
-                    aria-label={t`Note actions`}
-                    className="-me-1 -mt-0.5 shrink-0 text-muted-foreground hover:text-foreground"
-                    size="icon-sm"
-                    type="button"
-                    variant="ghost"
-                  />
-                }
-              >
-                <MoreVerticalIcon />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-40">
-                <DropdownMenuGroup>
-                  <DropdownMenuItem
-                    onClick={() => {
-                      navigator.clipboard.writeText(note.body).catch(() => {
-                        /* ignore clipboard errors */
-                      });
-                    }}
-                  >
-                    <Copy />
-                    <Trans>Copy item</Trans>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    disabled={removeNote.isPending}
-                    onClick={() => {
-                      removeNote.mutate(
-                        { id: note._id },
-                        {
-                          onSettled: () => {
-                            router.invalidate().catch(() => {
-                              /* invalidate best-effort */
-                            });
-                          },
-                        }
-                      );
-                    }}
-                    variant="destructive"
-                  >
-                    <Trash2Icon />
-                    <Trans>Delete item</Trans>
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </li>
+          note={note}
+          pendingDelete={removeNote.isPending}
+          removeNote={removeNote}
+          router={router}
+        />
       ))}
     </ol>
+  );
+}
+
+function NoteTimelineItem({
+  delayMs,
+  note,
+  pendingDelete,
+  removeNote,
+  router,
+}: {
+  delayMs: number;
+  note: {
+    _creationTime: number;
+    _id: Id<"notes">;
+    body: string;
+    label?: string;
+  };
+  pendingDelete: boolean;
+  removeNote: {
+    mutate: (
+      args: { id: Id<"notes"> },
+      options: { onSettled: () => void }
+    ) => void;
+  };
+  router: { invalidate: () => Promise<unknown> };
+}) {
+  const { i18n, t } = useLingui();
+
+  const copyBody = useCallback(() => {
+    navigator.clipboard.writeText(note.body).catch(() => {
+      /* ignore clipboard errors */
+    });
+  }, [note.body]);
+
+  const deleteNote = useCallback(() => {
+    removeNote.mutate(
+      { id: note._id },
+      {
+        onSettled: () => {
+          router.invalidate().catch(() => {
+            /* invalidate best-effort */
+          });
+        },
+      }
+    );
+  }, [note._id, removeNote, router]);
+
+  return (
+    <li className="ms-2 mb-8" style={{ animationDelay: `${delayMs}ms` }}>
+      <div
+        className={cn(
+          "absolute -start-[5px] mt-1.5 size-2 rounded-full",
+          "bg-muted-foreground/60"
+        )}
+      />
+      <div className="flex gap-2 rounded-lg border border-transparent p-3">
+        <div className="min-w-0 flex-1">
+          <p className="line-clamp-3 text-sm leading-relaxed">{note.body}</p>
+          <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-muted-foreground">
+            {note.label && isNoteLabel(note.label) ? (
+              <span
+                className={cn(
+                  "rounded-full border px-2 py-0.5 font-medium",
+                  noteLabelSurfaceClass(note.label)
+                )}
+              >
+                {i18n._(noteLabelMessage(note.label))}
+              </span>
+            ) : null}
+            <time dateTime={new Date(note._creationTime).toISOString()}>
+              {new Date(note._creationTime).toLocaleString(i18n.locale)}
+            </time>
+          </div>
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                aria-label={t`Note actions`}
+                className="-me-1 -mt-0.5 shrink-0 text-muted-foreground hover:text-foreground"
+                size="icon-sm"
+                type="button"
+                variant="ghost"
+              />
+            }
+          >
+            <MoreVerticalIcon />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-40">
+            <DropdownMenuGroup>
+              <DropdownMenuItem onClick={copyBody}>
+                <Copy />
+                <Trans>Copy item</Trans>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                disabled={pendingDelete}
+                onClick={deleteNote}
+                variant="destructive"
+              >
+                <Trash2Icon />
+                <Trans>Delete item</Trans>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </li>
   );
 }

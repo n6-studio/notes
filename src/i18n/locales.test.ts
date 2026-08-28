@@ -57,8 +57,8 @@ describe("getLocaleFromRequest", () => {
       getLocaleFromRequest(
         new Request("https://notes.test/", {
           headers: {
-            cookie: "locale=xx",
             "accept-language": "de,en;q=0.8",
+            cookie: "locale=xx",
           },
         })
       )

@@ -2,8 +2,9 @@ import { useLingui } from "@lingui/react/macro";
 
 const VIEW_W = 1600;
 const VIEW_H = 220;
-const EDGE_LIFT = 14;
-const PEAK_LIFT = 108;
+const EDGE_LIFT = 22;
+const PEAK_LIFT = 82;
+const BUMP_SPREAD = 0.46;
 const RIDGE_STEPS = 96;
 
 const HILL_FILL = "url(#grass-hill-body)";
@@ -28,7 +29,7 @@ function createRng(seed: number) {
 }
 
 function hillY(x: number) {
-  const t = (x / VIEW_W - 0.5) / 0.28;
+  const t = (x / VIEW_W - 0.5) / BUMP_SPREAD;
   const bump = Math.exp(-0.5 * t * t);
   return VIEW_H - EDGE_LIFT - PEAK_LIFT * bump;
 }
@@ -46,7 +47,7 @@ function bladePath(
 function buildHillBody(rng: () => number) {
   let d = `M0 ${VIEW_H}`;
 
-  for (let i = 0; i <= RIDGE_STEPS; i++) {
+  for (let i = 0; i <= RIDGE_STEPS; i += 1) {
     const x = (i / RIDGE_STEPS) * VIEW_W;
     const jitter = (rng() - 0.5) * 1.6;
     d += `L${svgCoord(x)} ${svgCoord(hillY(x) + jitter)}`;
@@ -74,7 +75,7 @@ function buildGrass(options: {
     const cx = rng() * VIEW_W;
     remaining -= tuftSize;
 
-    for (let i = 0; i < tuftSize; i++) {
+    for (let i = 0; i < tuftSize; i += 1) {
       const x = cx + (rng() - 0.5) * options.tuftSpread;
       if (x < -4 || x > VIEW_W + 4) {
         continue;
@@ -129,7 +130,7 @@ export function GrassHill() {
   return (
     <svg
       aria-hidden="true"
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-0 h-[min(20vh,10.5rem)] w-full"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-0 h-[min(11vh,6.25rem)] w-full md:h-[min(20vh,10.5rem)]"
       preserveAspectRatio="none"
       viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
     >
@@ -144,8 +145,8 @@ export function GrassHill() {
           y2="1"
         >
           <stop offset="0" stopColor="oklch(0.42 0.1 148)" />
-          <stop offset="0.5" stopColor="oklch(0.37 0.085 147)" />
-          <stop offset="1" stopColor="oklch(0.32 0.07 150)" />
+          <stop offset="0.5" stopColor="oklch(0.34 0.08 147)" />
+          <stop offset="1" stopColor="oklch(0.27 0.062 150)" />
         </linearGradient>
       </defs>
       <path d={HILL_BODY} fill={HILL_FILL} />

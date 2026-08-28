@@ -1,6 +1,12 @@
 import { Trans, useLingui } from "@lingui/react/macro";
 import { CalendarClock } from "lucide-react";
-import { useEffect, useId, useState } from "react";
+import {
+  type ChangeEvent,
+  useCallback,
+  useEffect,
+  useId,
+  useState,
+} from "react";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
 import { Input } from "~/components/ui/input";
@@ -73,39 +79,52 @@ export function TargetDatetimeButton({
           timeStyle: "short",
         });
 
-  const onTimeChange = (t: string) => {
-    setTimePart(t);
-    if (!value.trim()) {
-      return;
-    }
-    const [h, m] = t.split(":").map(Number);
-    if (!(Number.isFinite(h) && Number.isFinite(m))) {
-      return;
-    }
-    const base = parseDatetimeLocal(value);
-    if (!base) {
-      return;
-    }
-    base.setHours(h, m, 0, 0);
-    onChange(toDatetimeLocalValue(base));
-  };
+  const onTimeChange = useCallback(
+    (timeValue: string) => {
+      setTimePart(timeValue);
+      if (!value.trim()) {
+        return;
+      }
+      const [h, m] = timeValue.split(":").map(Number);
+      if (!(Number.isFinite(h) && Number.isFinite(m))) {
+        return;
+      }
+      const base = parseDatetimeLocal(value);
+      if (!base) {
+        return;
+      }
+      base.setHours(h, m, 0, 0);
+      onChange(toDatetimeLocalValue(base));
+    },
+    [onChange, value]
+  );
 
-  const onDaySelect = (date: Date | undefined) => {
-    if (!date) {
-      return;
-    }
-    const [h, m] = timePart.split(":").map(Number);
-    const hh = Number.isFinite(h) ? h : 9;
-    const mm = Number.isFinite(m) ? m : 0;
-    const merged = new Date(date);
-    merged.setHours(hh, mm, 0, 0);
-    onChange(toDatetimeLocalValue(merged));
-  };
+  const onTimeInputChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      onTimeChange(event.target.value);
+    },
+    [onTimeChange]
+  );
 
-  const clear = () => {
+  const onDaySelect = useCallback(
+    (date: Date | undefined) => {
+      if (!date) {
+        return;
+      }
+      const [h, m] = timePart.split(":").map(Number);
+      const hh = Number.isFinite(h) ? h : 9;
+      const mm = Number.isFinite(m) ? m : 0;
+      const merged = new Date(date);
+      merged.setHours(hh, mm, 0, 0);
+      onChange(toDatetimeLocalValue(merged));
+    },
+    [onChange, timePart]
+  );
+
+  const clear = useCallback(() => {
     onChange("");
     setOpen(false);
-  };
+  }, [onChange]);
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
@@ -154,7 +173,7 @@ export function TargetDatetimeButton({
           <Input
             className="h-9 max-w-36 bg-background/50"
             id={timeInputId}
-            onChange={(e) => onTimeChange(e.target.value)}
+            onChange={onTimeInputChange}
             step={60}
             type="time"
             value={timePart}

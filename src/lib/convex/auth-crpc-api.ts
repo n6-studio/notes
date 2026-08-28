@@ -9,8 +9,8 @@ function crpcLeaf(
 
   return {
     ...leaf,
-    type: kind,
     functionRef,
+    type: kind,
   };
 }
 
