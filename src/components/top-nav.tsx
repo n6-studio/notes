@@ -53,7 +53,7 @@ export function TopNav() {
                 tabIndex={-1}
                 to={isAuthenticated ? "/home" : "/"}
               >
-                <LogoMark className="size-5 shrink-0 text-foreground/90" />
+                <LogoMark className="size-6 shrink-0 text-foreground/90" />
               </Link>
               <Link
                 className="col-start-2 row-start-1 font-bold text-foreground text-sm leading-none tracking-tight transition-opacity hover:opacity-80"
