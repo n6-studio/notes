@@ -75,6 +75,10 @@ msgstr "Datum"
 msgid "Day"
 msgstr "Tag"
 
+#: src/components/grass-hill.tsx
+msgid "Decorative grass hill"
+msgstr "Dekorativer Grashügel"
+
 #: src/components/night-sky-background.tsx
 msgid "Decorative night sky"
 msgstr "Dekorativer Nachthimmel"

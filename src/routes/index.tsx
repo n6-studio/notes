@@ -28,7 +28,7 @@ function Landing() {
       <NightSkyBackground />
       <TopNav />
       <HomeCompanionProvider initialPair={companion}>
-        <main className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col gap-4 px-4 pt-10 pb-16 md:pt-16">
+        <main className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col gap-4 px-4 pt-10 pb-[max(4.5rem,20vh)] md:pt-16">
           <div className="flex h-[24dvh] flex-col justify-center gap-4 text-center md:h-[30dvh]">
             <h1 className="hero-title text-balance font-semibold text-4xl tracking-tight md:text-6xl">
               <Trans>Give space to your mind</Trans>
@@ -41,7 +41,7 @@ function Landing() {
             </p>
           </div>
 
-          <div className="flex h-[40dvh] flex-col justify-start">
+          <div className="flex flex-1 flex-col justify-start">
             <LandingComposer />
           </div>
         </main>

@@ -75,6 +75,10 @@ msgstr "Data"
 msgid "Day"
 msgstr "Giorno"
 
+#: src/components/grass-hill.tsx
+msgid "Decorative grass hill"
+msgstr "Collina d'erba decorativa"
+
 #: src/components/night-sky-background.tsx
 msgid "Decorative night sky"
 msgstr "Cielo notturno decorativo"

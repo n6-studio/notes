@@ -32,7 +32,7 @@ function Home() {
       <NightSkyBackground />
       <TopNav />
       <HomeCompanionProvider initialPair={companion}>
-        <main className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center px-4 py-8 md:py-12">
+        <main className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center px-4 pt-8 pb-[max(4.5rem,20vh)] md:pt-12">
           <HomeGreeting />
           <HomeComposer />
         </main>

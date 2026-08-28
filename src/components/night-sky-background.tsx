@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { GrassHill } from "~/components/grass-hill";
 
 interface SkyStar {
   opacity: number;
@@ -264,40 +265,53 @@ function NightSkyFallingStar() {
 export function NightSkyBackground() {
   const { t } = useLingui();
   return (
-    <div
-      aria-hidden="true"
-      className="night-sky-layer pointer-events-none absolute inset-0 overflow-hidden"
-    >
-      <div className="night-sky-wash absolute inset-0" />
-      <svg
-        className="absolute inset-0 h-full w-full"
-        preserveAspectRatio="xMidYMin slice"
-        viewBox="0 0 100 70"
+    <>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 overflow-hidden"
       >
-        <title>{t`Decorative night sky`}</title>
-        <defs>
-          <path d={STAR_PATH} id="night-sky-star" />
-          <linearGradient id="night-sky-fall-tail" x1="0" x2="1" y1="0" y2="0">
-            <stop offset="0" stopColor={STAR_FILL} stopOpacity="0" />
-            <stop offset="0.68" stopColor={STAR_FILL} stopOpacity="0.18" />
-            <stop offset="1" stopColor={STAR_FILL} stopOpacity="0.5" />
-          </linearGradient>
-        </defs>
-        {STARS.map((star) => (
-          <use
-            className={
-              star.twinkleDelay === undefined ? undefined : "night-sky-sparkle"
-            }
-            fill={STAR_FILL}
-            href="#night-sky-star"
-            key={`${star.x}-${star.y}`}
-            opacity={star.opacity}
-            style={sparkleStyle(star)}
-            transform={starTransform(star)}
-          />
-        ))}
-        <NightSkyFallingStar />
-      </svg>
-    </div>
+        <div className="night-sky-wash absolute inset-0" />
+        <div className="night-sky-layer absolute inset-0 overflow-hidden">
+          <svg
+            className="absolute inset-0 h-full w-full"
+            preserveAspectRatio="xMidYMin slice"
+            viewBox="0 0 100 70"
+          >
+            <title>{t`Decorative night sky`}</title>
+            <defs>
+              <path d={STAR_PATH} id="night-sky-star" />
+              <linearGradient
+                id="night-sky-fall-tail"
+                x1="0"
+                x2="1"
+                y1="0"
+                y2="0"
+              >
+                <stop offset="0" stopColor={STAR_FILL} stopOpacity="0" />
+                <stop offset="0.68" stopColor={STAR_FILL} stopOpacity="0.18" />
+                <stop offset="1" stopColor={STAR_FILL} stopOpacity="0.5" />
+              </linearGradient>
+            </defs>
+            {STARS.map((star) => (
+              <use
+                className={
+                  star.twinkleDelay === undefined
+                    ? undefined
+                    : "night-sky-sparkle"
+                }
+                fill={STAR_FILL}
+                href="#night-sky-star"
+                key={`${star.x}-${star.y}`}
+                opacity={star.opacity}
+                style={sparkleStyle(star)}
+                transform={starTransform(star)}
+              />
+            ))}
+            <NightSkyFallingStar />
+          </svg>
+        </div>
+      </div>
+      <GrassHill />
+    </>
   );
 }
