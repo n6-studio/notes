@@ -59,13 +59,13 @@ msgstr "Capture a note, link, reminder, or photo. Send once—it stays in your i
 msgid "Clear"
 msgstr "Clear"
 
+#: src/components/target-datetime-button.tsx
+msgid "Clear date"
+msgstr "Clear date"
+
 #: src/routes/_authed.notes.index.tsx
 msgid "Copy item"
 msgstr "Copy item"
-
-#: src/components/target-datetime-button.tsx
-msgid "Date"
-msgstr "Date"
 
 #: src/routes/_authed.notes.index.tsx
 msgid "Day"
@@ -261,9 +261,17 @@ msgstr "Target date {labelText}"
 msgid "Time"
 msgstr "Time"
 
+#: src/components/target-datetime-button.tsx
+msgid "Today"
+msgstr "Today"
+
 #: src/lib/note-label-styles.tsx
 msgid "Todo"
 msgstr "Todo"
+
+#: src/components/target-datetime-button.tsx
+msgid "Tomorrow"
+msgstr "Tomorrow"
 
 #: src/routes/_authed.notes.index.tsx
 msgid "Type"

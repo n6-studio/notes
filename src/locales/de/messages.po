@@ -59,13 +59,13 @@ msgstr "Erfasse eine Notiz, einen Link, eine Erinnerung oder ein Foto. Einmal se
 msgid "Clear"
 msgstr "Löschen"
 
+#: src/components/target-datetime-button.tsx
+msgid "Clear date"
+msgstr "Datum löschen"
+
 #: src/routes/_authed.notes.index.tsx
 msgid "Copy item"
 msgstr "Kopieren"
-
-#: src/components/target-datetime-button.tsx
-msgid "Date"
-msgstr "Datum"
 
 #: src/routes/_authed.notes.index.tsx
 msgid "Day"
@@ -261,9 +261,17 @@ msgstr "Zieldatum {labelText}"
 msgid "Time"
 msgstr "Uhrzeit"
 
+#: src/components/target-datetime-button.tsx
+msgid "Today"
+msgstr "Heute"
+
 #: src/lib/note-label-styles.tsx
 msgid "Todo"
 msgstr "Todo"
+
+#: src/components/target-datetime-button.tsx
+msgid "Tomorrow"
+msgstr "Morgen"
 
 #: src/routes/_authed.notes.index.tsx
 msgid "Type"

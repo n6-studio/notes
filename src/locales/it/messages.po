@@ -59,13 +59,13 @@ msgstr "Cattura una nota, un link, un promemoria o una foto. Invia una volta: re
 msgid "Clear"
 msgstr "Cancella"
 
+#: src/components/target-datetime-button.tsx
+msgid "Clear date"
+msgstr "Cancella data"
+
 #: src/routes/_authed.notes.index.tsx
 msgid "Copy item"
 msgstr "Copia"
-
-#: src/components/target-datetime-button.tsx
-msgid "Date"
-msgstr "Data"
 
 #: src/routes/_authed.notes.index.tsx
 msgid "Day"
@@ -261,9 +261,17 @@ msgstr "Data {labelText}"
 msgid "Time"
 msgstr "Ora"
 
+#: src/components/target-datetime-button.tsx
+msgid "Today"
+msgstr "Oggi"
+
 #: src/lib/note-label-styles.tsx
 msgid "Todo"
 msgstr "Todo"
+
+#: src/components/target-datetime-button.tsx
+msgid "Tomorrow"
+msgstr "Domani"
 
 #: src/routes/_authed.notes.index.tsx
 msgid "Type"

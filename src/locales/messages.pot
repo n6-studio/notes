@@ -59,12 +59,12 @@ msgstr ""
 msgid "Clear"
 msgstr ""
 
-#: src/routes/_authed.notes.index.tsx
-msgid "Copy item"
+#: src/components/target-datetime-button.tsx
+msgid "Clear date"
 msgstr ""
 
-#: src/components/target-datetime-button.tsx
-msgid "Date"
+#: src/routes/_authed.notes.index.tsx
+msgid "Copy item"
 msgstr ""
 
 #: src/routes/_authed.notes.index.tsx
@@ -261,8 +261,16 @@ msgstr ""
 msgid "Time"
 msgstr ""
 
+#: src/components/target-datetime-button.tsx
+msgid "Today"
+msgstr ""
+
 #: src/lib/note-label-styles.tsx
 msgid "Todo"
+msgstr ""
+
+#: src/components/target-datetime-button.tsx
+msgid "Tomorrow"
 msgstr ""
 
 #: src/routes/_authed.notes.index.tsx
