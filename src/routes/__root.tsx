@@ -12,16 +12,11 @@ import {
   useRouteContext,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { createServerFn } from "@tanstack/react-start";
 import { syncConvexAuthForStartLoader } from "kitcn/auth/start";
 import type { ConvexQueryClient } from "kitcn/react";
-import { getToken } from "~/lib/convex/auth-server";
+import { loadAuthToken } from "~/functions/get-auth";
 import { ConvexAppProvider } from "~/lib/convex/convex-provider";
 import appCss from "../styles.css?url";
-
-const getAuth = createServerFn({ method: "GET" }).handler(
-  async () => (await getToken()) ?? null
-);
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -31,10 +26,7 @@ export const Route = createRootRouteWithContext<{
     try {
       return await syncConvexAuthForStartLoader({
         convex: context.convexQueryClient,
-        getToken: async () =>
-          // During SSR, call getToken in-process. createServerFn would HTTP the
-          // same Vercel deployment (`/_serverFn`) and trip INFINITE_LOOP_DETECTED.
-          import.meta.env.SSR ? await getToken() : await getAuth(),
+        getToken: loadAuthToken,
       });
     } catch (error) {
       console.error("[auth] getToken failed", error);

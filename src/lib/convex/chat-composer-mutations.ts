@@ -8,16 +8,12 @@ import type { Id } from "../../../convex/_generated/dataModel.js";
 export interface ChatComposerNotePayload {
   body: string;
   files: File[];
-  label: string;
-  linkUrl: string | undefined;
   targetAt: number | undefined;
 }
 
 export interface ChatComposerCrpcMutations {
   createNote: (args: {
     body: string;
-    label: string;
-    linkUrl?: string;
     targetAt?: number;
     storageIds?: Id<"_storage">[];
   }) => Promise<unknown>;
@@ -77,8 +73,6 @@ export async function submitNoteCaptureOverHttp(
 
   await httpClient.mutation(api.notes.create, {
     body: payload.body,
-    label: payload.label,
-    linkUrl: payload.linkUrl,
     storageIds: storageIds.length ? storageIds : undefined,
     targetAt: payload.targetAt,
   });
@@ -95,8 +89,6 @@ export async function submitNoteCaptureOverCrpc(
 
   await mutations.createNote({
     body: payload.body,
-    label: payload.label,
-    linkUrl: payload.linkUrl,
     storageIds: storageIds.length ? storageIds : undefined,
     targetAt: payload.targetAt,
   });

@@ -4,7 +4,6 @@ import { useRouter } from "@tanstack/react-router";
 import { ImagePlus, Loader2 } from "lucide-react";
 import {
   type ChangeEvent,
-  type ClipboardEvent,
   type KeyboardEvent as ReactKeyboardEvent,
   useCallback,
   useEffect,
@@ -14,14 +13,6 @@ import {
 } from "react";
 import { TargetDatetimeButton } from "~/components/target-datetime-button";
 import { Button } from "~/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
 import { nextComposerFrameBox } from "~/lib/composer-frame-box";
 import {
@@ -30,130 +21,9 @@ import {
 } from "~/lib/convex/chat-composer-mutations";
 import { useCRPC } from "~/lib/convex/crpc";
 import { HOME_SAVE_LABEL_SIZER } from "~/lib/home-greeting";
-import {
-  isNoteLabel,
-  NOTE_LABELS,
-  type NoteLabel,
-  NoteLabelSelectDisplay,
-  noteLabelSelectFocusClass,
-  noteLabelSelectItemAccentClass,
-  noteLabelSurfaceClass,
-} from "~/lib/note-label-styles";
 import { cn } from "~/lib/utils";
 
-const CAPTURE_TYPE_ITEMS = NOTE_LABELS.map((l) => ({
-  label: l,
-  value: l,
-}));
-
 const SELECT_SPIN_S = 18;
-const HAS_WHITESPACE = /\s/;
-const FIRST_NON_WHITESPACE_TOKEN = /^(\S+)/;
-
-function firstTokenAfterTrimStart(text: string): string | undefined {
-  const lead = text.trimStart();
-  return FIRST_NON_WHITESPACE_TOKEN.exec(lead)?.[1];
-}
-
-/** If the whole trimmed message is one http(s) URL, return normalized href; else undefined. */
-function singleHttpUrlFromCaptureText(text: string): string | undefined {
-  const trimmed = text.trim();
-  if (!trimmed || HAS_WHITESPACE.test(trimmed)) {
-    return;
-  }
-  const withScheme =
-    trimmed.startsWith("http://") || trimmed.startsWith("https://")
-      ? trimmed
-      : `https://${trimmed}`;
-  try {
-    const url = new URL(withScheme);
-    if (url.protocol !== "http:" && url.protocol !== "https:") {
-      return;
-    }
-    // Require a dot in hostname unless the user included an explicit scheme (e.g. http://localhost).
-    const host = url.hostname;
-    if (
-      !(
-        trimmed.startsWith("http://") ||
-        trimmed.startsWith("https://") ||
-        host.includes(".")
-      )
-    ) {
-      return;
-    }
-    return url.href;
-  } catch (error) {
-    if (error instanceof TypeError) {
-      return;
-    }
-    throw error;
-  }
-}
-
-interface CaptureTypeSelectProps {
-  onValueChange: (value: NoteLabel) => void;
-  value: NoteLabel;
-}
-
-export function CaptureTypeSelect({
-  value,
-  onValueChange,
-}: CaptureTypeSelectProps) {
-  const { t } = useLingui();
-  const labelPlaceholder = t`Label`;
-
-  const handleValueChange = useCallback(
-    (next: string | null) => {
-      if (typeof next === "string" && isNoteLabel(next)) {
-        onValueChange(next);
-      }
-    },
-    [onValueChange]
-  );
-
-  const renderSelectedLabel = (selected: string | null) =>
-    selected && isNoteLabel(selected) ? (
-      <NoteLabelSelectDisplay label={selected} />
-    ) : (
-      labelPlaceholder
-    );
-
-  return (
-    <Select
-      items={CAPTURE_TYPE_ITEMS}
-      onValueChange={handleValueChange}
-      value={value}
-    >
-      <SelectTrigger
-        aria-label={t`Capture type`}
-        className={cn(
-          "w-[min(132px,100%)] shrink-0 border-0 font-medium",
-          noteLabelSurfaceClass(value),
-          value === "note" && "text-muted-foreground",
-          noteLabelSelectFocusClass(value)
-        )}
-        size="sm"
-      >
-        <SelectValue placeholder={labelPlaceholder}>
-          {renderSelectedLabel}
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        <SelectGroup>
-          {NOTE_LABELS.map((l) => (
-            <SelectItem
-              className={noteLabelSelectItemAccentClass(l)}
-              key={l}
-              value={l}
-            >
-              <NoteLabelSelectDisplay label={l} />
-            </SelectItem>
-          ))}
-        </SelectGroup>
-      </SelectContent>
-    </Select>
-  );
-}
 
 interface ChatComposerProps {
   className?: string;
@@ -187,7 +57,6 @@ export function ChatComposer({
   const hoverGradId = `composer-hover-${gradUid}`;
   const [frameBox, setFrameBox] = useState({ h: 0, rx: 18, w: 0 });
   const [body, setBody] = useState("");
-  const [label, setLabel] = useState<NoteLabel>(NOTE_LABELS[0]);
   const [targetAtLocal, setTargetAtLocal] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -204,25 +73,6 @@ export function ChatComposer({
   const { mutateAsync: createNote } = useMutation(
     crpc.notes.create.mutationOptions()
   );
-  useEffect(() => {
-    const cycleCaptureType = (event: KeyboardEvent) => {
-      if (!event.metaKey || event.repeat) {
-        return;
-      }
-      if (event.key !== "." && event.code !== "Period") {
-        return;
-      }
-      event.preventDefault();
-      setLabel((current) => {
-        const idx = NOTE_LABELS.indexOf(current);
-        const i = idx >= 0 ? idx : 0;
-        return NOTE_LABELS[(i + 1) % NOTE_LABELS.length];
-      });
-    };
-
-    window.addEventListener("keydown", cycleCaptureType);
-    return () => window.removeEventListener("keydown", cycleCaptureType);
-  }, []);
 
   useEffect(() => {
     if (frameEl === null) {
@@ -335,14 +185,9 @@ export function ChatComposer({
         ? new Date(targetAtLocal).getTime()
         : undefined;
 
-      const trimmedBody = body.trim();
-      const linkUrl = singleHttpUrlFromCaptureText(trimmedBody);
-
       const payload = {
-        body: trimmedBody,
+        body: body.trim(),
         files,
-        label,
-        linkUrl,
         targetAt,
       };
 
@@ -375,7 +220,6 @@ export function ChatComposer({
     fileInput,
     files,
     generateUploadUrl,
-    label,
     onCreated,
     onPreSubmit,
     router,
@@ -427,23 +271,6 @@ export function ChatComposer({
       });
     },
     []
-  );
-
-  const onBodyPaste = useCallback(
-    (e: ClipboardEvent<HTMLTextAreaElement>) => {
-      const el = e.currentTarget;
-      const start = el.selectionStart ?? 0;
-      const end = el.selectionEnd ?? 0;
-      if (body.slice(0, start).trim() !== "") {
-        return;
-      }
-      const merged = `${body.slice(0, start)}${e.clipboardData.getData("text")}${body.slice(end)}`;
-      const first = firstTokenAfterTrimStart(merged);
-      if (first && singleHttpUrlFromCaptureText(first)) {
-        setLabel("link");
-      }
-    },
-    [body]
   );
 
   const onBodyChange = useCallback(
@@ -573,7 +400,6 @@ export function ChatComposer({
           name="body"
           onChange={onBodyChange}
           onKeyDown={onBodyKeyDown}
-          onPaste={onBodyPaste}
           placeholder={`${placeholder}...`}
           value={body}
         />
@@ -584,8 +410,6 @@ export function ChatComposer({
         ) : null}
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
-            <CaptureTypeSelect onValueChange={setLabel} value={label} />
-
             <TargetDatetimeButton
               disabled={pending}
               onChange={setTargetAtLocal}

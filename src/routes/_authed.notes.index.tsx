@@ -33,13 +33,13 @@ import {
 } from "~/components/ui/select";
 import { useCRPC } from "~/lib/convex/crpc";
 import {
-  isNoteLabel,
-  NOTE_LABELS,
-  type NoteLabel,
+  NOTE_TYPES,
   NoteLabelSelectDisplay,
+  type NoteType,
   noteLabelMessage,
   noteLabelSelectItemAccentClass,
   noteLabelSurfaceClass,
+  resolveNoteLabel,
 } from "~/lib/note-label-styles";
 import { cn } from "~/lib/utils";
 import type { Id } from "../../convex/_generated/dataModel";
@@ -52,7 +52,7 @@ export const Route = createFileRoute("/_authed/notes/")({
 interface NotesListInput {
   dateFrom?: number;
   dateTo?: number;
-  label?: NoteLabel;
+  label?: NoteType;
   q?: string;
   sort?: "desc" | "asc";
 }
@@ -63,12 +63,12 @@ function NotesLibrary() {
     useConvexAuth();
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<"desc" | "asc">("desc");
-  const [typeFilter, setTypeFilter] = useState<NoteLabel | "all">("all");
+  const [typeFilter, setTypeFilter] = useState<NoteType | "all">("all");
   const [day, setDay] = useState("");
 
   const typeFilterItems = [
     { label: t`All types`, value: "all" },
-    ...NOTE_LABELS.map((label) => ({
+    ...NOTE_TYPES.map((label) => ({
       label: i18n._(noteLabelMessage(label)),
       value: label,
     })),
@@ -114,7 +114,7 @@ function NotesLibrary() {
     if (value === null) {
       return;
     }
-    setTypeFilter(value === "all" ? "all" : (value as NoteLabel));
+    setTypeFilter(value === "all" ? "all" : (value as NoteType));
   }, []);
 
   const onSortChange = useCallback((value: string | null) => {
@@ -199,7 +199,7 @@ function NotesLibrary() {
                       <SelectItem value="all">
                         <Trans>All types</Trans>
                       </SelectItem>
-                      {NOTE_LABELS.map((l) => (
+                      {NOTE_TYPES.map((l) => (
                         <SelectItem
                           className={noteLabelSelectItemAccentClass(l)}
                           key={l}
@@ -326,6 +326,8 @@ function NoteTimelineItem({
     );
   }, [note._id, removeNote, router]);
 
+  const resolvedLabel = note.label ? resolveNoteLabel(note.label) : undefined;
+
   return (
     <li className="ms-2 mb-8" style={{ animationDelay: `${delayMs}ms` }}>
       <div
@@ -338,14 +340,14 @@ function NoteTimelineItem({
         <div className="min-w-0 flex-1">
           <p className="line-clamp-3 text-sm leading-relaxed">{note.body}</p>
           <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-muted-foreground">
-            {note.label && isNoteLabel(note.label) ? (
+            {resolvedLabel ? (
               <span
                 className={cn(
                   "rounded-full border px-2 py-0.5 font-medium",
-                  noteLabelSurfaceClass(note.label)
+                  noteLabelSurfaceClass(resolvedLabel)
                 )}
               >
-                {i18n._(noteLabelMessage(note.label))}
+                {i18n._(noteLabelMessage(resolvedLabel))}
               </span>
             ) : null}
             <time dateTime={new Date(note._creationTime).toISOString()}>

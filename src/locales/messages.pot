@@ -44,15 +44,15 @@ msgid "Attach images"
 msgstr ""
 
 #: src/components/top-nav.tsx
+msgid "by N6 Studio"
+msgstr ""
+
+#: src/components/top-nav.tsx
 msgid "Cancel"
 msgstr ""
 
 #: src/routes/index.tsx
 msgid "Capture a note, link, reminder, or photo. Send once—it stays in your inbox."
-msgstr ""
-
-#: src/components/chat-composer.tsx
-msgid "Capture type"
 msgstr ""
 
 #: src/components/target-datetime-button.tsx
@@ -69,6 +69,10 @@ msgstr ""
 
 #: src/routes/_authed.notes.index.tsx
 msgid "Day"
+msgstr ""
+
+#: src/components/grass-hill.tsx
+msgid "Decorative grass hill"
 msgstr ""
 
 #: src/components/night-sky-background.tsx
@@ -147,16 +151,8 @@ msgstr ""
 msgid "Keep it"
 msgstr ""
 
-#: src/components/chat-composer.tsx
-msgid "Label"
-msgstr ""
-
 #: src/components/language-switcher.tsx
 msgid "Language"
-msgstr ""
-
-#: src/lib/note-label-styles.tsx
-msgid "Link"
 msgstr ""
 
 #: src/routes/_authed.notes.index.tsx
@@ -271,6 +267,10 @@ msgstr ""
 
 #: src/routes/_authed.notes.index.tsx
 msgid "Type"
+msgstr ""
+
+#: src/lib/note-label-styles.tsx
+msgid "URL"
 msgstr ""
 
 #: src/lib/home-greeting.ts

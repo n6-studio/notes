@@ -15,6 +15,7 @@ import type * as generated_server from "../generated/server.js";
 import type * as http from "../http.js";
 import type * as lib_app_user from "../lib/app_user.js";
 import type * as lib_crpc from "../lib/crpc.js";
+import type * as lib_note_type from "../lib/note_type.js";
 import type * as lib_protected from "../lib/protected.js";
 import type * as lib_trusted_origins from "../lib/trusted_origins.js";
 import type * as notes from "../notes.js";
@@ -33,6 +34,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   "lib/app_user": typeof lib_app_user;
   "lib/crpc": typeof lib_crpc;
+  "lib/note_type": typeof lib_note_type;
   "lib/protected": typeof lib_protected;
   "lib/trusted_origins": typeof lib_trusted_origins;
   notes: typeof notes;

@@ -55,10 +55,6 @@ msgstr "Abbrechen"
 msgid "Capture a note, link, reminder, or photo. Send once—it stays in your inbox."
 msgstr "Erfasse eine Notiz, einen Link, eine Erinnerung oder ein Foto. Einmal senden—es bleibt im Posteingang."
 
-#: src/components/chat-composer.tsx
-msgid "Capture type"
-msgstr "Notiztyp"
-
 #: src/components/target-datetime-button.tsx
 msgid "Clear"
 msgstr "Löschen"
@@ -155,17 +151,9 @@ msgstr "Hier ist es sicher, {firstName}"
 msgid "Keep it"
 msgstr "Behalt es"
 
-#: src/components/chat-composer.tsx
-msgid "Label"
-msgstr "Label"
-
 #: src/components/language-switcher.tsx
 msgid "Language"
 msgstr "Sprache"
-
-#: src/lib/note-label-styles.tsx
-msgid "Link"
-msgstr "Link"
 
 #: src/routes/_authed.notes.index.tsx
 msgid "Loading…"
@@ -280,6 +268,10 @@ msgstr "Todo"
 #: src/routes/_authed.notes.index.tsx
 msgid "Type"
 msgstr "Typ"
+
+#: src/lib/note-label-styles.tsx
+msgid "URL"
+msgstr "URL"
 
 #: src/lib/home-greeting.ts
 msgid "What do you want to keep?"

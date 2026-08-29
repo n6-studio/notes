@@ -2,6 +2,11 @@ import type { RegisteredMutation, RegisteredQuery } from "convex/server";
 import { CRPCError, zid } from "kitcn/server";
 import { z } from "zod";
 import type { DataModel, Doc, Id } from "./_generated/dataModel.js";
+import {
+  INFERRED_NOTE_TYPES,
+  inferNoteType,
+  storedLabelMatchesType,
+} from "./lib/note_type.js";
 import { authMutation, authQuery } from "./lib/protected.js";
 
 function filterByDates<T extends { _creationTime: number }>(
@@ -26,7 +31,7 @@ function filterByDates<T extends { _creationTime: number }>(
 const listInputSchema = z.object({
   dateFrom: z.number().optional(),
   dateTo: z.number().optional(),
-  label: z.enum(["note", "todo", "link", "idea"]).optional(),
+  label: z.enum(INFERRED_NOTE_TYPES).optional(),
   q: z.string().optional(),
   sort: z.enum(["desc", "asc"]).optional(),
 });
@@ -43,7 +48,9 @@ export const list = authQuery
       if (labelFilter === undefined) {
         return rows;
       }
-      return rows.filter((row) => row.label === labelFilter);
+      return rows.filter((row) =>
+        storedLabelMatchesType(row.label, labelFilter)
+      );
     }
 
     if (qText) {
@@ -106,8 +113,6 @@ export const get = authQuery
 
 const createInputSchema = z.object({
   body: z.string(),
-  label: z.string().optional(),
-  linkUrl: z.string().optional(),
   storageIds: z
     .array(z.custom<Id<"_storage">>((v) => typeof v === "string"))
     .optional(),
@@ -118,25 +123,19 @@ export const create = authMutation
   .input(createInputSchema)
   .mutation(async ({ ctx, input }) => {
     const { user } = ctx;
-    const trimmedLink = input.linkUrl?.trim();
     const body = input.body.trim();
-    if (
-      !(
-        body ||
-        (input.storageIds && input.storageIds.length > 0) ||
-        trimmedLink
-      )
-    ) {
+    if (!(body || (input.storageIds && input.storageIds.length > 0))) {
       throw new CRPCError({
         code: "BAD_REQUEST",
         message: "Note is empty",
       });
     }
 
+    const inferred = inferNoteType(body);
     const noteId = await ctx.db.insert("notes", {
-      body: body || trimmedLink || "(attachment)",
-      label: input.label,
-      linkUrl: trimmedLink,
+      body: body || "(attachment)",
+      label: inferred.label,
+      linkUrl: inferred.linkUrl,
       targetAt: input.targetAt,
       userId: user._id,
     });
