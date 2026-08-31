@@ -54,7 +54,7 @@ function Landing() {
 function LandingComposer() {
   const navigate = useNavigate();
   const { i18n } = useLingui();
-  const { cycle, pair } = useHomeCompanion();
+  const { pair } = useHomeCompanion();
 
   const goHome = useCallback(() => {
     navigate({ to: "/home" });
@@ -69,7 +69,6 @@ function LandingComposer() {
   return (
     <ChatComposer
       onCreated={goHome}
-      onCycleSaveLabel={cycle}
       onPreSubmit={signInAnonymous}
       placeholder={i18n._(pair.greeting)}
       saveLabel={i18n._(pair.saveLabel)}

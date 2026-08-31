@@ -43,12 +43,11 @@ function Home() {
 
 function HomeComposer() {
   const { i18n, t } = useLingui();
-  const { cycle, pair } = useHomeCompanion();
+  const { pair } = useHomeCompanion();
 
   return (
     <ChatComposer
       className="w-full"
-      onCycleSaveLabel={cycle}
       placeholder={t`Note, URL or image`}
       saveLabel={i18n._(pair.saveLabel)}
       variant="home"

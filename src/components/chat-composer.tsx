@@ -28,12 +28,10 @@ const SELECT_SPIN_S = 18;
 interface ChatComposerProps {
   className?: string;
   onCreated?: () => void;
-  /** Cycles the save verb. Title/placeholder stay as the SSR pick. */
-  onCycleSaveLabel?: () => void;
   /** Runs at the start of submit (before uploads). Use for ensuring auth, etc. */
   onPreSubmit?: () => void | Promise<void>;
   placeholder: string;
-  /** Companion-pair verb; always shown as-is, never replaced by a random CTA. */
+  /** Companion-pair verb from SSR; stays put for the page lifetime. */
   saveLabel: string;
   variant: "landing" | "home";
 }
@@ -42,7 +40,6 @@ export function ChatComposer({
   variant,
   className,
   onCreated,
-  onCycleSaveLabel,
   onPreSubmit,
   placeholder,
   saveLabel,
@@ -61,9 +58,6 @@ export function ChatComposer({
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-  const [saveLabelShouldAnimate, setSaveLabelShouldAnimate] = useState(false);
-  const cycleSaveLabelRef = useRef(onCycleSaveLabel);
-  cycleSaveLabelRef.current = onCycleSaveLabel;
   const bodyRef = useRef(body);
   bodyRef.current = body;
 
@@ -259,20 +253,6 @@ export function ChatComposer({
     [sendDisabled, submit]
   );
 
-  const releaseSaveHover = useCallback(
-    (event: { currentTarget: HTMLElement }) => {
-      const el = event.currentTarget;
-      requestAnimationFrame(() => {
-        if (el.matches(":hover") || el.matches(":focus-visible")) {
-          return;
-        }
-        setSaveLabelShouldAnimate(true);
-        cycleSaveLabelRef.current?.();
-      });
-    },
-    []
-  );
-
   const onBodyChange = useCallback(
     (event: ChangeEvent<HTMLTextAreaElement>) => {
       setBody(event.target.value);
@@ -445,14 +425,13 @@ export function ChatComposer({
 
           <Button
             aria-label={saveLabel}
-            className="composer-save relative shrink-0 overflow-visible"
+            className="composer-save relative shrink-0 overflow-hidden"
             disabled={sendDisabled}
-            onBlur={releaseSaveHover}
             onClick={onSaveClick}
-            onPointerLeave={releaseSaveHover}
             type="button"
           >
             <span aria-hidden className="composer-save-accent" />
+            <span aria-hidden className="composer-save-sheen" />
             {pending ? (
               <Loader2 className="relative z-1 size-4 animate-spin" />
             ) : null}
@@ -460,15 +439,7 @@ export function ChatComposer({
               <span aria-hidden className="invisible col-start-1 row-start-1">
                 {i18n._(HOME_SAVE_LABEL_SIZER)}
               </span>
-              <span
-                className={cn(
-                  "col-start-1 row-start-1",
-                  saveLabelShouldAnimate && "composer-save-label-swap"
-                )}
-                key={saveLabel}
-              >
-                {saveLabel}
-              </span>
+              <span className="col-start-1 row-start-1">{saveLabel}</span>
             </span>
           </Button>
         </div>

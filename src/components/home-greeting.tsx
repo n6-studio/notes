@@ -1,20 +1,9 @@
 import { useLingui } from "@lingui/react/macro";
-import {
-  createContext,
-  type ReactNode,
-  use,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import {
-  cycleHomeSaveLabel,
-  type HomeCompanionPair,
-} from "~/lib/home-greeting";
+import { createContext, type ReactNode, use, useEffect, useRef } from "react";
+import type { HomeCompanionPair } from "~/lib/home-greeting";
 import { cn } from "~/lib/utils";
 
 interface HomeCompanionValue {
-  cycle: () => void;
   pair: HomeCompanionPair;
 }
 
@@ -27,14 +16,8 @@ export function HomeCompanionProvider({
   children: ReactNode;
   initialPair: HomeCompanionPair;
 }) {
-  const [pair, setPair] = useState(initialPair);
-
-  const cycle = () => {
-    setPair((current) => cycleHomeSaveLabel(current));
-  };
-
   return (
-    <HomeCompanionContext value={{ cycle, pair }}>
+    <HomeCompanionContext value={{ pair: initialPair }}>
       {children}
     </HomeCompanionContext>
   );
