@@ -14,7 +14,7 @@
 html,
 body,
 #app {
-  min-height: 100%;
+  min-height: 100dvh;
 }
 
 body {
@@ -98,6 +98,12 @@ body {
   --sidebar-accent-foreground: oklch(0.218 0.008 223.9);
   --sidebar-border: oklch(0.925 0.005 214.3);
   --sidebar-ring: oklch(0.723 0.014 214.4);
+  --shadow-border:
+    0px 0px 0px 1px oklch(0 0 0 / 0.06), 0px 1px 2px -1px oklch(0 0 0 / 0.06),
+    0px 2px 4px 0px oklch(0 0 0 / 0.04);
+  --shadow-border-hover:
+    0px 0px 0px 1px oklch(0 0 0 / 0.08), 0px 1px 2px -1px oklch(0 0 0 / 0.08),
+    0px 2px 4px 0px oklch(0 0 0 / 0.06);
 }
 
 .dark {
@@ -132,6 +138,8 @@ body {
   --sidebar-accent-foreground: oklch(0.987 0.002 197.1);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.56 0.021 213.5);
+  --shadow-border: 0 0 0 1px oklch(1 0 0 / 0.08);
+  --shadow-border-hover: 0 0 0 1px oklch(1 0 0 / 0.13);
 }
 
 .hero-title {
@@ -144,9 +152,50 @@ body {
   animation: composer-save-label-in 150ms cubic-bezier(0.45, 0, 0.55, 1);
 }
 
+.notes-enter {
+  opacity: 0;
+  transform: translateY(12px);
+  filter: blur(4px);
+  animation: notes-enter-in 400ms ease-out forwards;
+}
+
+.notes-enter-title {
+  animation-delay: 0ms;
+}
+
+.notes-enter-toolbar {
+  animation-delay: 100ms;
+}
+
+@keyframes notes-enter-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.notes-entry {
+  box-shadow: var(--shadow-border);
+  transition-property: box-shadow;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+.notes-entry:hover {
+  box-shadow: var(--shadow-border-hover);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .home-greeting-swap {
     animation: none;
+  }
+
+  .notes-enter {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
   }
 }
 
@@ -183,6 +232,44 @@ body {
   );
 }
 
+.sky-scene .sky-scene-wash,
+.sky-scene .sky-scene-stars,
+.sky-scene .sky-scene-hill {
+  opacity: 0;
+  transition-duration: 220ms;
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+.sky-scene .sky-scene-stars {
+  filter: blur(4px);
+  transition-property: opacity, filter;
+}
+
+.sky-scene.is-active .sky-scene-wash {
+  opacity: 1;
+  transition-duration: 400ms;
+}
+
+.sky-scene.is-active .sky-scene-stars {
+  filter: blur(0);
+  opacity: 1;
+  transition-delay: 80ms;
+  transition-duration: 400ms;
+}
+
+.sky-scene.is-active .sky-scene-hill {
+  opacity: 1;
+  transition-delay: 160ms;
+  transition-duration: 400ms;
+}
+
+.sky-scene-static .sky-scene-wash,
+.sky-scene-static .sky-scene-stars,
+.sky-scene-static .sky-scene-hill {
+  transition: none;
+}
+
 .night-sky-wash {
   background:
     radial-gradient(
@@ -201,6 +288,37 @@ body {
       oklch(0.13 0.055 268) 34%,
       oklch(0.09 0.03 270) 72%,
       oklch(0.06 0.018 270) 100%
+    );
+}
+
+.notes-sky-wash {
+  background:
+    radial-gradient(
+      42% 30% at 54% 6%,
+      oklch(0.62 0.06 210 / 0.42) 0%,
+      transparent 72%
+    ),
+    radial-gradient(
+      88% 52% at 8% -10%,
+      oklch(0.26 0.1 230) 0%,
+      transparent 56%
+    ),
+    radial-gradient(
+      72% 42% at 94% 22%,
+      oklch(0.22 0.08 200) 0%,
+      transparent 52%
+    ),
+    radial-gradient(
+      80% 28% at 50% 100%,
+      oklch(0.2 0.055 175 / 0.32) 0%,
+      transparent 70%
+    ),
+    linear-gradient(
+      to bottom,
+      oklch(0.18 0.07 240) 0%,
+      oklch(0.12 0.045 245) 36%,
+      oklch(0.085 0.03 248) 72%,
+      oklch(0.07 0.022 200) 100%
     );
 }
 
@@ -225,6 +343,16 @@ body {
 
   .night-sky-fall {
     display: none;
+  }
+
+  .sky-scene .sky-scene-wash,
+  .sky-scene .sky-scene-stars,
+  .sky-scene .sky-scene-hill,
+  .sky-scene.is-active .sky-scene-wash,
+  .sky-scene.is-active .sky-scene-stars,
+  .sky-scene.is-active .sky-scene-hill {
+    filter: none;
+    transition: none;
   }
 }
 

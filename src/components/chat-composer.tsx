@@ -363,18 +363,13 @@ export function ChatComposer({
           />
         </svg>
       ) : null}
-      <div
-        className={cn(
-          "relative flex flex-col gap-3 p-3 sm:p-4",
-          variant === "home" && "gap-4 p-4 sm:p-6"
-        )}
-      >
+      <div className="relative flex flex-col gap-3 p-3 sm:p-4">
         <Textarea
           className={cn(
             "resize-none border-0 bg-transparent shadow-none focus-visible:ring-0",
             "text-base md:text-lg",
             variant === "home"
-              ? "md:max-h:90 max-h-70 min-h-50 md:min-h-70"
+              ? "max-h-[min(16rem,42dvh)] min-h-32 overflow-y-auto md:min-h-40"
               : "max-h-45 min-h-35 md:max-h-55 md:min-h-45"
           )}
           name="body"

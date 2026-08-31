@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-
+import { SkySwitch } from "~/components/sky-switch";
 import { crpcOptions } from "~/lib/convex/crpc-options";
 
 export const Route = createFileRoute("/_authed")({
@@ -12,5 +12,14 @@ export const Route = createFileRoute("/_authed")({
       ...crpcOptions.auth.me.staticQueryOptions({}, { skipUnauth: true }),
     });
   },
-  component: () => <Outlet />,
+  component: AuthedLayout,
 });
+
+function AuthedLayout() {
+  return (
+    <>
+      <SkySwitch />
+      <Outlet />
+    </>
+  );
+}

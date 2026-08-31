@@ -31,7 +31,8 @@ import {
 } from "~/lib/target-datetime";
 import { cn } from "~/lib/utils";
 
-const PRESET_BADGE_CLASS = "h-8 px-2.5 transition-colors duration-150";
+const PRESET_BADGE_CLASS =
+  "hidden h-8 px-2.5 transition-colors duration-150 sm:inline-flex";
 
 export interface TargetDatetimeButtonProps {
   className?: string;
@@ -249,7 +250,11 @@ export function TargetDatetimeButton({
                       ? t`Pick target date and time`
                       : t`Target date ${labelText}`
                   }
-                  className="text-muted-foreground"
+                  className={cn(
+                    "text-muted-foreground",
+                    (preset === "today" || preset === "tomorrow") &&
+                      "max-sm:bg-secondary max-sm:text-secondary-foreground"
+                  )}
                   disabled={disabled}
                   size="icon-sm"
                   type="button"

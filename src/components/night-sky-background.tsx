@@ -256,8 +256,8 @@ export function NightSkyBackground() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 overflow-hidden"
       >
-        <div className="night-sky-wash absolute inset-0" />
-        <div className="night-sky-layer absolute inset-0 overflow-hidden">
+        <div className="sky-scene-wash night-sky-wash absolute inset-0" />
+        <div className="sky-scene-stars night-sky-layer absolute inset-0 overflow-hidden">
           <svg
             className="absolute inset-0 h-full w-full"
             preserveAspectRatio="xMidYMin slice"

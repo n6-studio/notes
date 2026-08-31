@@ -1,82 +1,28 @@
-import { Trans, useLingui } from "@lingui/react/macro";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { Trans } from "@lingui/react/macro";
+import { createFileRoute } from "@tanstack/react-router";
 import { useConvexAuth } from "convex/react";
-import { Copy, MoreVerticalIcon, Trash2Icon } from "lucide-react";
+import { Suspense, useCallback, useMemo, useState } from "react";
+import { NotesFilters } from "~/components/notes-filters";
 import {
-  type ChangeEvent,
-  type ReactNode,
-  Suspense,
-  useCallback,
-  useMemo,
-  useState,
-} from "react";
+  NotesCount,
+  NotesJournal,
+  NotesJournalSkeleton,
+  type NotesListInput,
+} from "~/components/notes-journal";
 import { TopNav } from "~/components/top-nav";
-import { Button } from "~/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { useCRPC } from "~/lib/convex/crpc";
-import {
-  NOTE_TYPES,
-  NoteLabelSelectDisplay,
-  type NoteType,
-  noteLabelMessage,
-  noteLabelSelectItemAccentClass,
-  noteLabelSurfaceClass,
-  resolveNoteLabel,
-} from "~/lib/note-label-styles";
-import { cn } from "~/lib/utils";
-import type { Id } from "../../convex/_generated/dataModel";
+import type { NoteType } from "~/lib/note-label-styles";
 
 export const Route = createFileRoute("/_authed/notes/")({
   component: NotesLibrary,
 });
 
-/** Normalized filters passed to `notes.list` once Convex auth is ready. */
-interface NotesListInput {
-  dateFrom?: number;
-  dateTo?: number;
-  label?: NoteType;
-  q?: string;
-  sort?: "desc" | "asc";
-}
-
 function NotesLibrary() {
-  const { i18n, t } = useLingui();
   const { isLoading: authLoading, isAuthenticated: convexAuthed } =
     useConvexAuth();
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<"desc" | "asc">("desc");
   const [typeFilter, setTypeFilter] = useState<NoteType | "all">("all");
   const [day, setDay] = useState("");
-
-  const typeFilterItems = [
-    { label: t`All types`, value: "all" },
-    ...NOTE_TYPES.map((label) => ({
-      label: i18n._(noteLabelMessage(label)),
-      value: label,
-    })),
-  ];
-  const sortItems = [
-    { label: t`Newest first`, value: "desc" },
-    { label: t`Oldest first`, value: "asc" },
-  ];
 
   const bounds = useMemo(() => {
     if (!day) {
@@ -101,293 +47,54 @@ function NotesLibrary() {
   );
 
   const listReady = convexAuthed && !authLoading;
+  const filtersActive = Boolean(q.trim() || typeFilter !== "all" || day);
 
-  const onSearchChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    setQ(event.target.value);
+  const onClearFilters = useCallback(() => {
+    setQ("");
+    setTypeFilter("all");
+    setDay("");
   }, []);
 
-  const onDayChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    setDay(event.target.value);
-  }, []);
-
-  const onTypeFilterChange = useCallback((value: string | null) => {
-    if (value === null) {
-      return;
-    }
-    setTypeFilter(value === "all" ? "all" : (value as NoteType));
-  }, []);
-
-  const onSortChange = useCallback((value: string | null) => {
-    if (value === "desc" || value === "asc") {
-      setSort(value);
-    }
-  }, []);
-
-  const emptyMain: ReactNode = (
-    <p className="text-muted-foreground text-sm">
-      <Trans>Nothing here yet. Start on the home page.</Trans>
-    </p>
+  const listBody = listReady ? (
+    <Suspense fallback={<NotesJournalSkeleton />}>
+      <NotesJournal
+        filtersActive={filtersActive}
+        listArgs={listArgs}
+        onClearFilters={onClearFilters}
+      />
+    </Suspense>
+  ) : (
+    <NotesJournalSkeleton />
   );
 
-  let listBody: ReactNode;
-  if (listReady) {
-    listBody = (
-      <Suspense
-        fallback={
-          <p className="text-muted-foreground text-sm">
-            <Trans>Loading…</Trans>
-          </p>
-        }
-      >
-        <NotesTimeline emptyMessage={emptyMain} listArgs={listArgs} />
-      </Suspense>
-    );
-  } else {
-    listBody = (
-      <p className="text-muted-foreground text-sm">
-        <Trans>Loading…</Trans>
-      </p>
-    );
-  }
-
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="relative z-10 flex min-h-screen flex-col">
       <TopNav />
-      <main className="mx-auto w-full max-w-4xl flex-1 px-4 pt-8 pb-16">
-        <div className="mb-8 flex flex-col gap-4 border-border/40 border-b pb-6">
-          <h1 className="font-semibold text-xl tracking-tight">
-            <Trans>Notes</Trans>
+      <main className="relative mx-auto w-full max-w-4xl flex-1 px-4 pt-8 pb-[max(3rem,11vh)] md:pt-12 md:pb-[max(4.5rem,20vh)]">
+        <div className="notes-enter notes-enter-title mb-6 flex items-baseline gap-3">
+          <h1 className="hero-title font-semibold text-3xl tracking-tight md:text-4xl">
+            <Trans>My notes</Trans>
           </h1>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label className="text-[11px] text-muted-foreground uppercase tracking-wide">
-                <Trans>Search</Trans>
-              </Label>
-              <Input
-                className="h-9"
-                onChange={onSearchChange}
-                placeholder={t`Full-text search…`}
-                value={q}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-[11px] text-muted-foreground uppercase tracking-wide">
-                <Trans>Day</Trans>
-              </Label>
-              <Input
-                className="h-9"
-                onChange={onDayChange}
-                type="date"
-                value={day}
-              />
-            </div>
-            <div className="grid gap-3 sm:col-span-3 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label className="text-[11px] text-muted-foreground uppercase tracking-wide">
-                  <Trans>Type</Trans>
-                </Label>
-                <Select
-                  items={typeFilterItems}
-                  onValueChange={onTypeFilterChange}
-                  value={typeFilter}
-                >
-                  <SelectTrigger className="h-9 w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="all">
-                        <Trans>All types</Trans>
-                      </SelectItem>
-                      {NOTE_TYPES.map((l) => (
-                        <SelectItem
-                          className={noteLabelSelectItemAccentClass(l)}
-                          key={l}
-                          value={l}
-                        >
-                          <span className="flex items-center gap-2">
-                            <NoteLabelSelectDisplay label={l} />
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-[11px] text-muted-foreground uppercase tracking-wide">
-                  <Trans>Sort</Trans>
-                </Label>
-                <Select
-                  items={sortItems}
-                  onValueChange={onSortChange}
-                  value={sort}
-                >
-                  <SelectTrigger className="h-9 w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="desc">
-                        <Trans>Newest first</Trans>
-                      </SelectItem>
-                      <SelectItem value="asc">
-                        <Trans>Oldest first</Trans>
-                      </SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
+          {listReady ? (
+            <Suspense fallback={null}>
+              <NotesCount listArgs={listArgs} />
+            </Suspense>
+          ) : null}
         </div>
-
+        <div className="notes-enter notes-enter-toolbar mb-8">
+          <NotesFilters
+            day={day}
+            onDayChange={setDay}
+            onSearchChange={setQ}
+            onSortChange={setSort}
+            onTypeFilterChange={setTypeFilter}
+            q={q}
+            sort={sort}
+            typeFilter={typeFilter}
+          />
+        </div>
         {listBody}
       </main>
     </div>
-  );
-}
-
-function NotesTimeline({
-  emptyMessage,
-  listArgs,
-}: {
-  emptyMessage: ReactNode;
-  listArgs: NotesListInput;
-}) {
-  const router = useRouter();
-  const crpc = useCRPC();
-  const removeNote = useMutation(crpc.notes.remove.mutationOptions());
-  const { data: notes } = useSuspenseQuery({
-    ...crpc.notes.list.queryOptions(listArgs),
-  });
-
-  if (notes.length === 0) {
-    return emptyMessage;
-  }
-
-  return (
-    <ol className="relative border-border/50 border-s ps-4">
-      {notes.map((note, i) => (
-        <NoteTimelineItem
-          delayMs={i * 25}
-          key={note._id}
-          note={note}
-          pendingDelete={removeNote.isPending}
-          removeNote={removeNote}
-          router={router}
-        />
-      ))}
-    </ol>
-  );
-}
-
-function NoteTimelineItem({
-  delayMs,
-  note,
-  pendingDelete,
-  removeNote,
-  router,
-}: {
-  delayMs: number;
-  note: {
-    _creationTime: number;
-    _id: Id<"notes">;
-    body: string;
-    label?: string;
-  };
-  pendingDelete: boolean;
-  removeNote: {
-    mutate: (
-      args: { id: Id<"notes"> },
-      options: { onSettled: () => void }
-    ) => void;
-  };
-  router: { invalidate: () => Promise<unknown> };
-}) {
-  const { i18n, t } = useLingui();
-
-  const copyBody = useCallback(() => {
-    navigator.clipboard.writeText(note.body).catch(() => {
-      /* ignore clipboard errors */
-    });
-  }, [note.body]);
-
-  const deleteNote = useCallback(() => {
-    removeNote.mutate(
-      { id: note._id },
-      {
-        onSettled: () => {
-          router.invalidate().catch(() => {
-            /* invalidate best-effort */
-          });
-        },
-      }
-    );
-  }, [note._id, removeNote, router]);
-
-  const resolvedLabel = note.label ? resolveNoteLabel(note.label) : undefined;
-
-  return (
-    <li className="ms-2 mb-8" style={{ animationDelay: `${delayMs}ms` }}>
-      <div
-        className={cn(
-          "absolute -start-[5px] mt-1.5 size-2 rounded-full",
-          "bg-muted-foreground/60"
-        )}
-      />
-      <div className="flex gap-2 rounded-lg border border-transparent p-3">
-        <div className="min-w-0 flex-1">
-          <p className="line-clamp-3 text-sm leading-relaxed">{note.body}</p>
-          <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-muted-foreground">
-            {resolvedLabel ? (
-              <span
-                className={cn(
-                  "rounded-full border px-2 py-0.5 font-medium",
-                  noteLabelSurfaceClass(resolvedLabel)
-                )}
-              >
-                {i18n._(noteLabelMessage(resolvedLabel))}
-              </span>
-            ) : null}
-            <time dateTime={new Date(note._creationTime).toISOString()}>
-              {new Date(note._creationTime).toLocaleString(i18n.locale)}
-            </time>
-          </div>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button
-                aria-label={t`Note actions`}
-                className="-me-1 -mt-0.5 shrink-0 text-muted-foreground hover:text-foreground"
-                size="icon-sm"
-                type="button"
-                variant="ghost"
-              />
-            }
-          >
-            <MoreVerticalIcon />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="min-w-40">
-            <DropdownMenuGroup>
-              <DropdownMenuItem onClick={copyBody}>
-                <Copy />
-                <Trans>Copy item</Trans>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                disabled={pendingDelete}
-                onClick={deleteNote}
-                variant="destructive"
-              >
-                <Trash2Icon />
-                <Trans>Delete item</Trans>
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </li>
   );
 }

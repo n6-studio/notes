@@ -6,7 +6,6 @@ import {
   HomeGreeting,
   useHomeCompanion,
 } from "~/components/home-greeting";
-import { NightSkyBackground } from "~/components/night-sky-background";
 import { TopNav } from "~/components/top-nav";
 import { crpcOptions } from "~/lib/convex/crpc-options";
 import {
@@ -28,11 +27,10 @@ function Home() {
   const { companion } = Route.useLoaderData();
 
   return (
-    <div className="relative flex min-h-screen flex-col">
-      <NightSkyBackground />
+    <div className="relative z-10 flex h-dvh flex-col overflow-hidden overscroll-none">
       <TopNav />
       <HomeCompanionProvider initialPair={companion}>
-        <main className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center px-4 pt-8 pb-[max(3rem,11vh)] md:pt-12 md:pb-[max(4.5rem,20vh)]">
+        <main className="relative mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col justify-center px-4 pt-5 pb-4 md:pt-8 md:pb-6">
           <HomeGreeting />
           <HomeComposer />
         </main>

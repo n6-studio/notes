@@ -18,6 +18,11 @@ msgstr ""
 msgid "{0, plural, one {# image} other {# images}}"
 msgstr "{0, plural, one {# Bild} other {# Bilder}}"
 
+#. placeholder {0}: notes.length
+#: src/components/notes-journal.tsx
+msgid "{0, plural, one {# note} other {# notes}}"
+msgstr "{0, plural, one {# Notiz} other {# Notizen}}"
+
 #: src/components/top-nav.tsx
 #: src/routes/_authed.settings.tsx
 msgid "Account"
@@ -31,9 +36,9 @@ msgstr "Füg es hinzu"
 msgid "Afternoon, {firstName}"
 msgstr "Nachmittag, {firstName}"
 
-#: src/routes/_authed.notes.index.tsx
-msgid "All types"
-msgstr "Alle Typen"
+#: src/components/notes-filters.tsx
+msgid "All"
+msgstr "Alle"
 
 #: src/routes/_authed.settings.tsx
 msgid "Anonymous session"
@@ -59,15 +64,21 @@ msgstr "Erfasse eine Notiz, einen Link, eine Erinnerung oder ein Foto. Einmal se
 msgid "Clear"
 msgstr "Löschen"
 
+#: src/components/notes-filters.tsx
 #: src/components/target-datetime-button.tsx
 msgid "Clear date"
 msgstr "Datum löschen"
 
-#: src/routes/_authed.notes.index.tsx
+#: src/components/notes-filters.tsx
+#: src/components/notes-journal.tsx
+msgid "Clear filters"
+msgstr "Filter löschen"
+
+#: src/components/notes-journal.tsx
 msgid "Copy item"
 msgstr "Kopieren"
 
-#: src/routes/_authed.notes.index.tsx
+#: src/components/notes-filters.tsx
 msgid "Day"
 msgstr "Tag"
 
@@ -75,11 +86,15 @@ msgstr "Tag"
 msgid "Decorative grass hill"
 msgstr "Dekorativer Grashügel"
 
+#: src/components/notes-sky-background.tsx
+msgid "Decorative moonlit sky"
+msgstr "Dekorativer Mondhimmel"
+
 #: src/components/night-sky-background.tsx
 msgid "Decorative night sky"
 msgstr "Dekorativer Nachthimmel"
 
-#: src/routes/_authed.notes.index.tsx
+#: src/components/notes-journal.tsx
 msgid "Delete item"
 msgstr "Löschen"
 
@@ -87,7 +102,11 @@ msgstr "Löschen"
 msgid "Evening, {firstName}"
 msgstr "Abend, {firstName}"
 
-#: src/routes/_authed.notes.index.tsx
+#: src/components/notes-filters.tsx
+msgid "Filters"
+msgstr "Filter"
+
+#: src/components/notes-filters.tsx
 msgid "Full-text search…"
 msgstr "Volltextsuche…"
 
@@ -98,6 +117,10 @@ msgstr "Gib ihm einen Platz"
 #: src/routes/index.tsx
 msgid "Give space to your mind"
 msgstr "Gib deinem Kopf Raum"
+
+#: src/components/notes-journal.tsx
+msgid "Go to Home"
+msgstr "Zu Home"
 
 #: src/lib/home-greeting.ts
 msgid "Good evening"
@@ -152,30 +175,39 @@ msgid "Keep it"
 msgstr "Behalt es"
 
 #: src/components/language-switcher.tsx
+#: src/components/top-nav.tsx
 msgid "Language"
 msgstr "Sprache"
-
-#: src/routes/_authed.notes.index.tsx
-msgid "Loading…"
-msgstr "Laden…"
 
 #: src/lib/home-greeting.ts
 msgid "Make a little room"
 msgstr "Mach ein bisschen Platz"
+
+#: src/components/top-nav.tsx
+msgid "Menu"
+msgstr "Menü"
 
 #: src/lib/home-greeting.ts
 msgid "Morning, {firstName}"
 msgstr "Morgen, {firstName}"
 
 #: src/routes/_authed.notes.index.tsx
-msgid "Newest first"
-msgstr "Neueste zuerst"
+msgid "My notes"
+msgstr "Meine Notizen"
+
+#: src/components/notes-filters.tsx
+msgid "Newest"
+msgstr "Neueste"
+
+#: src/components/notes-journal.tsx
+msgid "No notes match"
+msgstr "Keine passenden Notizen"
 
 #: src/lib/note-label-styles.tsx
 msgid "Note"
 msgstr "Notiz"
 
-#: src/routes/_authed.notes.index.tsx
+#: src/components/notes-journal.tsx
 msgid "Note actions"
 msgstr "Notizaktionen"
 
@@ -188,17 +220,24 @@ msgid "Note, URL or image"
 msgstr "Notiz, URL oder Bild"
 
 #: src/components/top-nav.tsx
-#: src/routes/_authed.notes.index.tsx
 msgid "Notes"
 msgstr "Notizen"
 
-#: src/routes/_authed.notes.index.tsx
-msgid "Nothing here yet. Start on the home page."
-msgstr "Hier ist noch nichts. Starte auf der Startseite."
+#: src/components/notes-journal.tsx
+msgid "Nothing here yet"
+msgstr "Noch nichts hier"
 
-#: src/routes/_authed.notes.index.tsx
-msgid "Oldest first"
-msgstr "Älteste zuerst"
+#: src/components/notes-filters.tsx
+msgid "Oldest"
+msgstr "Älteste"
+
+#: src/components/top-nav.tsx
+msgid "Open menu"
+msgstr "Menü öffnen"
+
+#: src/components/top-nav.tsx
+msgid "Pages and language"
+msgstr "Seiten und Sprache"
 
 #: src/components/target-datetime-button.tsx
 msgid "Pick target date and time"
@@ -208,7 +247,7 @@ msgstr "Datum und Uhrzeit wählen"
 msgid "Save it"
 msgstr "Speicher es"
 
-#: src/routes/_authed.notes.index.tsx
+#: src/components/notes-filters.tsx
 msgid "Search"
 msgstr "Suche"
 
@@ -241,9 +280,13 @@ msgstr "Abmelden, Website-Daten löschen, privates Surfen oder ein anderes Gerä
 msgid "Something went wrong"
 msgstr "Etwas ist schiefgelaufen"
 
-#: src/routes/_authed.notes.index.tsx
+#: src/components/notes-filters.tsx
 msgid "Sort"
 msgstr "Sortieren"
+
+#: src/components/notes-journal.tsx
+msgid "Start on the home page."
+msgstr "Fang auf der Home-Seite an."
 
 #: src/lib/home-greeting.ts
 msgid "Still up, {firstName}"
@@ -273,7 +316,11 @@ msgstr "Todo"
 msgid "Tomorrow"
 msgstr "Morgen"
 
-#: src/routes/_authed.notes.index.tsx
+#: src/components/notes-journal.tsx
+msgid "Try a different search, type, or day."
+msgstr "Versuch eine andere Suche, einen anderen Typ oder Tag."
+
+#: src/components/notes-filters.tsx
 msgid "Type"
 msgstr "Typ"
 

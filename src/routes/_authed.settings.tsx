@@ -15,7 +15,7 @@ function Settings() {
   const isAnonymous = user?.isAnonymous === true;
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="relative z-10 flex min-h-screen flex-col">
       <TopNav />
       <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 pt-8 pb-16 md:pt-12">
         <h1 className="font-medium text-foreground/90 text-xl tracking-tight">

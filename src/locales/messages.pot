@@ -18,6 +18,11 @@ msgstr ""
 msgid "{0, plural, one {# image} other {# images}}"
 msgstr ""
 
+#. placeholder {0}: notes.length
+#: src/components/notes-journal.tsx
+msgid "{0, plural, one {# note} other {# notes}}"
+msgstr ""
+
 #: src/components/top-nav.tsx
 #: src/routes/_authed.settings.tsx
 msgid "Account"
@@ -31,8 +36,8 @@ msgstr ""
 msgid "Afternoon, {firstName}"
 msgstr ""
 
-#: src/routes/_authed.notes.index.tsx
-msgid "All types"
+#: src/components/notes-filters.tsx
+msgid "All"
 msgstr ""
 
 #: src/routes/_authed.settings.tsx
@@ -59,15 +64,20 @@ msgstr ""
 msgid "Clear"
 msgstr ""
 
+#: src/components/notes-filters.tsx
 #: src/components/target-datetime-button.tsx
 msgid "Clear date"
 msgstr ""
 
-#: src/routes/_authed.notes.index.tsx
+#: src/components/notes-journal.tsx
+msgid "Clear filters"
+msgstr ""
+
+#: src/components/notes-journal.tsx
 msgid "Copy item"
 msgstr ""
 
-#: src/routes/_authed.notes.index.tsx
+#: src/components/notes-filters.tsx
 msgid "Day"
 msgstr ""
 
@@ -79,7 +89,7 @@ msgstr ""
 msgid "Decorative night sky"
 msgstr ""
 
-#: src/routes/_authed.notes.index.tsx
+#: src/components/notes-journal.tsx
 msgid "Delete item"
 msgstr ""
 
@@ -87,7 +97,7 @@ msgstr ""
 msgid "Evening, {firstName}"
 msgstr ""
 
-#: src/routes/_authed.notes.index.tsx
+#: src/components/notes-filters.tsx
 msgid "Full-text search…"
 msgstr ""
 
@@ -97,6 +107,10 @@ msgstr ""
 
 #: src/routes/index.tsx
 msgid "Give space to your mind"
+msgstr ""
+
+#: src/components/notes-journal.tsx
+msgid "Go to Home"
 msgstr ""
 
 #: src/lib/home-greeting.ts
@@ -155,10 +169,6 @@ msgstr ""
 msgid "Language"
 msgstr ""
 
-#: src/routes/_authed.notes.index.tsx
-msgid "Loading…"
-msgstr ""
-
 #: src/lib/home-greeting.ts
 msgid "Make a little room"
 msgstr ""
@@ -167,15 +177,19 @@ msgstr ""
 msgid "Morning, {firstName}"
 msgstr ""
 
-#: src/routes/_authed.notes.index.tsx
-msgid "Newest first"
+#: src/components/notes-filters.tsx
+msgid "Newest"
+msgstr ""
+
+#: src/components/notes-journal.tsx
+msgid "No notes match"
 msgstr ""
 
 #: src/lib/note-label-styles.tsx
 msgid "Note"
 msgstr ""
 
-#: src/routes/_authed.notes.index.tsx
+#: src/components/notes-journal.tsx
 msgid "Note actions"
 msgstr ""
 
@@ -192,12 +206,12 @@ msgstr ""
 msgid "Notes"
 msgstr ""
 
-#: src/routes/_authed.notes.index.tsx
-msgid "Nothing here yet. Start on the home page."
+#: src/components/notes-journal.tsx
+msgid "Nothing here yet"
 msgstr ""
 
-#: src/routes/_authed.notes.index.tsx
-msgid "Oldest first"
+#: src/components/notes-filters.tsx
+msgid "Oldest"
 msgstr ""
 
 #: src/components/target-datetime-button.tsx
@@ -208,7 +222,7 @@ msgstr ""
 msgid "Save it"
 msgstr ""
 
-#: src/routes/_authed.notes.index.tsx
+#: src/components/notes-filters.tsx
 msgid "Search"
 msgstr ""
 
@@ -241,8 +255,12 @@ msgstr ""
 msgid "Something went wrong"
 msgstr ""
 
-#: src/routes/_authed.notes.index.tsx
+#: src/components/notes-filters.tsx
 msgid "Sort"
+msgstr ""
+
+#: src/components/notes-journal.tsx
+msgid "Start on the home page."
 msgstr ""
 
 #: src/lib/home-greeting.ts
@@ -273,7 +291,11 @@ msgstr ""
 msgid "Tomorrow"
 msgstr ""
 
-#: src/routes/_authed.notes.index.tsx
+#: src/components/notes-journal.tsx
+msgid "Try a different search, type, or day."
+msgstr ""
+
+#: src/components/notes-filters.tsx
 msgid "Type"
 msgstr ""
 

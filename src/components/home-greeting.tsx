@@ -48,7 +48,7 @@ export function HomeGreeting() {
     <h1
       aria-live="polite"
       className={cn(
-        "hero-title mb-10 min-h-[1.15em] text-balance text-center font-semibold text-4xl tracking-tight md:mb-16 md:text-6xl",
+        "hero-title mb-4 min-h-[1.15em] shrink-0 text-balance text-center font-semibold text-3xl tracking-tight md:mb-6 md:text-5xl",
         isSwap && "home-greeting-swap"
       )}
       key={greeting}
