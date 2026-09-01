@@ -322,6 +322,44 @@ body {
     );
 }
 
+.sky-wash {
+  view-transition-name: sky-wash;
+}
+
+.app-view {
+  view-transition-name: app;
+}
+
+html:active-view-transition-type(sky)::view-transition-old(root),
+html:active-view-transition-type(sky)::view-transition-new(root) {
+  animation: none;
+}
+
+html:active-view-transition-type(sky)::view-transition-group(root) {
+  animation: none;
+}
+
+html:active-view-transition-type(sky)::view-transition-old(app),
+html:active-view-transition-type(sky)::view-transition-new(app) {
+  animation: none;
+}
+
+::view-transition-group(app) {
+  z-index: 1;
+}
+
+::view-transition-group(sky-wash) {
+  z-index: 0;
+  animation-duration: 400ms;
+  animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+::view-transition-old(sky-wash),
+::view-transition-new(sky-wash) {
+  animation-duration: 400ms;
+  animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
 .night-sky-sparkle {
   animation: night-sky-twinkle 7.2s ease-in-out infinite;
 }
@@ -343,6 +381,11 @@ body {
 
   .night-sky-fall {
     display: none;
+  }
+
+  .sky-wash,
+  .app-view {
+    view-transition-name: none;
   }
 
   .sky-scene .sky-scene-wash,

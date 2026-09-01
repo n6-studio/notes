@@ -19,7 +19,9 @@ function AuthedLayout() {
   return (
     <>
       <SkySwitch />
-      <Outlet />
+      <div className="app-view">
+        <Outlet />
+      </div>
     </>
   );
 }

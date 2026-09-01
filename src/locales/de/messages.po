@@ -86,10 +86,6 @@ msgstr "Tag"
 msgid "Decorative grass hill"
 msgstr "Dekorativer Grashügel"
 
-#: src/components/notes-sky-background.tsx
-msgid "Decorative moonlit sky"
-msgstr "Dekorativer Mondhimmel"
-
 #: src/components/night-sky-background.tsx
 msgid "Decorative night sky"
 msgstr "Dekorativer Nachthimmel"

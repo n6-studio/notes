@@ -46,26 +46,6 @@ const HOME_SCENE: HillScene = {
   seeds: { back: 11, body: 7, front: 29, ridge: 19 },
 };
 
-const NOTES_SCENE: HillScene = {
-  bodyId: "grass-hill-notes-body",
-  edgeLift: 18,
-  fills: {
-    back: "oklch(0.31 0.078 166)",
-    body: [
-      "oklch(0.38 0.085 165)",
-      "oklch(0.3 0.07 168)",
-      "oklch(0.24 0.055 170)",
-    ],
-    front: "oklch(0.24 0.065 170)",
-    ridge: "oklch(0.27 0.072 168)",
-  },
-  peaks: [
-    { at: 0.2, lift: 58, spread: 0.2 },
-    { at: 0.74, lift: 72, spread: 0.24 },
-  ],
-  seeds: { back: 43, body: 41, front: 53, ridge: 47 },
-};
-
 function svgCoord(value: number) {
   return Math.round(value * 10) / 10;
 }
@@ -191,7 +171,6 @@ function buildHillDrawing(scene: HillScene) {
 }
 
 const HOME_HILL = buildHillDrawing(HOME_SCENE);
-const NOTES_HILL = buildHillDrawing(NOTES_SCENE);
 
 function GrassHillScene({
   className,
@@ -238,8 +217,4 @@ function GrassHillScene({
 
 export function GrassHill() {
   return <GrassHillScene drawing={HOME_HILL} />;
-}
-
-export function NotesGrassHill() {
-  return <GrassHillScene drawing={NOTES_HILL} />;
 }

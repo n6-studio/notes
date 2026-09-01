@@ -3,26 +3,14 @@
 import { useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { NightSkyBackground } from "~/components/night-sky-background";
-import { NotesSkyBackground } from "~/components/notes-sky-background";
+import { skySceneFromPath } from "~/lib/sky-scene";
 import { cn } from "~/lib/utils";
-
-function sceneFromPath(pathname: string) {
-  if (pathname === "/notes" || pathname.startsWith("/notes/")) {
-    return "notes" as const;
-  }
-
-  if (pathname === "/home" || pathname.startsWith("/home/")) {
-    return "home" as const;
-  }
-
-  return null;
-}
 
 export function SkySwitch() {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
-  const scene = sceneFromPath(pathname);
+  const scene = skySceneFromPath(pathname);
   const [canAnimate, setCanAnimate] = useState(false);
 
   useEffect(() => {
@@ -43,20 +31,11 @@ export function SkySwitch() {
       <div
         className={cn(
           "sky-scene absolute inset-0",
-          scene === "home" && "is-active",
+          scene !== null && "is-active",
           !canAnimate && "sky-scene-static"
         )}
       >
-        <NightSkyBackground />
-      </div>
-      <div
-        className={cn(
-          "sky-scene absolute inset-0",
-          scene === "notes" && "is-active",
-          !canAnimate && "sky-scene-static"
-        )}
-      >
-        <NotesSkyBackground />
+        <NightSkyBackground wash={scene === "notes" ? "notes" : "home"} />
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ import {
   attachConvexQueryClient,
   createQueryClient,
 } from "./lib/convex/query-client";
+import { skyViewTransitionTypes } from "./lib/sky-scene";
 import { routeTree } from "./routeTree.gen";
 
 interface StartI18nContext {
@@ -49,6 +50,9 @@ export function getRouter() {
       queryClient,
     },
     defaultPreload: "intent",
+    defaultViewTransition: {
+      types: skyViewTransitionTypes,
+    },
     routeTree,
     scrollRestoration: true,
     Wrap: ({ children }) => <I18nProvider i18n={i18n}>{children}</I18nProvider>,

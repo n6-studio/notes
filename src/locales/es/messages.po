@@ -86,10 +86,6 @@ msgstr "Día"
 msgid "Decorative grass hill"
 msgstr "Colina de hierba decorativa"
 
-#: src/components/notes-sky-background.tsx
-msgid "Decorative moonlit sky"
-msgstr "Cielo lunar decorativo"
-
 #: src/components/night-sky-background.tsx
 msgid "Decorative night sky"
 msgstr "Cielo nocturno decorativo"

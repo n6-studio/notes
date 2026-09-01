@@ -3,6 +3,7 @@
 import { useLingui } from "@lingui/react/macro";
 import { type CSSProperties, useEffect, useState } from "react";
 import { GrassHill } from "~/components/grass-hill";
+import { cn } from "~/lib/utils";
 
 interface SkyStar {
   opacity: number;
@@ -248,7 +249,11 @@ function NightSkyFallingStar() {
   );
 }
 
-export function NightSkyBackground() {
+export function NightSkyBackground({
+  wash = "home",
+}: {
+  wash?: "home" | "notes";
+}) {
   const { t } = useLingui();
   return (
     <>
@@ -256,7 +261,12 @@ export function NightSkyBackground() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 overflow-hidden"
       >
-        <div className="sky-scene-wash night-sky-wash absolute inset-0" />
+        <div
+          className={cn(
+            "sky-scene-wash sky-wash absolute inset-0",
+            wash === "notes" ? "notes-sky-wash" : "night-sky-wash"
+          )}
+        />
         <div className="sky-scene-stars night-sky-layer absolute inset-0 overflow-hidden">
           <svg
             className="absolute inset-0 h-full w-full"
